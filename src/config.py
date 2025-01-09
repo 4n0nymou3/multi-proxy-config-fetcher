@@ -1,6 +1,10 @@
+
 from typing import Dict, List
 from datetime import datetime
 import re
+import os
+import telegram
+from telegram.ext import Updater, CommandHandler
 
 # Class to track metrics for each channel
 class ChannelMetrics:
@@ -133,3 +137,33 @@ class ProxyConfig:
         
         if channel.metrics.overall_score < 30:
             channel.enabled = False
+
+# توکن ربات تلگرام را جایگزین کنید
+TOKEN = '7207194239:AAGOkRaytoJMuk_U8_GikFIke2rVF0XLdDY'
+CHANNEL_ID = '@proxyfig'
+
+# ایجاد یک نمونه از بات تلگرام
+bot = telegram.Bot(token=TOKEN)
+
+def send_configs_to_channel(update, context):
+    # خواندن کانفیگ‌ها از فایل
+    config_file_path = 'path/to/your/config/file.txt'
+    with open(config_file_path, 'r') as file:
+        configs = file.read()
+
+    # ارسال کانفیگ‌ها به کانال تلگرام
+    bot.send_message(chat_id=CHANNEL_ID, text=configs)
+    update.message.reply_text('Configs sent to the Telegram channel!')
+
+def main():
+    updater = Updater(TOKEN, use_context=True)
+    dp = updater.dispatcher
+
+    # فرمانی برای ارسال کانفیگ‌ها
+    dp.add_handler(CommandHandler('send_configs', send_configs_to_channel))
+
+    updater.start_polling()
+    updater.idle()
+
+if __name__ ==__main__
+ main()
