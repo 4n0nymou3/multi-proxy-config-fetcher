@@ -24,7 +24,7 @@ class ConfigToXray:
             "log": {
                 "loglevel": "warning"
             },
-            "remarks": "👽 Anonymous Multi Balanced",
+            "remarks": "ðŸ‘½ Anonymous Multi Balanced",
             "dns": {
                 "servers": [
                     "https://dns.google/dns-query",
@@ -48,7 +48,6 @@ class ConfigToXray:
             ],
             "inbounds": [
                 {
-                    "listen": "127.0.0.1",
                     "port": 10808,
                     "protocol": "socks",
                     "settings": {
