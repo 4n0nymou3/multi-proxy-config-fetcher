@@ -236,7 +236,9 @@ class ConfigRenamer:
             if security == 'reality':
                 info_parts.append('REALITY')
                 if data.get('pbk'):
-                    info_parts.append('PQ')
+                    info_parts.append('PBK')
+                if data.get('sid'):
+                    info_parts.append('SID')
             elif security == 'tls':
                 info_parts.append('TLS')
             elif security == 'xtls':
