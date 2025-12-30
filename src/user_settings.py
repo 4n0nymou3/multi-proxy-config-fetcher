@@ -19,11 +19,11 @@ SOURCE_URLS = [
 
 # Set to True to fetch the maximum possible number of configurations.
 # If True, SPECIFIC_CONFIG_COUNT will be ignored.
-USE_MAXIMUM_POWER = True
+USE_MAXIMUM_POWER = False
 
 # Desired number of configurations to fetch.
 # This is used only if USE_MAXIMUM_POWER is False.
-SPECIFIC_CONFIG_COUNT = 20
+SPECIFIC_CONFIG_COUNT = 2500
 
 # Dictionary of protocols to enable or disable.
 # Set each protocol to True to enable, False to disable.
