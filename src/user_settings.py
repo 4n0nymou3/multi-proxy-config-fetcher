@@ -23,13 +23,13 @@ USE_MAXIMUM_POWER = False
 
 # Desired number of configurations to fetch.
 # This is used only if USE_MAXIMUM_POWER is False.
-SPECIFIC_CONFIG_COUNT = 150
+SPECIFIC_CONFIG_COUNT = 100
 
 # Dictionary of protocols to enable or disable.
 # Set each protocol to True to enable, False to disable.
 ENABLED_PROTOCOLS = {
     "wireguard://": False,
-    "hysteria2://": True,
+    "hysteria2://": False,
     "vless://": True,
     "vmess://": True,
     "ss://": True,
