@@ -208,6 +208,10 @@ jobs:
         run: python src/xray_config_tester.py configs/proxy_configs.txt configs/proxy_configs_tested.txt
         continue-on-error: true
       
+      - name: Update input file with tested configs
+        run: cp configs/proxy_configs_tested.txt configs/proxy_configs.txt
+        continue-on-error: true
+      
       - name: Convert configs to sing-box format
         run: python src/config_to_singbox.py
       
