@@ -11,11 +11,44 @@ def generate_basic_svg(stats_data):
     
     svg = f'''<?xml version="1.0" encoding="UTF-8"?>
     <svg width="{width}" height="{height}" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="grad-green" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#16a34a"/>
+            <stop offset="100%" stop-color="#4ade80"/>
+        </linearGradient>
+        <linearGradient id="grad-yellow" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#ca8a04"/>
+            <stop offset="100%" stop-color="#fde047"/>
+        </linearGradient>
+        <linearGradient id="grad-red" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#dc2626"/>
+            <stop offset="100%" stop-color="#f87171"/>
+        </linearGradient>
+        <linearGradient id="shimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="rgba(255,255,255,0)"/>
+            <stop offset="50%" stop-color="rgba(255,255,255,0.4)"/>
+            <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+        </linearGradient>
+        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1.5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+    </defs>
     <style>
-        .row {{ font: 14px Arial; fill: #64748b; }}
-        .score {{ font: bold 14px Arial; fill: #64748b; }}
+        .bg-rect {{ fill: #0f172a; }}
+        .title {{ font: bold 22px 'Segoe UI', Arial, sans-serif; fill: #f8fafc; }}
+        .row {{ font: bold 15px 'Segoe UI', Arial, sans-serif; fill: #38bdf8; filter: url(#glow); }}
+        .score {{ font: bold 14px 'Segoe UI', Arial, sans-serif; fill: #f1f5f9; }}
+        @keyframes shimmer-anim {{
+            0% {{ transform: translateX(-100%); }}
+            100% {{ transform: translateX(200%); }}
+        }}
+        .shimmer-rect {{
+            animation: shimmer-anim 2.5s infinite linear;
+        }}
     </style>
-    <text x="400" y="40" text-anchor="middle" font-size="20px" font-weight="bold" fill="#64748b">Channel Performance Overview</text>'''
+    <rect width="100%" height="100%" class="bg-rect"/>
+    <text x="400" y="45" text-anchor="middle" class="title">Channel Performance Overview</text>'''
     
     for idx, channel in enumerate(sorted_channels):
         y = 80 + (idx * 50)
@@ -24,15 +57,20 @@ def generate_basic_svg(stats_data):
         success = (channel['metrics']['success_count'] / 
                   max(1, channel['metrics']['success_count'] + channel['metrics']['fail_count'])) * 100
         
-        svg += f'<rect x="150" y="{y}" width="500" height="30" fill="#eee" rx="5"/>'
-        
-        width = min(500, 5 * score)
-        color = '#22c55e' if score >= 70 else '#eab308' if score >= 50 else '#ef4444'
-        svg += f'<rect x="150" y="{y}" width="{width}" height="30" fill="{color}" rx="5"/>'
+        bar_width = min(500, 5 * score)
+        color_id = 'grad-green' if score >= 70 else 'grad-yellow' if score >= 50 else 'grad-red'
         
         svg += f'''
-        <text x="140" y="{y+20}" text-anchor="end" class="row">{name}</text>
-        <text x="660" y="{y+20}" text-anchor="start" class="score">{score:.1f}% (S:{success:.0f}%)</text>'''
+        <rect x="150" y="{y}" width="500" height="30" fill="#1e293b" rx="6"/>
+        <clipPath id="clip-{idx}">
+            <rect x="150" y="{y}" width="{bar_width}" height="30" rx="6"/>
+        </clipPath>
+        <rect x="150" y="{y}" width="{bar_width}" height="30" fill="url(#{color_id})" rx="6"/>
+        <g clip-path="url(#clip-{idx})">
+            <rect x="150" y="{y}" width="100%" height="30" fill="url(#shimmer)" class="shimmer-rect"/>
+        </g>
+        <text x="135" y="{y+20}" text-anchor="end" class="row">{name}</text>
+        <text x="665" y="{y+20}" text-anchor="start" class="score">{score:.1f}% (S:{success:.0f}%)</text>'''
     
     svg += '</svg>'
     return svg
