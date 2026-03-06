@@ -27,7 +27,9 @@ def is_base64(s: str) -> bool:
         return False
     try:
         s = s.rstrip('=')
-        return bool(re.match(r'^[A-Za-z0-9+/\-_]+$', s)) and len(s) % 4 in (0, 2, 3)
+        # NOTE: Uses '+' (one or more) - requires at least one base64 character
+        # This differs from config_validator.py:is_base64 which uses '*' (zero or more)
+        return bool(re.match(r'^[A-Za-z0-9+\-_]+$', s)) and len(s) % 4 in (0, 2, 3)
     except Exception:
         return False
 
