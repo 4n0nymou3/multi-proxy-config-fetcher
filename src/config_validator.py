@@ -9,7 +9,9 @@ class ConfigValidator:
     def is_base64(s: str) -> bool:
         try:
             s = s.rstrip('=')
-            return bool(re.match(r'^[A-Za-z0-9+/\-_]*$', s))
+            # NOTE: Uses '*' (zero or more) - allows empty strings after stripping
+            # This differs from config_parser.py:is_base64 which uses '+' (one or more)
+            return bool(re.match(r'^[A-Za-z0-9+/=_-]*$', s))
         except:
             return False
 
