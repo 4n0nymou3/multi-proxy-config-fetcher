@@ -4,6 +4,7 @@
 # Add or remove URLs as needed. All URLs in this list are automatically enabled.
 SOURCE_URLS = [
     "https://raw.githubusercontent.com/therealaleph/Iran-configs/refs/heads/main/ir_configs.txt",
+    "https://raw.githubusercontent.com/hiddify/hiddify-app/refs/heads/main/test.configs/mahsa",
     "https://t.me/s/PrivateVPNs",
     "https://t.me/s/DirectVPN",
     "https://t.me/s/persianvpnhub",
