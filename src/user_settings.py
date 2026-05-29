@@ -23,11 +23,11 @@ SOURCE_URLS = [
 
 # Set to True to fetch the maximum possible number of configurations.
 # If True, SPECIFIC_CONFIG_COUNT will be ignored.
-USE_MAXIMUM_POWER = False
+USE_MAXIMUM_POWER = True
 
 # Desired number of configurations to fetch.
 # This is used only if USE_MAXIMUM_POWER is False.
-SPECIFIC_CONFIG_COUNT = 2500
+SPECIFIC_CONFIG_COUNT = 0
 
 # Dictionary of protocols to enable or disable.
 # Set each protocol to True to enable, False to disable.
@@ -43,7 +43,7 @@ ENABLED_PROTOCOLS = {
 
 # Maximum age of configurations in days.
 # Configurations older than this will be considered invalid.
-MAX_CONFIG_AGE_DAYS = 3
+MAX_CONFIG_AGE_DAYS = 1
 
 # --- Sing-box Config Tester Settings ---
 
