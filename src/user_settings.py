@@ -46,7 +46,7 @@ ENABLED_PROTOCOLS = {
 
 # Maximum age of configurations in days.
 # Configurations older than this will be considered invalid.
-MAX_CONFIG_AGE_DAYS = 3
+MAX_CONFIG_AGE_DAYS = 1
 
 # --- Sing-box Config Tester Settings ---
 
