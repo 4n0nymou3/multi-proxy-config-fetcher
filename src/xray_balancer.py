@@ -24,6 +24,7 @@ class ConfigToXray:
             "log": {
                 "loglevel": "warning"
             },
+            "version": {"min": "26.2.6"},
             "remarks": "👽 Anonymous Multi Balanced",
             "dns": {
                 "servers": [
@@ -291,9 +292,9 @@ class ConfigToXray:
             return
 
         temp_outbounds.extend([
-            {"protocol": "freedom", "settings": {}, "tag": "direct"},
+            {"protocol": "freedom", "settings": {"domainStrategy": "UseIP"}, "tag": "direct"},
             {"protocol": "blackhole", "settings": {"response": {"type": "http"}}, "tag": "block"},
-            {"protocol": "dns", "tag": "dns-out"}
+            {"protocol": "dns", "settings": {"rules": [{"action": "hijack"}]}, "tag": "dns-out"}
         ])
         
         final_config["outbounds"] = temp_outbounds
