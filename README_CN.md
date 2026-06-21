@@ -27,6 +27,9 @@ Web 界面提供：
 - **Sing-box 全部** — 以 Sing-box 格式提供的所有配置
 - **Sing-box 测试** — 使用 Sing-box 验证的配置（通过阶段 2）
 - **Sing-box 安全** — 最高安全级别的 Sing-box 配置
+- **Clash 全部** — 以 Clash/Mihomo 格式提供的所有配置
+- **Clash 测试** — 使用 Clash 验证的测试配置
+- **Clash 安全** — 最高安全级别的 Clash 配置
 
 ## 📊 源性能监控
 
@@ -98,7 +101,8 @@ Web 界面提供：
 6. **格式转换**
    - 自动转换为 Sing-box JSON 格式
    - 生成 Xray 负载均衡配置
-   - 保持与两种 core 的兼容性
+   - 生成 Clash/Mihomo YAML 配置
+   - 保持与三种 core 的兼容性
 
 ## 🚀 快速开始
 
@@ -186,6 +190,9 @@ LOCATION_APIS = [
 - `configs/singbox_configs_all.json` - 以 Sing-box 格式保存的所有配置
 - `configs/singbox_configs_tested.json` - Sing-box 测试通过的配置
 - `configs/singbox_configs_secure.json` - 安全过滤后的 Sing-box 配置
+- `configs/clash_configs_all.yaml` - 以 Clash/Mihomo 格式保存的所有配置
+- `configs/clash_configs_tested.yaml` - Clash 测试通过的配置
+- `configs/clash_configs_secure.yaml` - 安全过滤后的 Clash 配置
 - `configs/xray_loadbalanced_config.json` - Xray 负载均衡配置
 - `configs/xray_secure_loadbalanced_config.json` - 安全的 Xray 负载均衡配置
 - `configs/location_cache.json` - 地理位置缓存数据
@@ -210,9 +217,10 @@ LOCATION_APIS = [
 5. 转换为 Sing-box 格式
 6. 使用 Sing-box core 测试（阶段 2）
 7. 进行安全过滤
-8. 生成负载均衡配置
-9. 更新图表和报告
-10. 提交并推送更改
+8. 生成 Clash/Mihomo YAML 配置
+9. 生成负载均衡配置
+10. 更新图表和报告
+11. 提交并推送更改
 
 ## 🛡️ 安全功能
 
@@ -321,6 +329,7 @@ LOCATION_APIS = [
 
 - **Xray-core** — 高性能代理平台
 - **Sing-box** — 通用代理平台
+- **Clash/Mihomo** — 现代代理平台
 - **GitHub Actions** — 自动化基础设施
 
 ---
