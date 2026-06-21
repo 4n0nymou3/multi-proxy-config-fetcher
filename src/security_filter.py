@@ -445,9 +445,9 @@ class SecurityFilter:
                 return False
             
             xray_outbounds.extend([
-                {"protocol": "freedom", "settings": {}, "tag": "direct"},
+                {"protocol": "freedom", "settings": {"domainStrategy": "UseIP"}, "tag": "direct"},
                 {"protocol": "blackhole", "settings": {"response": {"type": "http"}}, "tag": "block"},
-                {"protocol": "dns", "tag": "dns-out"}
+                {"protocol": "dns", "settings": {"rules": [{"action": "hijack"}]}, "tag": "dns-out"}
             ])
             
             xray_config["outbounds"] = xray_outbounds
