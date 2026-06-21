@@ -116,18 +116,17 @@ class ConfigToSingbox:
                     {"type": "fakeip", "tag": "dns-fake", "inet4_range": "198.18.0.0/15", "inet6_range": "fc00::/18"}
                 ],
                 "rules": [
-                    {"domain": ["raw.githubusercontent.com"], "server": "dns-direct"},
                     {"clash_mode": "Direct", "server": "dns-direct"},
                     {"clash_mode": "Global", "server": "dns-remote"},
-                    {"type": "logical", "mode": "and", "rules": [{"rule_set": "geosite-ir"}, {"rule_set": "geoip-ir"}], "action": "route", "server": "dns-direct"},
+                    {"rule_set": ["geosite-ir"], "server": "dns-direct"},
                     {"rule_set": ["geosite-malware", "geosite-phishing", "geosite-cryptominers", "geosite-category-ads-all"], "action": "reject"},
-                    {"disable_cache": True, "inbound": "tun-in", "query_type": ["A", "AAAA"], "server": "dns-fake"}
+                    {"inbound": "tun-in", "query_type": ["A", "AAAA"], "server": "dns-fake"}
                 ],
                 "strategy": "ipv4_only",
                 "independent_cache": True
             },
             "inbounds": [
-                {"type": "tun", "tag": "tun-in", "address": ["172.18.0.1/30", "fdfe:dcba:9876::1/126"], "mtu": 9000, "auto_route": True, "strict_route": True, "endpoint_independent_nat": True, "stack": "mixed"},
+                {"type": "tun", "tag": "tun-in", "address": ["172.18.0.1/30", "fdfe:dcba:9876::1/126"], "mtu": 9000, "auto_route": True, "strict_route": True, "stack": "mixed"},
                 {"type": "mixed", "tag": "mixed-in", "listen": "0.0.0.0", "listen_port": 2080}
             ],
             "outbounds": [
@@ -137,16 +136,16 @@ class ConfigToSingbox:
             ] + outbounds,
             "route": {
                 "rules": [
-                    {"ip_cidr": "172.18.0.2", "action": "hijack-dns"},
-                    {"clash_mode": "Direct", "outbound": "direct"},
-                    {"clash_mode": "Global", "outbound": "🌐 Anonymous Multi"},
                     {"action": "sniff"},
                     {"protocol": "dns", "action": "hijack-dns"},
+                    {"clash_mode": "Direct", "outbound": "direct"},
+                    {"clash_mode": "Global", "outbound": "🌐 Anonymous Multi"},
+                    {"ip_is_private": True, "outbound": "direct"},
                     {"network": "udp", "action": "reject"},
                     {"rule_set": ["geosite-malware", "geosite-phishing", "geosite-cryptominers", "geosite-category-ads-all"], "action": "reject"},
                     {"rule_set": ["geoip-malware", "geoip-phishing"], "action": "reject"},
-                    {"rule_set": ["geosite-ir"], "action": "route", "outbound": "direct"},
-                    {"rule_set": ["geoip-ir"], "action": "route", "outbound": "direct"}
+                    {"rule_set": ["geosite-ir"], "outbound": "direct"},
+                    {"rule_set": ["geoip-ir"], "outbound": "direct"}
                 ],
                 "rule_set": [
                     {"type": "remote", "tag": "geosite-malware", "format": "binary", "url": "https://raw.githubusercontent.com/Chocolate4U/Iran-sing-box-rules/rule-set/geosite-malware.srs", "download_detour": "direct"},
@@ -165,7 +164,7 @@ class ConfigToSingbox:
             "ntp": {"enabled": True, "server": "time.cloudflare.com", "server_port": 123, "domain_resolver": "dns-direct", "interval": "30m", "write_to_system": False},
             "experimental": {
                 "cache_file": {"enabled": True, "store_fakeip": True},
-                "clash_api": {"external_controller": "127.0.0.1:9090", "external_ui": "ui", "external_ui_download_url": "https://github.com/MetaCubeX/metacubexd/archive/refs/heads/gh-pages.zip", "external_ui_download_detour": "direct", "default_mode": "Rule"}
+                "clash_api": {"external_controller": "127.0.0.1:9090", "external_ui": "ui", "default_mode": "Rule"}
             }
         }
 
