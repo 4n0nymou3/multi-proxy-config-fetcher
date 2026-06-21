@@ -230,6 +230,10 @@ jobs:
         run: python src/security_filter.py
         continue-on-error: true
       
+      - name: Convert sing-box configs to Clash YAML format
+        run: python src/singbox_to_clash.py
+        continue-on-error: true
+      
       - name: Convert tested configs to Xray format
         run: python src/xray_balancer.py
         continue-on-error: true
@@ -263,6 +267,9 @@ jobs:
           git add configs/singbox_configs_all.json
           git add configs/singbox_configs_tested.json
           git add configs/singbox_configs_secure.json
+          git add configs/clash_configs_all.yaml
+          git add configs/clash_configs_tested.yaml
+          git add configs/clash_configs_secure.yaml
           git add configs/xray_loadbalanced_config.json
           git add configs/xray_secure_loadbalanced_config.json
           git add configs/channel_stats.json
