@@ -27,6 +27,9 @@ The web interface provides:
 - **Sing-box All** - All configs in Sing-box format
 - **Sing-box Tested** - Sing-box verified configs (Pass 2)
 - **Sing-box Secure** - Maximum security Sing-box configs
+- **Clash All** - All configs in Clash/Mihomo format
+- **Clash Tested** - Clash-compatible tested configs
+- **Clash Secure** - Maximum security Clash configs
 
 ## 📊 Source Performance Monitoring
 
@@ -98,7 +101,8 @@ Sources scoring below 30% are automatically disabled to maintain system quality.
 6. **Format Conversion**
    - Automatic conversion to Sing-box JSON format
    - Xray load-balanced configuration generation
-   - Maintains compatibility with both cores
+   - Clash/Mihomo YAML configuration generation
+   - Maintains compatibility with all three cores
 
 ## 🚀 Quick Start
 
@@ -186,6 +190,9 @@ The system generates multiple output files for different use cases:
 - `configs/singbox_configs_all.json` - All configs in Sing-box format
 - `configs/singbox_configs_tested.json` - Sing-box tested configs
 - `configs/singbox_configs_secure.json` - Security-filtered Sing-box configs
+- `configs/clash_configs_all.yaml` - All configs in Clash/Mihomo format
+- `configs/clash_configs_tested.yaml` - Clash-compatible tested configs
+- `configs/clash_configs_secure.yaml` - Security-filtered Clash configs
 - `configs/xray_loadbalanced_config.json` - Load-balanced Xray config
 - `configs/xray_secure_loadbalanced_config.json` - Secure load-balanced Xray config
 - `configs/location_cache.json` - Cached geolocation data
@@ -210,9 +217,10 @@ The workflow performs these steps in order:
 5. Convert to Sing-box format
 6. Test with Sing-box core (Pass 2)
 7. Filter for security
-8. Generate load-balanced configs
-9. Update charts and reports
-10. Commit and push changes
+8. Generate Clash/Mihomo YAML configs
+9. Generate load-balanced configs
+10. Update charts and reports
+11. Commit and push changes
 
 ## 🛡️ Security Features
 
@@ -321,6 +329,7 @@ Developed with ❤️ by **4n0nymou3**
 
 - **Xray-core** - High-performance proxy platform
 - **Sing-box** - Universal proxy platform
+- **Clash/Mihomo** - Modern proxy platform
 - **GitHub Actions** - Automation infrastructure
 
 ---
