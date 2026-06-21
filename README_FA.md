@@ -27,6 +27,9 @@
 - **همه در Sing-box** — همه پیکربندی‌ها در فرمت Sing-box
 - **تست‌شده با Sing-box** — پیکربندی‌های تأییدشده توسط Sing-box (مرحله ۲)
 - **Sing-box امن** — پیکربندی‌های Sing-box با بالاترین سطح امنیت
+- **Clash همه** — همه پیکربندی‌ها در فرمت Clash/Mihomo
+- **Clash تست‌شده** — پیکربندی‌های تست‌شده سازگار با Clash
+- **Clash امن** — پیکربندی‌های Clash با بالاترین سطح امنیت
 
 ## 📊 مانیتورینگ عملکرد منابع
 
@@ -98,7 +101,8 @@
 6. **تبدیل فرمت**
    - تبدیل خودکار به فرمت JSON برای Sing-box
    - تولید پیکربندی‌های متعادل‌شده Xray
-   - حفظ سازگاری با هر دو هسته
+   - تولید فایل YAML برای Clash/Mihomo
+   - حفظ سازگاری با هر سه هسته
 
 ## 🚀 شروع سریع
 
@@ -186,6 +190,9 @@ LOCATION_APIS = [
 - `configs/singbox_configs_all.json` - همه پیکربندی‌ها در فرمت Sing-box
 - `configs/singbox_configs_tested.json` - پیکربندی‌های تست‌شده Sing-box
 - `configs/singbox_configs_secure.json` - پیکربندی‌های Sing-box فیلترشده از نظر امنیت
+- `configs/clash_configs_all.yaml` - همه پیکربندی‌ها در فرمت Clash/Mihomo
+- `configs/clash_configs_tested.yaml` - پیکربندی‌های تست‌شده سازگار با Clash
+- `configs/clash_configs_secure.yaml` - پیکربندی‌های Clash فیلترشده از نظر امنیت
 - `configs/xray_loadbalanced_config.json` - پیکربندی متعادل‌شده Xray
 - `configs/xray_secure_loadbalanced_config.json` - پیکربندی متعادل‌شده Xray ایمن
 - `configs/location_cache.json` - داده‌های کش شده موقعیت جغرافیایی
@@ -210,9 +217,10 @@ LOCATION_APIS = [
 5. تبدیل به فرمت Sing-box
 6. تست با Sing-box core (مرحله ۲)
 7. فیلتر امنیتی
-8. تولید پیکربندی‌های متعادل‌شده
-9. به‌روزرسانی نمودارها و گزارش‌ها
-10. commit و push تغییرات
+8. تولید فایل‌های YAML برای Clash/Mihomo
+9. تولید پیکربندی‌های متعادل‌شده
+10. به‌روزرسانی نمودارها و گزارش‌ها
+11. commit و push تغییرات
 
 ## 🛡️ ویژگی‌های امنیتی
 
@@ -321,6 +329,7 @@ LOCATION_APIS = [
 
 - **Xray-core** — سکوی پراکسی با عملکرد بالا
 - **Sing-box** — سکوی پراکسی جامع
+- **Clash/Mihomo** — سکوی پراکسی مدرن
 - **GitHub Actions** — زیرساخت اتوماسیون
 
 ---
