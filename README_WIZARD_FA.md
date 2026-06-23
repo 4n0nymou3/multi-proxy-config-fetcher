@@ -204,15 +204,16 @@ bash manage.sh start
 
 ### مراحل اجرا:
 ```
-➤ Fetch Configs         ✓ دریافت از منابع
-➤ Enrich Configs        ✓ شناسایی موقعیت جغرافیایی
-➤ Rename Configs        ✓ تغییر نام با جزئیات
-➤ Test with Xray        ✓ تست سلامت مرحله 1
-➤ Convert to Sing-box   ✓ تبدیل فرمت
-➤ Test with Sing-box    ✓ تست سلامت مرحله 2
-➤ Security Filter       ✓ فیلتر امنیتی
-➤ Generate Balanced     ✓ ساخت لودبالانس
-➤ Generate Charts       ✓ ساخت نمودارها
+➤ Fetch Configs              ✓ دریافت از منابع
+➤ Enrich Configs             ✓ شناسایی موقعیت جغرافیایی
+➤ Rename Configs             ✓ تغییر نام با جزئیات
+➤ Test with Xray             ✓ تست سلامت مرحله 1
+➤ Convert to Sing-box        ✓ تبدیل فرمت Sing-box
+➤ Test with Sing-box         ✓ تست سلامت مرحله 2
+➤ Security Filter            ✓ فیلتر امنیتی
+➤ Generate Clash YAML        ✓ ساخت کانفیگ Clash/Mihomo
+➤ Generate Balanced          ✓ ساخت لودبالانس Xray
+➤ Generate Charts            ✓ ساخت نمودارها
 ```
 
 ---
@@ -542,6 +543,7 @@ bash manage.sh status
 📁 Output files:
    configs/proxy_configs.txt - 45K
    configs/singbox_configs_secure.json - 156K
+   configs/clash_configs_secure.yaml - 148K
 ```
 
 ---
@@ -592,6 +594,9 @@ bash manage.sh help
 | `singbox_configs_all.json` | همه کانفیگ‌ها Sing-box | SFA, Hiddify, NekoBox |
 | `singbox_configs_tested.json` | تست شده Sing-box | SFA, Hiddify, NekoBox ⭐ |
 | `singbox_configs_secure.json` | تست شده و امن | SFA, Hiddify 🛡️⭐ |
+| `clash_configs_all.yaml` | همه کانفیگ‌ها Clash | Clash Verge, Mihomo |
+| `clash_configs_tested.yaml` | تست شده Clash | Clash Verge, Mihomo ⭐ |
+| `clash_configs_secure.yaml` | تست شده و امن Clash | Clash Verge, Mihomo 🛡️⭐ |
 | `xray_loadbalanced_config.json` | لودبالانس Xray | v2rayNG, v2rayN ⭐ |
 | `xray_secure_loadbalanced_config.json` | لودبالانس امن | v2rayNG, v2rayN 🛡️⭐ |
 
@@ -651,6 +656,36 @@ cp ~/multi-proxy-config-fetcher/configs/xray_secure_loadbalanced_config.json /mn
 
 **در v2rayN:**
 - منو → Import → Import from file
+
+---
+
+### 🐱 استفاده در Clash / Mihomo (Android, iOS, Windows, macOS, Linux)
+
+#### روش 1: Import از فایل محلی
+
+```bash
+termux-setup-storage
+cp ~/multi-proxy-config-fetcher/configs/clash_configs_secure.yaml ~/storage/downloads/
+```
+
+**در Clash Verge یا Mihomo:**
+1. Profiles → Import → Select file
+2. انتخاب فایل `clash_configs_secure.yaml`
+3. Import
+
+---
+
+#### روش 2: HTTP Server (دسترسی از شبکه)
+
+```bash
+cd ~/multi-proxy-config-fetcher/configs
+python -m http.server 8080
+```
+
+**لینک اشتراک Clash:**
+```
+http://YOUR_IP:8080/clash_configs_tested.yaml
+```
 
 ---
 
@@ -895,6 +930,7 @@ cd ~/multi-proxy-config-fetcher
 bash run.sh
 termux-setup-storage
 cp configs/xray_secure_loadbalanced_config.json ~/storage/downloads/
+cp configs/clash_configs_secure.yaml ~/storage/downloads/
 ```
 
 ---
@@ -925,6 +961,7 @@ cp configs/xray_secure_loadbalanced_config.json ~/storage/downloads/
 - **صفحه وب کانفیگ‌ها**: https://4n0nymou3.github.io/Anonymous-Proxy-Hub/
 - **Xray-core**: https://github.com/XTLS/Xray-core
 - **Sing-box**: https://sing-box.sagernet.org
+- **Clash/Mihomo**: https://github.com/MetaCubeX/mihomo
 - **v2rayNG**: https://github.com/2dust/v2rayNG
 - **Termux**: https://termux.dev
 - **Crontab Guru** (برای تست فرمت Cron): https://crontab.guru
@@ -1078,6 +1115,8 @@ find ~/multi-proxy-config-fetcher/logs -name "*.log" -mtime +7 -delete
 - `proxy_configs_tested.txt` ✅
 - `singbox_configs_tested.json` ✅
 - `singbox_configs_secure.json` ✅ (امن‌ترین)
+- `clash_configs_tested.yaml` ✅
+- `clash_configs_secure.yaml` ✅ (امن‌ترین)
 - `xray_secure_loadbalanced_config.json` ✅ (امن‌ترین)
 
 ---
@@ -1237,10 +1276,12 @@ XRAY_TESTER_URLS = [
 **همیشه از فایل‌های secure استفاده کنید:**
 - ✅ `xray_secure_loadbalanced_config.json`
 - ✅ `singbox_configs_secure.json`
+- ✅ `clash_configs_secure.yaml`
 
 **از این فایل‌ها استفاده نکنید:**
 - ❌ `proxy_configs.txt` (تست نشده)
 - ❌ `singbox_configs_all.json` (تست نشده)
+- ❌ `clash_configs_all.yaml` (تست نشده)
 
 ---
 
@@ -1509,6 +1550,7 @@ bash run.sh
 ### سهم‌گذاران:
 - **Xray-core Team** - موتور پروکسی قدرتمند
 - **Sing-box Team** - موتور پروکسی جامع
+- **Clash/Mihomo Team** - پلتفرم پروکسی مدرن
 - **جامعه Open Source** - پشتیبانی و بازخورد
 
 ### حمایت از پروژه:
