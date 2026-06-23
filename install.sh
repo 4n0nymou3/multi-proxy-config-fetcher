@@ -225,7 +225,7 @@ install_xray() {
             
             if [ -z "$xray_version" ]; then
                 print_warning "Failed to detect Xray version, using fallback..."
-                xray_version="v24.9.30"
+                xray_version="v26.6.1"
             fi
             
             local download_url="https://github.com/XTLS/Xray-core/releases/download/${xray_version}/Xray-linux-${xray_arch}.zip"
