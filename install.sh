@@ -421,6 +421,8 @@ run_step "Test with Sing-box" "\$PYTHON_CMD src/config_tester.py configs/singbox
 
 run_step "Security Filter" "\$PYTHON_CMD src/security_filter.py"
 
+run_step "Generate Clash YAML" "\$PYTHON_CMD src/singbox_to_clash.py"
+
 run_step "Generate Xray Balanced Config" "\$PYTHON_CMD src/xray_balancer.py"
 
 run_step "Generate Charts" "\$PYTHON_CMD src/generate_charts.py"
