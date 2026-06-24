@@ -127,8 +127,14 @@
 
 #### راه‌اندازی محلی
 
-**[Anonymous Wizard](README_WIZARD_FA.md
-)**
+**Anonymous Wizard** یک راهنمای گام‌به‌گام کامل برای نصب، اجرا و مدیریت این پروژه در سیستم محلی شماست — شامل Termux (اندروید)، لینوکس، macOS، iSH (iOS) و ویندوز (WSL2). زبان مورد نظر خود را انتخاب کنید:
+
+| زبان | راهنما |
+|------|--------|
+| فارسی | [Anonymous Wizard — راهنمای فارسی](README_WIZARD_FA.md) |
+| انگلیسی | [Anonymous Wizard — English Guide](README_WIZARD_EN.md) |
+| چینی | [Anonymous Wizard — 中文指南](README_WIZARD_CN.md) |
+| روسی | [Anonymous Wizard — Руководство на русском](README_WIZARD_RU.md) |
 
 ## ⚙️ گزینه‌های پیکربندی
 
