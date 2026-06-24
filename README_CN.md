@@ -8,7 +8,7 @@
 
 # Multi Proxy Config Fetcher
 
-[**🇺🇸English**](README.md) | [**![Lang_farsi](https://user-images.githubusercontent.com/125398461/234186932-52f1fa82-52c6-417f-8b37-08fe9250a55f.png)فارسی**](README_FA.md) | [**🇨🇳中文**](README_CN.md) | [**🇷🇺Русский**](README_RU.md)
+[**🇺🇸English**](README.md) | [**![Lang_farsi](https://raw.githubusercontent.com/4n0nymou3/multi-proxy-config-fetcher/refs/heads/main/flag/iran.svg)فارسی**](README_FA.md) | [**🇨🇳中文**](README_CN.md) | [**🇷🇺Русский**](README_RU.md)
 
 一个高级的自动化代理配置管理系统，从多个来源抓取、验证、测试、丰富和过滤代理配置。该项目提供企业级的代理管理功能，包括实时健康监控、地理标记和多阶段安全过滤。
 
