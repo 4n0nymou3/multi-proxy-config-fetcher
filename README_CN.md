@@ -127,8 +127,14 @@ Web 界面提供：
 
 #### 本地部署
 
-**[Anonymous Wizard](README_WIZARD_FA.md
-)**
+**Anonymous Wizard** 是在本地系统上安装、运行和管理本项目的完整分步指南——支持 Termux（Android）、Linux、macOS、iSH（iOS）和 Windows（WSL2）。请选择您的首选语言：
+
+| 语言 | 指南 |
+|------|------|
+| 波斯语 | [Anonymous Wizard — راهنمای فارسی](README_WIZARD_FA.md) |
+| 英语 | [Anonymous Wizard — English Guide](README_WIZARD_EN.md) |
+| 中文 | [Anonymous Wizard — 中文指南](README_WIZARD_CN.md) |
+| 俄语 | [Anonymous Wizard — Руководство на русском](README_WIZARD_RU.md) |
 
 ## ⚙️ 配置选项
 
