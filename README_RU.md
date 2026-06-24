@@ -127,8 +127,14 @@
 
 #### Локальная настройка
 
-**[Anonymous Wizard](README_WIZARD_FA.md
-)**
+**Anonymous Wizard** — это полное пошаговое руководство по установке, запуску и управлению проектом на вашей локальной системе, включая Termux (Android), Linux, macOS, iSH (iOS) и Windows (WSL2). Выберите предпочитаемый язык:
+
+| Язык | Руководство |
+|------|------------|
+| Персидский | [Anonymous Wizard — راهنمای فارسی](README_WIZARD_FA.md) |
+| Английский | [Anonymous Wizard — English Guide](README_WIZARD_EN.md) |
+| Китайский | [Anonymous Wizard — 中文指南](README_WIZARD_CN.md) |
+| Русский | [Anonymous Wizard — Руководство на русском](README_WIZARD_RU.md) |
 
 ## ⚙️ Параметры конфигурации
 
