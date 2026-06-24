@@ -127,8 +127,14 @@ Sources scoring below 30% are automatically disabled to maintain system quality.
 
 #### Local Setup
 
-**[Anonymous Wizard](README_WIZARD_FA.md
-)**
+**Anonymous Wizard** is a complete step-by-step guide for installing, running and managing this project on your local system — including Termux (Android), Linux, macOS, iSH (iOS), and Windows (WSL2). Choose your preferred language:
+
+| Language | Guide |
+|----------|-------|
+| Persian | [Anonymous Wizard — راهنمای فارسی](README_WIZARD_FA.md) |
+| English | [Anonymous Wizard — English Guide](README_WIZARD_EN.md) |
+| Chinese | [Anonymous Wizard — 中文指南](README_WIZARD_CN.md) |
+| Russian | [Anonymous Wizard — Руководство на русском](README_WIZARD_RU.md) |
 
 ## ⚙️ Configuration Options
 
