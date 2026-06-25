@@ -8,7 +8,7 @@
 
 # Multi Proxy Config Fetcher
 
-[**🇺🇸English**](README.md) | [**![Lang_farsi](https://raw.githubusercontent.com/4n0nymou3/multi-proxy-config-fetcher/refs/heads/main/flag/iran.svg)فارسی**](README_FA.md) | [**🇨🇳中文**](README_CN.md) | [**🇷🇺Русский**](README_RU.md)
+[**🇺🇸English**](README.md) | [**<img src="https://raw.githubusercontent.com/4n0nymou3/multi-proxy-config-fetcher/refs/heads/main/flag/iran.svg" height="20" style="vertical-align:middle">فارسی**](README_FA.md) | [**🇨🇳中文**](README_CN.md) | [**🇷🇺Русский**](README_RU.md)
 
 Продвинутая автоматизированная система управления конфигурациями прокси, которая собирает, проверяет, тестирует, обогащает и фильтрует конфигурации прокси из нескольких источников. Проект предоставляет корпоративное управление прокси с мониторингом состояния в реальном времени, геотегированием и многоступенчатой фильтрацией безопасности.
 
