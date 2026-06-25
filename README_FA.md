@@ -8,7 +8,7 @@
 
 # Multi Proxy Config Fetcher
 
-[**🇺🇸English**](README.md) | [**![Lang_farsi](https://raw.githubusercontent.com/4n0nymou3/multi-proxy-config-fetcher/refs/heads/main/flag/iran.svg)فارسی**](README_FA.md) | [**🇨🇳中文**](README_CN.md) | [**🇷🇺Русский**](README_RU.md)
+[**🇺🇸English**](README.md) | [**<img src="https://raw.githubusercontent.com/4n0nymou3/multi-proxy-config-fetcher/refs/heads/main/flag/iran.svg" height="20" style="vertical-align:middle">فارسی**](README_FA.md) | [**🇨🇳中文**](README_CN.md) | [**🇷🇺Русский**](README_RU.md)
 
 یک سیستم پیشرفته و خودکار برای مدیریت پیکربندی‌های پراکسی که از منابع مختلف جمع‌آوری، اعتبارسنجی، آزمایش، غنی‌سازی و فیلتر می‌کند. این پروژه مدیریت پراکسی در سطح سازمانی با نظارت سلامت بلادرنگ، برچسب‌گذاری جغرافیایی و فیلتر امنیتی چندمرحله‌ای ارائه می‌دهد.
 
