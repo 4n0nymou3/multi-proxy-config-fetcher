@@ -306,7 +306,7 @@ def save_configs(configs: List[str], config: ProxyConfig):
             header = """//profile-title: base64:8J+RvUFub255bW91cy3wnZWP
 //profile-update-interval: 1
 //subscription-userinfo: upload=0; download=0; total=10737418240000000; expire=2546249531
-//support-url: https://t.me/BXAMbot
+//support-url: https://t.me/An0nymou3Bot
 //profile-web-page-url: https://github.com/4n0nymou3
 
 """
