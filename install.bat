@@ -5,7 +5,7 @@ echo.
 echo ================================================================
 echo             Multi Wizard - Windows Setup
 echo ================================================================
-echo               Designed by: Anonymous
+echo               Engineered by: Anonymous
 echo ================================================================
 echo.
 
