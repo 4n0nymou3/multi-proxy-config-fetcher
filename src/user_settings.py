@@ -14,7 +14,7 @@ SOURCE_URLS = [
     "https://raw.githubusercontent.com/MahsaNetConfigTopic/config/refs/heads/main/xray_final.txt",
     "https://raw.githubusercontent.com/Mahdi0024/ProxyCollector/master/sub/proxies.txt",
     "https://raw.githubusercontent.com/zieng2/wl/refs/heads/main/vless_universal.txt",
-    "https://raw.githubusercontent.com/iampedii/whitedns-sub/refs/heads/main/base64.txt",
+    #"https://raw.githubusercontent.com/iampedii/whitedns-sub/refs/heads/main/base64.txt",
     "https://raw.githubusercontent.com/Ashkan-m/v2ray/main/Sub.txt",
     "https://raw.githubusercontent.com/masir-sefid/Sub/main/@Masir_Sefid.txt",
     "https://raw.githubusercontent.com/arshiacomplus/v2rayExtractor/refs/heads/main/mix/sub.html",
