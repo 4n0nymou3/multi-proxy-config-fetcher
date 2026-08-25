@@ -42,6 +42,35 @@ def find_free_port() -> int:
     raise RuntimeError("Could not find a free port")
 
 
+def get_usable_test_urls(candidate_urls: List[str], timeout: int = 6) -> List[str]:
+    usable = []
+    for url in candidate_urls:
+        try:
+            response = requests.get(url, timeout=timeout)
+            if response.status_code in (200, 204):
+                usable.append(url)
+        except Exception as e:
+            logger.warning(f"Test endpoint unreachable, skipping: {url} ({str(e)[:80]})")
+    if not usable:
+        logger.warning("No test endpoints passed preflight check, falling back to full configured list")
+        return list(candidate_urls)
+    return usable
+
+
+def rotate_urls(urls: List[str], offset: int) -> List[str]:
+    if not urls:
+        return urls
+    offset = offset % len(urls)
+    return urls[offset:] + urls[:offset]
+
+
+def median_of(values: List[int]) -> int:
+    if not values:
+        return 999999
+    ordered = sorted(values)
+    return ordered[len(ordered) // 2]
+
+
 @contextmanager
 def managed_process(command: List[str], config_file: str):
     process = None
@@ -193,15 +222,15 @@ class SingBoxTester:
 
 
 class ParallelConfigTester:
-    def __init__(self, singbox_path: str = 'sing-box', max_workers: int = 8, timeout: int = 10, test_urls: List[str] = None):
-        self.tester = SingBoxTester(singbox_path, timeout, test_urls)
+    def __init__(self, singbox_path: str = 'sing-box', max_workers: int = 8, timeout: int = 10,
+                 test_urls: List[str] = None, rounds: int = 2):
+        self.base_test_urls = test_urls if test_urls else ['https://www.youtube.com/generate_204']
+        self.tester = SingBoxTester(singbox_path, timeout, self.base_test_urls)
         self.max_workers = max(1, min(max_workers, os.cpu_count() or 4))
+        self.rounds = max(1, rounds)
         
-    def test_all(self, outbounds: List[Dict]) -> List[Dict]:
-        logger.info(f"Testing {len(outbounds)} configs with {self.max_workers} workers...")
-        logger.info(f"Test URLs: {self.tester.test_urls}")
-        
-        working = []
+    def _run_single_round(self, outbounds: List[Dict]) -> Dict[str, int]:
+        round_results: Dict[str, int] = {}
         tested = 0
         
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
@@ -214,23 +243,52 @@ class ParallelConfigTester:
                 try:
                     success, delay, tag = future.result(timeout=self.tester.timeout + 10)
                     if success and delay is not None:
-                        outbound_copy = outbound.copy()
-                        outbound_copy['_test_delay'] = delay
-                        working.append(outbound_copy)
+                        round_results[tag] = delay
                     
                     if tested % 25 == 0 or tested == len(outbounds):
-                        logger.info(f"Progress: {tested}/{len(outbounds)} ({len(working)} working)")
+                        logger.info(f"Progress: {tested}/{len(outbounds)} ({len(round_results)} working so far)")
                 
                 except Exception as e:
                     logger.error(f"Test error for {outbound.get('tag', 'unknown')}: {str(e)}")
+        
+        return round_results
+        
+    def test_all(self, outbounds: List[Dict]) -> List[Dict]:
+        total = len(outbounds)
+        logger.info(f"Testing {total} configs with {self.max_workers} workers over {self.rounds} round(s)...")
+        logger.info(f"Base test URLs: {self.base_test_urls}")
+        
+        candidates = list(outbounds)
+        delays_by_tag: Dict[str, List[int]] = {}
+        
+        for round_num in range(1, self.rounds + 1):
+            if not candidates:
+                break
+            
+            self.tester.test_urls = rotate_urls(self.base_test_urls, round_num - 1)
+            logger.info(f"--- Round {round_num}/{self.rounds}: {len(candidates)} configs, endpoint order {self.tester.test_urls} ---")
+            
+            round_results = self._run_single_round(candidates)
+            candidates = [ob for ob in candidates if ob.get('tag') in round_results]
+            for ob in candidates:
+                delays_by_tag.setdefault(ob['tag'], []).append(round_results[ob['tag']])
+            
+            success_rate = (len(candidates) * 100) // max(1, total)
+            logger.info(f"Round {round_num} result: {len(candidates)}/{total} survive ({success_rate}%)")
+        
+        working = []
+        for ob in candidates:
+            ob_copy = ob.copy()
+            ob_copy['_test_delay'] = median_of(delays_by_tag.get(ob['tag'], []))
+            working.append(ob_copy)
         
         working.sort(key=lambda x: x.get('_test_delay', 999999))
         
         for ob in working:
             ob.pop('_test_delay', None)
         
-        success_rate = (len(working) * 100) // max(1, len(outbounds))
-        logger.info(f"Results: {len(working)}/{len(outbounds)} working ({success_rate}%)")
+        success_rate = (len(working) * 100) // max(1, total)
+        logger.info(f"Final results after {self.rounds} round(s): {len(working)}/{total} working ({success_rate}%)")
         return working
 
 
@@ -301,7 +359,8 @@ def main():
 
     max_workers = config_settings.TESTER_MAX_WORKERS
     timeout = config_settings.TESTER_TIMEOUT_SECONDS
-    test_urls = config_settings.TESTER_URLS
+    rounds = config_settings.TESTER_ROUNDS
+    test_urls = get_usable_test_urls(config_settings.TESTER_URLS)
     
     logger.info(f"Loading config from {input_file}")
     
@@ -326,7 +385,7 @@ def main():
     
     logger.info(f"Found {len(proxy_outbounds)} proxy outbounds")
     
-    tester = ParallelConfigTester(max_workers=max_workers, timeout=timeout, test_urls=test_urls)
+    tester = ParallelConfigTester(max_workers=max_workers, timeout=timeout, test_urls=test_urls, rounds=rounds)
     working = tester.test_all(proxy_outbounds)
     
     if working:
