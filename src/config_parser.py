@@ -21,6 +21,7 @@ VALID_SS_METHODS = {
 VALID_VLESS_FLOWS = {'', 'xtls-rprx-origin', 'xtls-rprx-direct', 'xtls-rprx-vision'}
 VALID_VLESS_SECURITY = {'none', 'tls', 'reality', 'xtls'}
 VALID_TRANSPORT_TYPES = {'tcp', 'kcp', 'ws', 'http', 'h2', 'quic', 'grpc', 'httpupgrade', 'splithttp', 'xhttp', 'raw'}
+VALID_XHTTP_MODES = {'auto', 'packet-up', 'stream-up', 'stream-one'}
 
 def is_base64(s: str) -> bool:
     if not s or len(s) < 4:
@@ -115,6 +116,10 @@ def parse_vless(config: str) -> Optional[Dict]:
     if transport_type not in VALID_TRANSPORT_TYPES:
         transport_type = 'tcp'
     
+    mode = params.get('mode', [''])[0].lower()
+    if mode not in VALID_XHTTP_MODES:
+        mode = ''
+    
     return {
         'uuid': url.username,
         'address': url.hostname,
@@ -130,6 +135,7 @@ def parse_vless(config: str) -> Optional[Dict]:
         'pbk': params.get('pbk', [''])[0],
         'sid': params.get('sid', [''])[0],
         'spx': params.get('spx', [''])[0],
+        'mode': mode,
         'name': unquote(url.fragment) if url.fragment else ''
     }
 
@@ -152,6 +158,10 @@ def parse_trojan(config: str) -> Optional[Dict]:
     if transport_type not in VALID_TRANSPORT_TYPES:
         transport_type = 'tcp'
     
+    mode = params.get('mode', [''])[0].lower()
+    if mode not in VALID_XHTTP_MODES:
+        mode = ''
+    
     return {
         'password': url.username,
         'address': url.hostname,
@@ -164,6 +174,7 @@ def parse_trojan(config: str) -> Optional[Dict]:
         'security': params.get('security', ['tls'])[0],
         'fp': params.get('fp', [''])[0],
         'flow': params.get('flow', [''])[0],
+        'mode': mode,
         'name': unquote(url.fragment) if url.fragment else ''
     }
 
@@ -353,3 +364,60 @@ def parse_tuic(config: str) -> Optional[Dict]:
         'disable_sni': params.get('disable_sni', ['0'])[0],
         'name': unquote(url.fragment) if url.fragment else ''
     }
+
+def compute_identity(config: str) -> str:
+    if not config or not isinstance(config, str):
+        return config
+    
+    cleaned = config.strip()
+    low = cleaned.lower()
+    
+    try:
+        if low.startswith('vmess://'):
+            data = decode_vmess(cleaned)
+            if data:
+                return '|'.join(['vmess', str(data.get('add', '')).lower(), str(data.get('port', '')),
+                                  str(data.get('id', '')).lower(), str(data.get('net', 'tcp')).lower(),
+                                  str(data.get('tls', 'none')).lower(), str(data.get('path', '')),
+                                  str(data.get('host', '')).lower()])
+        elif low.startswith('vless://'):
+            data = parse_vless(cleaned)
+            if data:
+                return '|'.join(['vless', str(data.get('address', '')).lower(), str(data.get('port', '')),
+                                  str(data.get('uuid', '')).lower(), str(data.get('type', 'tcp')),
+                                  str(data.get('security', 'none')), str(data.get('flow', '')),
+                                  str(data.get('path', '')), str(data.get('host', '')).lower(),
+                                  str(data.get('sni', '')).lower(), str(data.get('pbk', ''))])
+        elif low.startswith('trojan://'):
+            data = parse_trojan(cleaned)
+            if data:
+                return '|'.join(['trojan', str(data.get('address', '')).lower(), str(data.get('port', '')),
+                                  str(data.get('password', '')), str(data.get('type', 'tcp')),
+                                  str(data.get('path', '')), str(data.get('host', '')).lower()])
+        elif low.startswith(('hysteria2://', 'hy2://')):
+            data = parse_hysteria2(cleaned)
+            if data:
+                return '|'.join(['hysteria2', str(data.get('address', '')).lower(), str(data.get('port', '')),
+                                  str(data.get('password', ''))])
+        elif low.startswith('ss://'):
+            data = parse_shadowsocks(cleaned)
+            if data:
+                return '|'.join(['ss', str(data.get('address', '')).lower(), str(data.get('port', '')),
+                                  str(data.get('method', '')), str(data.get('password', ''))])
+        elif low.startswith('wireguard://'):
+            data = parse_wireguard(cleaned)
+            if data:
+                return '|'.join(['wireguard', str(data.get('address', '')).lower(), str(data.get('port', '')),
+                                  str(data.get('private_key', ''))])
+        elif low.startswith('tuic://'):
+            data = parse_tuic(cleaned)
+            if data:
+                return '|'.join(['tuic', str(data.get('address', '')).lower(), str(data.get('port', '')),
+                                  str(data.get('uuid', '')).lower(), str(data.get('password', ''))])
+    except Exception as e:
+        logger.debug(f"compute_identity fallback for config due to: {e}")
+    
+    fragment_index = cleaned.find('#')
+    if fragment_index != -1:
+        cleaned = cleaned[:fragment_index]
+    return cleaned.lower()
