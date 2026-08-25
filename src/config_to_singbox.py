@@ -122,8 +122,7 @@ class ConfigToSingbox:
                     {"rule_set": ["geosite-malware", "geosite-phishing", "geosite-cryptominers", "geosite-category-ads-all"], "action": "reject"},
                     {"inbound": "tun-in", "query_type": ["A", "AAAA"], "server": "dns-fake"}
                 ],
-                "strategy": "ipv4_only",
-                "independent_cache": True
+                "strategy": "ipv4_only"
             },
             "inbounds": [
                 {"type": "tun", "tag": "tun-in", "address": ["172.18.0.1/30", "fdfe:dcba:9876::1/126"], "mtu": 9000, "auto_route": True, "strict_route": True, "stack": "mixed"},
