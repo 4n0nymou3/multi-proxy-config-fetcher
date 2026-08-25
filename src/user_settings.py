@@ -63,10 +63,21 @@ SINGBOX_TESTER_TIMEOUT_SECONDS = 10
 
 # List of URLs to test sing-box configs against.
 # The tester will try each URL in order until one succeeds.
+# Before testing starts, this list is automatically checked and any URL that is
+# currently unreachable (from the runner itself, without a proxy) is skipped.
 SINGBOX_TESTER_URLS = [
-    'https://www.youtube.com/generate_204'
-    #'https://www.gstatic.com/generate_204'
+    'https://www.youtube.com/generate_204',
+    'https://www.gstatic.com/generate_204',
+    'https://cp.cloudflare.com'
 ]
+
+# Number of independent test rounds a config must pass to be marked as working.
+# A config is only kept if it succeeds in every round, which filters out
+# "flaky" configs that only appear to work when tested a single time.
+# Each round also rotates which test URL is tried first, so a config is
+# checked against more than one destination overall.
+# Higher values are more accurate but take longer to run. 2 is a good default.
+SINGBOX_TESTER_ROUNDS = 3
 
 # --- Xray Config Tester Settings ---
 
@@ -85,10 +96,21 @@ XRAY_TESTER_TIMEOUT_SECONDS = 10
 
 # List of URLs to test Xray configs against.
 # The tester will try each URL in order until one succeeds.
+# Before testing starts, this list is automatically checked and any URL that is
+# currently unreachable (from the runner itself, without a proxy) is skipped.
 XRAY_TESTER_URLS = [
-    'https://www.youtube.com/generate_204'
-    #'https://www.gstatic.com/generate_204'
+    'https://www.youtube.com/generate_204',
+    'https://www.gstatic.com/generate_204',
+    'https://cp.cloudflare.com'
 ]
+
+# Number of independent test rounds a config must pass to be marked as working.
+# A config is only kept if it succeeds in every round, which filters out
+# "flaky" configs that only appear to work when tested a single time.
+# Each round also rotates which test URL is tried first, so a config is
+# checked against more than one destination overall.
+# Higher values are more accurate but take longer to run. 2 is a good default.
+XRAY_TESTER_ROUNDS = 3
 
 # --- Location API Settings ---
 
