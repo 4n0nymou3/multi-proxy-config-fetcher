@@ -108,15 +108,21 @@ def build_xray_settings(data: Dict) -> Dict:
                 "host": data.get('host', address)
             }
         elif net_type == 'splithttp':
-            stream_settings["splithttpSettings"] = {
+            splithttp_settings = {
                 "path": data.get('path', '/'),
                 "host": data.get('host', address)
             }
+            if data.get('mode'):
+                splithttp_settings["mode"] = data.get('mode')
+            stream_settings["splithttpSettings"] = splithttp_settings
         elif net_type == 'xhttp':
-            stream_settings["xhttpSettings"] = {
+            xhttp_settings = {
                 "path": data.get('path', '/'),
                 "host": data.get('host', address)
             }
+            if data.get('mode'):
+                xhttp_settings["mode"] = data.get('mode')
+            stream_settings["xhttpSettings"] = xhttp_settings
         
         if security == 'reality':
             stream_settings["security"] = "reality"
@@ -130,7 +136,6 @@ def build_xray_settings(data: Dict) -> Dict:
             stream_settings["security"] = "tls"
             stream_settings["tlsSettings"] = {
                 "serverName": data.get('sni', address),
-                "allowInsecure": False,
                 "fingerprint": data.get('fp', 'chrome'),
                 "alpn": data.get('alpn', '').split(',') if data.get('alpn') else ["h2", "http/1.1"]
             }
@@ -138,7 +143,6 @@ def build_xray_settings(data: Dict) -> Dict:
             stream_settings["security"] = "xtls"
             stream_settings["xtlsSettings"] = {
                 "serverName": data.get('sni', address),
-                "allowInsecure": False,
                 "alpn": data.get('alpn', '').split(',') if data.get('alpn') else ["h2", "http/1.1"]
             }
             
