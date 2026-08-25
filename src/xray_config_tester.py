@@ -44,6 +44,28 @@ def find_free_port() -> int:
     raise RuntimeError("Could not find a free port")
 
 
+def get_usable_test_urls(candidate_urls: List[str], timeout: int = 6) -> List[str]:
+    usable = []
+    for url in candidate_urls:
+        try:
+            response = requests.get(url, timeout=timeout)
+            if response.status_code in (200, 204):
+                usable.append(url)
+        except Exception as e:
+            logger.warning(f"Test endpoint unreachable, skipping: {url} ({str(e)[:80]})")
+    if not usable:
+        logger.warning("No test endpoints passed preflight check, falling back to full configured list")
+        return list(candidate_urls)
+    return usable
+
+
+def rotate_urls(urls: List[str], offset: int) -> List[str]:
+    if not urls:
+        return urls
+    offset = offset % len(urls)
+    return urls[offset:] + urls[:offset]
+
+
 @contextmanager
 def managed_process(command: List[str], config_file: str):
     process = None
@@ -292,17 +314,16 @@ class XrayTester:
 
 
 class ParallelXrayTester:
-    def __init__(self, xray_path: str = 'xray', max_workers: int = 8, timeout: int = 10, test_urls: List[str] = None):
-        self.tester = XrayTester(xray_path, timeout, test_urls)
+    def __init__(self, xray_path: str = 'xray', max_workers: int = 8, timeout: int = 10,
+                 test_urls: List[str] = None, rounds: int = 2):
+        self.base_test_urls = test_urls if test_urls else ['https://www.youtube.com/generate_204']
+        self.tester = XrayTester(xray_path, timeout, self.base_test_urls)
         self.max_workers = max(1, min(max_workers, os.cpu_count() or 4))
+        self.rounds = max(1, rounds)
         
-    def test_all(self, configs: List[str]) -> List[str]:
-        logger.info(f"Testing {len(configs)} configs with {self.max_workers} workers...")
-        logger.info(f"Test URLs: {self.tester.test_urls}")
-        
-        working = []
+    def _run_single_round(self, configs: List[str]) -> Dict[str, int]:
+        round_results: Dict[str, int] = {}
         tested = 0
-        skipped = 0
         
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             futures = {executor.submit(self.tester.test_config, cfg): cfg for cfg in configs}
@@ -314,18 +335,41 @@ class ParallelXrayTester:
                 try:
                     success, delay, config_str = future.result(timeout=self.tester.timeout + 10)
                     if success:
-                        working.append(config_str)
-                        if delay == 0:
-                            skipped += 1
+                        round_results[config_str] = delay if delay else 0
                     
                     if tested % 25 == 0 or tested == len(configs):
-                        logger.info(f"Progress: {tested}/{len(configs)} ({len(working)} working, {skipped} skipped)")
+                        logger.info(f"Progress: {tested}/{len(configs)} ({len(round_results)} working so far)")
                 
                 except Exception as e:
                     logger.error(f"Test error: {str(e)}")
         
-        success_rate = (len(working) * 100) // max(1, len(configs))
-        logger.info(f"Results: {len(working)}/{len(configs)} working ({success_rate}%) - {skipped} skipped (unsupported)")
+        return round_results
+        
+    def test_all(self, configs: List[str]) -> List[str]:
+        total = len(configs)
+        logger.info(f"Testing {total} configs with {self.max_workers} workers over {self.rounds} round(s)...")
+        logger.info(f"Base test URLs: {self.base_test_urls}")
+        
+        candidates = list(configs)
+        skipped = 0
+        
+        for round_num in range(1, self.rounds + 1):
+            if not candidates:
+                break
+            
+            self.tester.test_urls = rotate_urls(self.base_test_urls, round_num - 1)
+            logger.info(f"--- Round {round_num}/{self.rounds}: {len(candidates)} configs, endpoint order {self.tester.test_urls} ---")
+            
+            round_results = self._run_single_round(candidates)
+            skipped = sum(1 for cfg in candidates if cfg in round_results and round_results[cfg] == 0)
+            candidates = [cfg for cfg in candidates if cfg in round_results]
+            
+            success_rate = (len(candidates) * 100) // max(1, total)
+            logger.info(f"Round {round_num} result: {len(candidates)}/{total} survive ({success_rate}%)")
+        
+        working = candidates
+        success_rate = (len(working) * 100) // max(1, total)
+        logger.info(f"Final results after {self.rounds} round(s): {len(working)}/{total} working ({success_rate}%) - {skipped} skipped (unsupported)")
         return working
 
 
@@ -355,7 +399,8 @@ def main():
 
     max_workers = config_settings.XRAY_TESTER_MAX_WORKERS
     timeout = config_settings.XRAY_TESTER_TIMEOUT_SECONDS
-    test_urls = config_settings.XRAY_TESTER_URLS
+    rounds = config_settings.XRAY_TESTER_ROUNDS
+    test_urls = get_usable_test_urls(config_settings.XRAY_TESTER_URLS)
     
     logger.info(f"Loading configs from {input_file}")
     
@@ -383,7 +428,7 @@ def main():
     
     logger.info(f"Found {len(configs)} configs")
     
-    tester = ParallelXrayTester(max_workers=max_workers, timeout=timeout, test_urls=test_urls)
+    tester = ParallelXrayTester(max_workers=max_workers, timeout=timeout, test_urls=test_urls, rounds=rounds)
     working = tester.test_all(configs)
     
     os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
