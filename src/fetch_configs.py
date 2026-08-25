@@ -9,6 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 from config import ProxyConfig, ChannelConfig
 from config_validator import ConfigValidator
+import config_parser as parser
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,6 +20,8 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
+
+RETRYABLE_STATUS_CODES = {408, 429}
 
 class ConfigFetcher:
     def __init__(self, config: ProxyConfig):
@@ -52,14 +55,34 @@ class ConfigFetcher:
                 response = self.session.get(url, timeout=self.config.REQUEST_TIMEOUT)
                 response.raise_for_status()
                 return response
-            except requests.RequestException as e:
+            except requests.exceptions.HTTPError as e:
+                status_code = e.response.status_code if e.response is not None else None
+                is_retryable = status_code is not None and (status_code in RETRYABLE_STATUS_CODES or status_code >= 500)
+                
+                if not is_retryable:
+                    logger.error(f"Failed to fetch {url}: permanent HTTP error {status_code}")
+                    return None
+                
                 if attempt == self.config.MAX_RETRIES - 1:
                     logger.error(f"Failed to fetch {url} after {self.config.MAX_RETRIES} attempts: {str(e)}")
                     return None
+                
+                wait_time = min(self.config.RETRY_DELAY * backoff, 60)
+                logger.warning(f"Attempt {attempt + 1} failed with HTTP {status_code}, retrying in {wait_time}s")
+                time.sleep(wait_time)
+                backoff *= 2
+            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError) as e:
+                if attempt == self.config.MAX_RETRIES - 1:
+                    logger.error(f"Failed to fetch {url} after {self.config.MAX_RETRIES} attempts: {str(e)}")
+                    return None
+                
                 wait_time = min(self.config.RETRY_DELAY * backoff, 60)
                 logger.warning(f"Attempt {attempt + 1} failed, retrying in {wait_time}s: {str(e)}")
                 time.sleep(wait_time)
                 backoff *= 2
+            except requests.RequestException as e:
+                logger.error(f"Failed to fetch {url}: non-retryable error: {str(e)}")
+                return None
         return None
 
     def fetch_ssconf_configs(self, url: str) -> List[str]:
@@ -170,7 +193,14 @@ class ConfigFetcher:
             channel.metrics.total_configs += len(found_configs)
             configs.extend(found_configs)
         
-        configs = list(set(configs))
+        deduped_configs = []
+        seen_local = set()
+        for config in configs:
+            identity = parser.compute_identity(config)
+            if identity not in seen_local:
+                seen_local.add(identity)
+                deduped_configs.append(config)
+        configs = deduped_configs
         
         for config in configs[:]:
             for protocol in self.config.SUPPORTED_PROTOCOLS:
@@ -219,9 +249,10 @@ class ConfigFetcher:
                     channel.metrics.valid_configs += 1
                     channel.metrics.protocol_counts[protocol] = channel.metrics.protocol_counts.get(protocol, 0) + 1
                     
-                    if clean_config not in self.seen_configs:
+                    identity = parser.compute_identity(clean_config)
+                    if identity not in self.seen_configs:
                         channel.metrics.unique_configs += 1
-                        self.seen_configs.add(clean_config)
+                        self.seen_configs.add(identity)
                         processed_configs.append(clean_config)
                         self.protocol_counts[protocol] += 1
                 break
