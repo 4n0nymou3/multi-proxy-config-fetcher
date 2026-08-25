@@ -14,11 +14,15 @@ SOURCE_URLS = [
     #"https://raw.githubusercontent.com/MahsaNetConfigTopic/config/refs/heads/main/xray_final.txt",
     "https://raw.githubusercontent.com/Mahdi0024/ProxyCollector/master/sub/proxies.txt",
     "https://raw.githubusercontent.com/zieng2/wl/refs/heads/main/vless_universal.txt",
-    #"https://raw.githubusercontent.com/iampedii/whitedns-sub/refs/heads/main/base64.txt",
+    "https://raw.githubusercontent.com/iampedii/whitedns-sub/refs/heads/main/base64.txt",
+    "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/verified/configs.txt",
+    "https://raw.githubusercontent.com/itsyebekhe/PSG/main/subscriptions/xray/mix",
+    "https://github.com/Delta-Kronecker/V2ray-Config/raw/refs/heads/main/config/all_configs.txt",
+    "https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_RAW.txt",
     "https://raw.githubusercontent.com/Ashkan-m/v2ray/main/Sub.txt",
     "https://raw.githubusercontent.com/masir-sefid/Sub/main/@Masir_Sefid.txt",
     "https://raw.githubusercontent.com/arshiacomplus/v2rayExtractor/refs/heads/main/mix/sub.html",
-    "https://raw.githubusercontent.com/therealaleph/Iran-configs/refs/heads/main/ir_configs.txt",
+    #"https://raw.githubusercontent.com/therealaleph/Iran-configs/refs/heads/main/ir_configs.txt",
     "https://t.me/s/persianvpnhub",
 ]
 
@@ -44,7 +48,7 @@ ENABLED_PROTOCOLS = {
 
 # Maximum age of configurations in days.
 # Configurations older than this will be considered invalid.
-MAX_CONFIG_AGE_DAYS = 2
+MAX_CONFIG_AGE_DAYS = 3
 
 # --- Sing-box Config Tester Settings ---
 
@@ -55,7 +59,7 @@ ENABLE_SINGBOX_TESTER = True
 
 # Number of parallel workers to use for testing sing-box configs.
 # A higher number means faster testing but uses more CPU/RAM.
-SINGBOX_TESTER_MAX_WORKERS = 8
+SINGBOX_TESTER_MAX_WORKERS = 16
 
 # Maximum time (in seconds) to wait for a sing-box config to respond during testing.
 # Configs that take longer than this will be marked as failed.
@@ -88,7 +92,7 @@ ENABLE_XRAY_TESTER = True
 
 # Number of parallel workers to use for testing Xray configs.
 # A higher number means faster testing but uses more CPU/RAM.
-XRAY_TESTER_MAX_WORKERS = 8
+XRAY_TESTER_MAX_WORKERS = 16
 
 # Maximum time (in seconds) to wait for an Xray config to respond during testing.
 # Configs that take longer than this will be marked as failed.
