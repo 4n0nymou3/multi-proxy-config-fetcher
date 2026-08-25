@@ -3,6 +3,7 @@ import base64
 import json
 from typing import Optional, Tuple, List
 from urllib.parse import unquote, urlparse
+import config_parser as parser
 
 class ConfigValidator:
     @staticmethod
@@ -166,8 +167,9 @@ class ConfigValidator:
         seen = set()
         unique_configs = []
         for config in final_configs:
-            if config not in seen:
-                seen.add(config)
+            identity = parser.compute_identity(config)
+            if identity not in seen:
+                seen.add(identity)
                 unique_configs.append(config)
         
         return unique_configs
