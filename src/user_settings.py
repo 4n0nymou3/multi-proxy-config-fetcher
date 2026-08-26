@@ -72,8 +72,7 @@ SINGBOX_TESTER_TIMEOUT_SECONDS = 10
 SINGBOX_TESTER_URLS = [
     'https://www.youtube.com/generate_204',
     'https://www.gstatic.com/generate_204',
-    'http://www.msftconnecttest.com/connecttest.txt'
-    #'https://cp.cloudflare.com'
+    'https://cp.cloudflare.com'
 ]
 
 # Number of independent test rounds a config must pass to be marked as working.
