@@ -2,10 +2,8 @@ import json
 import os
 import sys
 import logging
-import base64
-import re
 from typing import Dict, List, Set, Optional
-from urllib.parse import urlparse, parse_qs, unquote
+import transport_builder
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -48,6 +46,7 @@ class SecurityFilter:
             "log": {
                 "loglevel": "warning"
             },
+            "version": {"min": "26.2.6"},
             "remarks": "👽 Anonymous Multi Balanced - Secure Configs",
             "dns": {
                 "servers": [
@@ -181,6 +180,53 @@ class SecurityFilter:
             }
         }
 
+    @staticmethod
+    def extract_flat_data(sb_outbound: Dict) -> Dict:
+        server = sb_outbound.get('server', '')
+        transport = sb_outbound.get('transport') or {}
+        tls = sb_outbound.get('tls') or {}
+        reality = tls.get('reality') or {}
+        utls = tls.get('utls') or {}
+        net_type = transport.get('type', 'tcp')
+
+        if reality.get('enabled'):
+            security = 'reality'
+        elif tls.get('enabled'):
+            security = 'tls'
+        else:
+            security = 'none'
+
+        host = server
+        path = ''
+
+        if net_type == 'ws':
+            path = transport.get('path', '/')
+            host = (transport.get('headers') or {}).get('Host', server)
+        elif net_type == 'grpc':
+            path = transport.get('service_name', '')
+        elif net_type == 'http':
+            host_list = transport.get('host') or [server]
+            host = host_list[0] if host_list else server
+            path = transport.get('path', '/')
+
+        alpn_list = tls.get('alpn') or []
+
+        return {
+            'address': server,
+            'port': sb_outbound.get('server_port', 443),
+            'net': net_type,
+            'type': net_type,
+            'security': security,
+            'sni': tls.get('server_name', server),
+            'alpn': ','.join(alpn_list),
+            'fp': utls.get('fingerprint', ''),
+            'pbk': reality.get('public_key', ''),
+            'sid': reality.get('short_id', ''),
+            'host': host,
+            'path': path,
+            'protocol': sb_outbound.get('type', '')
+        }
+
     def singbox_to_xray_vmess(self, sb_outbound: Dict, tag: str) -> Optional[Dict]:
         try:
             server = sb_outbound.get('server')
@@ -211,43 +257,8 @@ class SecurityFilter:
                         }
                     ]
                 },
-                "streamSettings": {
-                    "network": "tcp",
-                    "security": "none"
-                }
+                "streamSettings": transport_builder.build_xray_settings(self.extract_flat_data(sb_outbound))
             }
-            
-            transport = sb_outbound.get('transport', {})
-            if isinstance(transport, dict):
-                transport_type = transport.get('type', 'tcp')
-                outbound["streamSettings"]["network"] = transport_type
-                
-                if transport_type == 'ws':
-                    ws_path = transport.get('path', '/')
-                    ws_host = transport.get('headers', {}).get('Host', server)
-                    outbound["streamSettings"]["wsSettings"] = {
-                        "path": ws_path,
-                        "headers": {"Host": ws_host}
-                    }
-            
-            tls = sb_outbound.get('tls', {})
-            if isinstance(tls, dict) and tls.get('enabled'):
-                outbound["streamSettings"]["security"] = "tls"
-                sni = tls.get('server_name', server)
-                outbound["streamSettings"]["tlsSettings"] = {
-                    "serverName": sni,
-                    "allowInsecure": False
-                }
-                
-                alpn = tls.get('alpn', [])
-                if alpn:
-                    outbound["streamSettings"]["tlsSettings"]["alpn"] = alpn
-                
-                utls = tls.get('utls', {})
-                if isinstance(utls, dict) and utls.get('enabled'):
-                    fp = utls.get('fingerprint', '')
-                    if fp:
-                        outbound["streamSettings"]["tlsSettings"]["fingerprint"] = fp
             
             return outbound
         except Exception as e:
@@ -283,43 +294,8 @@ class SecurityFilter:
                         }
                     ]
                 },
-                "streamSettings": {
-                    "network": "tcp",
-                    "security": "none"
-                }
+                "streamSettings": transport_builder.build_xray_settings(self.extract_flat_data(sb_outbound))
             }
-            
-            transport = sb_outbound.get('transport', {})
-            if isinstance(transport, dict):
-                transport_type = transport.get('type', 'tcp')
-                outbound["streamSettings"]["network"] = transport_type
-                
-                if transport_type == 'ws':
-                    ws_path = transport.get('path', '/')
-                    ws_host = transport.get('headers', {}).get('Host', server)
-                    outbound["streamSettings"]["wsSettings"] = {
-                        "path": ws_path,
-                        "headers": {"Host": ws_host}
-                    }
-            
-            tls = sb_outbound.get('tls', {})
-            if isinstance(tls, dict) and tls.get('enabled'):
-                outbound["streamSettings"]["security"] = "tls"
-                sni = tls.get('server_name', server)
-                outbound["streamSettings"]["tlsSettings"] = {
-                    "serverName": sni,
-                    "allowInsecure": False
-                }
-                
-                alpn = tls.get('alpn', [])
-                if alpn:
-                    outbound["streamSettings"]["tlsSettings"]["alpn"] = alpn
-                
-                utls = tls.get('utls', {})
-                if isinstance(utls, dict) and utls.get('enabled'):
-                    fp = utls.get('fingerprint', '')
-                    if fp:
-                        outbound["streamSettings"]["tlsSettings"]["fingerprint"] = fp
             
             return outbound
         except Exception as e:
@@ -348,36 +324,8 @@ class SecurityFilter:
                         }
                     ]
                 },
-                "streamSettings": {
-                    "network": "tcp",
-                    "security": "tls"
-                }
+                "streamSettings": transport_builder.build_xray_settings(self.extract_flat_data(sb_outbound))
             }
-            
-            transport = sb_outbound.get('transport', {})
-            if isinstance(transport, dict):
-                transport_type = transport.get('type', 'tcp')
-                outbound["streamSettings"]["network"] = transport_type
-                
-                if transport_type == 'ws':
-                    ws_path = transport.get('path', '/')
-                    ws_host = transport.get('headers', {}).get('Host', server)
-                    outbound["streamSettings"]["wsSettings"] = {
-                        "path": ws_path,
-                        "headers": {"Host": ws_host}
-                    }
-            
-            tls = sb_outbound.get('tls', {})
-            if isinstance(tls, dict):
-                sni = tls.get('server_name', server)
-                outbound["streamSettings"]["tlsSettings"] = {
-                    "serverName": sni,
-                    "allowInsecure": False
-                }
-                
-                alpn = tls.get('alpn', [])
-                if alpn:
-                    outbound["streamSettings"]["tlsSettings"]["alpn"] = alpn
             
             return outbound
         except Exception as e:
