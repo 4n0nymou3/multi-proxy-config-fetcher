@@ -15,15 +15,15 @@ SOURCE_URLS = [
     "https://raw.githubusercontent.com/Mahdi0024/ProxyCollector/master/sub/proxies.txt",
     "https://raw.githubusercontent.com/zieng2/wl/refs/heads/main/vless_universal.txt",
     #"https://raw.githubusercontent.com/iampedii/whitedns-sub/refs/heads/main/base64.txt",
-    "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/verified/configs.txt",
+    #"https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/verified/configs.txt",
     #"https://raw.githubusercontent.com/itsyebekhe/PSG/main/subscriptions/xray/mix",
-    "https://github.com/Delta-Kronecker/V2ray-Config/raw/refs/heads/main/config/all_configs.txt",
+    #"https://github.com/Delta-Kronecker/V2ray-Config/raw/refs/heads/main/config/all_configs.txt",
     #"https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_RAW.txt",
     "https://raw.githubusercontent.com/Ashkan-m/v2ray/main/Sub.txt",
-    "https://raw.githubusercontent.com/masir-sefid/Sub/main/@Masir_Sefid.txt",
+    #"https://raw.githubusercontent.com/masir-sefid/Sub/main/@Masir_Sefid.txt",
     #"https://raw.githubusercontent.com/arshiacomplus/v2rayExtractor/refs/heads/main/mix/sub.html",
     #"https://raw.githubusercontent.com/therealaleph/Iran-configs/refs/heads/main/ir_configs.txt",
-    "https://t.me/s/persianvpnhub",
+    #"https://t.me/s/persianvpnhub",
 ]
 
 # Set to True to fetch the maximum possible number of configurations.
@@ -72,7 +72,8 @@ SINGBOX_TESTER_TIMEOUT_SECONDS = 10
 SINGBOX_TESTER_URLS = [
     'https://www.youtube.com/generate_204',
     'https://www.gstatic.com/generate_204',
-    'https://cp.cloudflare.com'
+    'http://www.msftconnecttest.com/connecttest.txt'
+    #'https://cp.cloudflare.com'
 ]
 
 # Number of independent test rounds a config must pass to be marked as working.
@@ -81,7 +82,7 @@ SINGBOX_TESTER_URLS = [
 # Each round also rotates which test URL is tried first, so a config is
 # checked against more than one destination overall.
 # Higher values are more accurate but take longer to run. 2 is a good default.
-SINGBOX_TESTER_ROUNDS = 3
+SINGBOX_TESTER_ROUNDS = 2
 
 # --- Xray Config Tester Settings ---
 
