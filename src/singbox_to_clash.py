@@ -24,6 +24,7 @@ def singbox_outbound_to_clash_proxy(outbound: Dict) -> Optional[Dict]:
 
     transport = outbound.get('transport') or {}
     tls = outbound.get('tls') or {}
+    reality = tls.get('reality') or {}
 
     ws_opts = {}
     if transport.get('type') == 'ws':
@@ -43,6 +44,11 @@ def singbox_outbound_to_clash_proxy(outbound: Dict) -> Optional[Dict]:
         }
         if tls.get('alpn'):
             tls_fields['alpn'] = tls['alpn']
+        if reality.get('enabled'):
+            tls_fields['reality-opts'] = {
+                'public-key': reality.get('public_key', ''),
+                'short-id': reality.get('short_id', ''),
+            }
 
     if proxy_type == 'vmess':
         proxy = {
@@ -68,6 +74,9 @@ def singbox_outbound_to_clash_proxy(outbound: Dict) -> Optional[Dict]:
             'uuid': outbound.get('uuid', ''),
             'network': transport.get('type', 'tcp'),
         }
+        flow = outbound.get('flow', '')
+        if flow:
+            proxy['flow'] = flow
         proxy.update(ws_opts)
         proxy.update(tls_fields)
         return proxy
