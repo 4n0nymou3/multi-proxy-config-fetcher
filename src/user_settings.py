@@ -24,7 +24,7 @@ SOURCE_URLS = [
     #"https://raw.githubusercontent.com/masir-sefid/Sub/main/@Masir_Sefid.txt",
     #"https://raw.githubusercontent.com/arshiacomplus/v2rayExtractor/refs/heads/main/mix/sub.html",
     #"https://raw.githubusercontent.com/therealaleph/Iran-configs/refs/heads/main/ir_configs.txt",
-    #"https://t.me/s/persianvpnhub",
+    "https://t.me/s/persianvpnhub",
 ]
 
 # Set to True to fetch the maximum possible number of configurations.
