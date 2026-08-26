@@ -238,6 +238,10 @@ jobs:
         run: python src/xray_balancer.py
         continue-on-error: true
       
+      - name: Convert tested configs to Xray Fragment format
+        run: python src/xray_fragment_balancer.py
+        continue-on-error: true
+      
       - name: Generate charts and reports
         run: python src/generate_charts.py
       
@@ -271,6 +275,7 @@ jobs:
           git add configs/clash_configs_tested.yaml
           git add configs/clash_configs_secure.yaml
           git add configs/xray_loadbalanced_config.json
+          git add configs/xray_fragment_loadbalanced_config.json
           git add configs/xray_secure_loadbalanced_config.json
           git add configs/channel_stats.json
           git add assets/
