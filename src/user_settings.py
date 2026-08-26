@@ -22,7 +22,7 @@ SOURCE_URLS = [
     #"https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_RAW.txt",
     "https://raw.githubusercontent.com/Ashkan-m/v2ray/main/Sub.txt",
     #"https://raw.githubusercontent.com/masir-sefid/Sub/main/@Masir_Sefid.txt",
-    #"https://raw.githubusercontent.com/arshiacomplus/v2rayExtractor/refs/heads/main/mix/sub.html",
+    "https://raw.githubusercontent.com/arshiacomplus/v2rayExtractor/refs/heads/main/mix/sub.html",
     #"https://raw.githubusercontent.com/therealaleph/Iran-configs/refs/heads/main/ir_configs.txt",
     "https://t.me/s/persianvpnhub",
 ]
@@ -56,7 +56,7 @@ MAX_CONFIG_AGE_DAYS = 3
 # Set to True to enable testing of configs using sing-box.
 # If True, sing-box will be used to test all fetched configs and create a 'tested' config file.
 # If False, the testing step will be skipped.
-ENABLE_SINGBOX_TESTER = False
+ENABLE_SINGBOX_TESTER = True
 
 # Number of parallel workers to use for testing sing-box configs.
 # A higher number means faster testing but uses more CPU/RAM.
