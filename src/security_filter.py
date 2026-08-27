@@ -4,6 +4,7 @@ import sys
 import logging
 from typing import Dict, List, Set, Optional
 import transport_builder
+import xray_template
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -39,146 +40,6 @@ class SecurityFilter:
         except Exception as e:
             logger.error(f"Error loading config: {e}")
             return None
-
-    @staticmethod
-    def get_xray_template() -> Dict:
-        return {
-            "log": {
-                "loglevel": "warning"
-            },
-            "version": {"min": "26.2.6"},
-            "remarks": "👽 Anonymous Multi Balanced - Secure Configs",
-            "dns": {
-                "servers": [
-                    "https://dns.google/dns-query",
-                    "https://cloudflare-dns.com/dns-query",
-                    {
-                        "address": "1.1.1.2",
-                        "domains": [
-                            "domain:ir",
-                            "geosite:category-ir"
-                        ],
-                        "skipFallback": True,
-                        "tag": "domestic-dns"
-                    }
-                ]
-            },
-            "fakedns": [
-                {
-                    "ipPool": "198.18.0.0/15",
-                    "poolSize": 10000
-                }
-            ],
-            "inbounds": [
-                {
-                    "port": 10808,
-                    "protocol": "socks",
-                    "settings": {
-                        "auth": "noauth",
-                        "udp": True,
-                        "userLevel": 8
-                    },
-                    "sniffing": {
-                        "destOverride": [
-                            "http",
-                            "tls",
-                            "fakedns"
-                        ],
-                        "enabled": True,
-                        "routeOnly": False
-                    },
-                    "tag": "socks"
-                }
-            ],
-            "observatory": {
-                "enableConcurrency": True,
-                "probeInterval": "3m",
-                "probeUrl": "https://www.gstatic.com/generate_204",
-                "subjectSelector": [
-                    "proxy-"
-                ]
-            },
-            "outbounds": [],
-            "policy": {
-                "levels": {
-                    "8": {
-                        "connIdle": 300,
-                        "downlinkOnly": 1,
-                        "handshake": 4,
-                        "uplinkOnly": 1
-                    }
-                },
-                "system": {
-                    "statsOutboundUplink": True,
-                    "statsOutboundDownlink": True
-                }
-            },
-            "routing": {
-                "balancers": [
-                    {
-                        "selector": [
-                            "proxy-"
-                        ],
-                        "strategy": {
-                            "type": "leastPing"
-                        },
-                        "tag": "proxy-round"
-                    }
-                ],
-                "domainStrategy": "AsIs",
-                "rules": [
-                    {
-                        "inboundTag": [
-                            "socks"
-                        ],
-                        "outboundTag": "dns-out",
-                        "port": "53",
-                        "type": "field"
-                    },
-                    {
-                        "ip": [
-                            "geoip:private"
-                        ],
-                        "outboundTag": "direct",
-                        "type": "field"
-                    },
-                    {
-                        "domain": [
-                            "geosite:private"
-                        ],
-                        "outboundTag": "direct",
-                        "type": "field"
-                    },
-                    {
-                        "domain": [
-                            "domain:ir",
-                            "geosite:category-ir"
-                        ],
-                        "outboundTag": "direct",
-                        "type": "field"
-                    },
-                    {
-                        "ip": [
-                            "geoip:ir"
-                        ],
-                        "outboundTag": "direct",
-                        "type": "field"
-                    },
-                    {
-                        "inboundTag": [
-                            "domestic-dns"
-                        ],
-                        "outboundTag": "direct",
-                        "type": "field"
-                    },
-                    {
-                        "balancerTag": "proxy-round",
-                        "network": "tcp,udp",
-                        "type": "field"
-                    }
-                ]
-            }
-        }
 
     @staticmethod
     def extract_flat_data(sb_outbound: Dict) -> Dict:
@@ -368,7 +229,7 @@ class SecurityFilter:
 
     def convert_secure_configs_to_xray(self, secure_outbounds: List[Dict]) -> bool:
         try:
-            xray_config = self.get_xray_template()
+            xray_config = xray_template.get_xray_template("👽 Anonymous Multi Balanced - Secure Configs")
             xray_outbounds = []
             
             for idx, sb_outbound in enumerate(secure_outbounds, 1):
@@ -392,11 +253,7 @@ class SecurityFilter:
                 logger.warning("No secure configs could be converted to Xray format")
                 return False
             
-            xray_outbounds.extend([
-                {"protocol": "freedom", "settings": {"domainStrategy": "UseIP"}, "tag": "direct"},
-                {"protocol": "blackhole", "settings": {"response": {"type": "http"}}, "tag": "block"},
-                {"protocol": "dns", "settings": {"rules": [{"action": "hijack"}]}, "tag": "dns-out"}
-            ])
+            xray_outbounds.extend(xray_template.get_utility_outbounds())
             
             xray_config["outbounds"] = xray_outbounds
             
