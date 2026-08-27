@@ -10,7 +10,7 @@
 
 [**🇺🇸English**](README.md) | [**<img src="https://raw.githubusercontent.com/4n0nymou3/multi-proxy-config-fetcher/refs/heads/main/flag/iran.svg" height="14" style="vertical-align:middle">فارسی**](README_FA.md) | [**🇨🇳中文**](README_CN.md) | [**🇷🇺Русский**](README_RU.md)
 
-An advanced, automated proxy configuration management system that fetches, validates, tests, enriches, and filters proxy configurations from multiple sources. This project provides enterprise-grade proxy management with real-time health monitoring, geographical tagging, and multi-stage security filtering.
+An advanced, automated proxy configuration management system that fetches, validates, tests, enriches, and filters proxy configurations from multiple sources. This project provides enterprise-grade proxy management with real-time health monitoring, geographical tagging, multi-round connectivity testing, and multi-stage security filtering.
 
 ## 🌐 Access Configurations
 
@@ -19,13 +19,14 @@ All proxy configurations and endpoints are available through our unified web int
 ### **[👉 Anonymous Proxy Hub - Access All Endpoints](https://4n0nymou3.github.io/Anonymous-Proxy-Hub/)**
 
 The web interface provides:
-- **7 Different Endpoints** for various use cases
+- **11 Different Endpoints** for various use cases
 - **Raw Configurations** - Unfiltered original configs
-- **Xray Tested** - Configs verified with Xray core (Pass 1)
+- **Xray Tested** - Configs verified with Xray core
 - **Xray Load Balanced** - Smart load-balanced JSON configs
+- **Xray Fragment Load Balanced** - Load-balanced JSON configs with advanced two-stage TLS fragmentation for stronger DPI resistance
 - **Xray Secure** - High-security filtered configs
 - **Sing-box All** - All configs in Sing-box format
-- **Sing-box Tested** - Sing-box verified configs (Pass 2)
+- **Sing-box Tested** - Sing-box verified configs
 - **Sing-box Secure** - Maximum security Sing-box configs
 - **Clash All** - All configs in Clash/Mihomo format
 - **Clash Tested** - Clash-compatible tested configs
@@ -33,7 +34,7 @@ The web interface provides:
 
 ## 📊 Source Performance Monitoring
 
-Real-time performance statistics of all configured sources (Telegram channels and URLs). This chart is automatically updated every 12 hours.
+Real-time performance statistics of all configured sources (Telegram channels and URLs). This chart is automatically updated on every run.
 
 ### Quick Overview
 <div align="center">
@@ -59,26 +60,28 @@ Sources scoring below 30% are automatically disabled to maintain system quality.
 ## ✨ Key Features
 
 ### Multi-Protocol Support
-- **WireGuard** - Modern, fast VPN protocol
-- **Hysteria2** - High-performance proxy protocol
-- **VLESS** - Lightweight VMess alternative
+- **VLESS** - Lightweight VMess alternative, including Reality and XTLS Vision
 - **VMess** - Popular V2Ray protocol
-- **Shadowsocks** - Secure SOCKS5 proxy
 - **Trojan** - TLS-based proxy protocol
-- **TUIC** - UDP-based proxy protocol
+- **Shadowsocks** - Secure SOCKS5 proxy (AEAD ciphers only)
+- **Hysteria2** - High-performance proxy protocol
+- **WireGuard** - Modern, fast VPN protocol (extracted and included in the raw/tested text output only; disabled by default and not yet part of the Sing-box, Xray-balanced, or Clash conversions)
+- **TUIC** - UDP-based proxy protocol (same current limitation as WireGuard above; disabled by default)
 
 ### Advanced Processing Pipeline
 
 1. **Intelligent Fetching**
    - Supports Telegram channels, SSCONF links, and custom URLs
    - Automatic base64 decoding and format detection
-   - Duplicate removal and validation
+   - Semantic duplicate removal (matches configs by protocol, address, port, and credentials, ignoring name or parameter order) and validation
+   - Retries failed sources only on transient errors (timeouts, connection issues, HTTP 408/429/5xx); permanent errors fail fast
 
-2. **Two-Stage Testing System**
-   - **Pass 1**: Health check using Xray core
-   - **Pass 2**: Health check using Sing-box core
-   - Parallel testing with configurable workers
-   - Custom timeout and test URL configuration
+2. **Multi-Round, Two-Core Testing System**
+   - Health checks using both the Xray core and the Sing-box core
+   - Each core tests in multiple independent rounds (2 by default) - a config is only kept if it passes every round, filtering out unstable "flaky" configs
+   - The test URL is rotated between rounds so configs aren't judged against a single destination
+   - Test URLs are automatically pre-checked before each run, and any endpoint that is unreachable at that moment is skipped
+   - Parallel testing with configurable workers, timeout, and test URLs
 
 3. **Geographical Enrichment**
    - Automatic server location detection
@@ -96,13 +99,13 @@ Sources scoring below 30% are automatically disabled to maintain system quality.
    - Removes insecure encryption methods
    - Validates TLS/SSL configurations
    - Filters deprecated protocols
-   - Generates separate secure endpoint files
+   - Generates separate secure endpoint files for Xray, Sing-box, and Clash
 
 6. **Format Conversion**
    - Automatic conversion to Sing-box JSON format
-   - Xray load-balanced configuration generation
+   - Xray load-balanced configuration generation, including a variant with advanced two-stage TLS fragmentation
    - Clash/Mihomo YAML configuration generation
-   - Maintains compatibility with all three cores
+   - Full Reality and XTLS Vision support carried through every output format
 
 ## 🚀 Quick Start
 
@@ -122,8 +125,9 @@ Sources scoring below 30% are automatically disabled to maintain system quality.
    - Enabled protocols
    - Testing parameters
    - Geolocation API preferences
-3. Enable GitHub Actions in your forked repository
-4. Configurations will auto-update every 12 hours
+3. Edit `src/fragment_settings.py` if you want to customize the advanced TLS fragmentation used in the Fragment endpoint
+4. Enable GitHub Actions in your forked repository
+5. Configurations will auto-update automatically on the project's schedule
 
 #### Local Setup
 
@@ -170,13 +174,23 @@ MAX_CONFIG_AGE_DAYS = 1
 ENABLE_SINGBOX_TESTER = True
 SINGBOX_TESTER_MAX_WORKERS = 8
 SINGBOX_TESTER_TIMEOUT_SECONDS = 10
-SINGBOX_TESTER_URLS = ['https://www.youtube.com/generate_204']
+SINGBOX_TESTER_URLS = [
+    'https://www.youtube.com/generate_204',
+    'https://www.gstatic.com/generate_204',
+    'https://cp.cloudflare.com'
+]
+SINGBOX_TESTER_ROUNDS = 2
 
 # Xray Testing
 ENABLE_XRAY_TESTER = True
 XRAY_TESTER_MAX_WORKERS = 8
 XRAY_TESTER_TIMEOUT_SECONDS = 10
-XRAY_TESTER_URLS = ['https://www.youtube.com/generate_204']
+XRAY_TESTER_URLS = [
+    'https://www.youtube.com/generate_204',
+    'https://www.gstatic.com/generate_204',
+    'https://cp.cloudflare.com'
+]
+XRAY_TESTER_ROUNDS = 2
 
 # Geolocation APIs (in priority order)
 LOCATION_APIS = [
@@ -186,6 +200,35 @@ LOCATION_APIS = [
     'ipapi.co'
 ]
 ```
+
+Turning either tester off (`ENABLE_SINGBOX_TESTER = False` or `ENABLE_XRAY_TESTER = False`) skips that connectivity check entirely for that run - the previous file for that stage is simply copied through unchanged. This speeds up the workflow, but note that the Sing-box, Clash, and Xray Secure outputs all depend on the Sing-box test stage, so turning it off reduces their reliability even though the plain Xray and Xray Fragment outputs stay unaffected.
+
+### `src/fragment_settings.py`
+
+```python
+FRAGMENT_ENABLED = True
+
+FRAGMENT_STAGE_1 = {
+    "packets": "tlshello",
+    "lengths": ["5", "94", "1"],
+    "delays": ["0"],
+    "max_split": "0"
+}
+
+FRAGMENT_STAGE_2_ENABLED = True
+
+FRAGMENT_STAGE_2 = {
+    "packets": "1-1",
+    "lengths": ["109", "1"],
+    "delays": ["1"],
+    "max_split": "355"
+}
+
+FRAGMENT_TLS_FINGERPRINT = "unsafe"
+FRAGMENT_TLS_CIPHER_SUITES = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:..."
+```
+
+This controls the advanced, two-stage TLS ClientHello fragmentation applied to every config in the `xray_fragment_loadbalanced_config.json` endpoint. Adjust the stage settings, fingerprint, or cipher suites here without touching any other file.
 
 ## 📁 Output Files
 
@@ -200,6 +243,7 @@ The system generates multiple output files for different use cases:
 - `configs/clash_configs_tested.yaml` - Clash-compatible tested configs
 - `configs/clash_configs_secure.yaml` - Security-filtered Clash configs
 - `configs/xray_loadbalanced_config.json` - Load-balanced Xray config
+- `configs/xray_fragment_loadbalanced_config.json` - Load-balanced Xray config with advanced TLS fragmentation
 - `configs/xray_secure_loadbalanced_config.json` - Secure load-balanced Xray config
 - `configs/location_cache.json` - Cached geolocation data
 - `configs/channel_stats.json` - Source performance metrics
@@ -208,10 +252,10 @@ The system generates multiple output files for different use cases:
 
 The project uses GitHub Actions for automatic updates:
 
-- Runs twice daily (08:00 and 20:00 UTC)
+- Runs every 3 hours (8 times daily)
 - Can be triggered manually via workflow_dispatch
 - Automatically commits and pushes updated configurations
-- Generates performance reports and charts
+- Generates performance reports, charts, and a per-run pipeline summary
 
 ### GitHub Actions Workflow
 
@@ -219,14 +263,16 @@ The workflow performs these steps in order:
 1. Fetch configs from all sources
 2. Enrich with geolocation data
 3. Rename with descriptive tags
-4. Test with Xray core (Pass 1)
+4. Test with Xray core (multi-round)
 5. Convert to Sing-box format
-6. Test with Sing-box core (Pass 2)
-7. Filter for security
+6. Test with Sing-box core (multi-round)
+7. Filter for security and generate the secure Sing-box and Xray outputs
 8. Generate Clash/Mihomo YAML configs
-9. Generate load-balanced configs
-10. Update charts and reports
-11. Commit and push changes
+9. Generate the load-balanced Xray config
+10. Generate the Fragment-enabled load-balanced Xray config
+11. Update charts and reports
+12. Generate the pipeline run summary
+13. Commit and push changes
 
 ## 🛡️ Security Features
 
@@ -253,7 +299,7 @@ Dedicated secure endpoint files contain only configurations that meet modern sec
 - **Intelligent caching** for geolocation data
 - **Connection pooling** for HTTP requests
 - **Configurable timeouts** to balance speed and reliability
-- **Smart retry logic** with exponential backoff
+- **Smart retry logic** with exponential backoff, limited to transient errors
 - **Resource cleanup** to prevent memory leaks
 
 ## 🌍 Geolocation System
@@ -294,6 +340,7 @@ The system tracks comprehensive metrics for each source:
   - Protocol distribution
   - Response time analysis
   - Historical trends
+- **Pipeline Run Summary** - A config count for every stage and output file, shown directly on each GitHub Actions run page
 
 ## 🤝 Contributing
 
