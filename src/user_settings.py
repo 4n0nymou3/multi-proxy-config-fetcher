@@ -81,7 +81,7 @@ SINGBOX_TESTER_URLS = [
 # Each round also rotates which test URL is tried first, so a config is
 # checked against more than one destination overall.
 # Higher values are more accurate but take longer to run. 2 is a good default.
-SINGBOX_TESTER_ROUNDS = 2
+SINGBOX_TESTER_ROUNDS = 3
 
 # --- Xray Config Tester Settings ---
 
