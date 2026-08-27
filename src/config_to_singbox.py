@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class ConfigToSingbox:
     def __init__(self):
-        self.output_file = 'configs/singbox_configs.json'
+        self.output_file = 'configs/singbox_configs_all.json'
 
     def convert_to_singbox(self, config: str, index: int, protocol_type: str) -> Optional[Dict]:
         try:
