@@ -4,6 +4,7 @@ import logging
 from typing import Dict, Optional, List
 import config_parser as parser
 import transport_builder
+import xray_template
 from fragment_settings import (
     FRAGMENT_ENABLED, FRAGMENT_STAGE_1, FRAGMENT_STAGE_2_ENABLED, FRAGMENT_STAGE_2,
     FRAGMENT_TLS_FINGERPRINT, FRAGMENT_TLS_CIPHER_SUITES
@@ -57,146 +58,6 @@ class ConfigToXrayFragment:
         self.input_file = input_file
         self.output_file = output_file
         self.outbounds = []
-
-    @staticmethod
-    def get_xray_template() -> Dict:
-        return {
-            "log": {
-                "loglevel": "warning"
-            },
-            "version": {"min": "26.2.6"},
-            "remarks": "👽 Anonymous Multi Balanced + Fragment",
-            "dns": {
-                "servers": [
-                    "https://dns.google/dns-query",
-                    "https://cloudflare-dns.com/dns-query",
-                    {
-                        "address": "1.1.1.2",
-                        "domains": [
-                            "domain:ir",
-                            "geosite:category-ir"
-                        ],
-                        "skipFallback": True,
-                        "tag": "domestic-dns"
-                    }
-                ]
-            },
-            "fakedns": [
-                {
-                    "ipPool": "198.18.0.0/15",
-                    "poolSize": 10000
-                }
-            ],
-            "inbounds": [
-                {
-                    "port": 10808,
-                    "protocol": "socks",
-                    "settings": {
-                        "auth": "noauth",
-                        "udp": True,
-                        "userLevel": 8
-                    },
-                    "sniffing": {
-                        "destOverride": [
-                            "http",
-                            "tls",
-                            "fakedns"
-                        ],
-                        "enabled": True,
-                        "routeOnly": False
-                    },
-                    "tag": "socks"
-                }
-            ],
-            "observatory": {
-                "enableConcurrency": True,
-                "probeInterval": "3m",
-                "probeUrl": "https://www.gstatic.com/generate_204",
-                "subjectSelector": [
-                    "proxy-"
-                ]
-            },
-            "outbounds": [],
-            "policy": {
-                "levels": {
-                    "8": {
-                        "connIdle": 300,
-                        "downlinkOnly": 1,
-                        "handshake": 4,
-                        "uplinkOnly": 1
-                    }
-                },
-                "system": {
-                    "statsOutboundUplink": True,
-                    "statsOutboundDownlink": True
-                }
-            },
-            "routing": {
-                "balancers": [
-                    {
-                        "selector": [
-                            "proxy-"
-                        ],
-                        "strategy": {
-                            "type": "leastPing"
-                        },
-                        "tag": "proxy-round"
-                    }
-                ],
-                "domainStrategy": "AsIs",
-                "rules": [
-                    {
-                        "inboundTag": [
-                            "socks"
-                        ],
-                        "outboundTag": "dns-out",
-                        "port": "53",
-                        "type": "field"
-                    },
-                    {
-                        "ip": [
-                            "geoip:private"
-                        ],
-                        "outboundTag": "direct",
-                        "type": "field"
-                    },
-                    {
-                        "domain": [
-                            "geosite:private"
-                        ],
-                        "outboundTag": "direct",
-                        "type": "field"
-                    },
-                    {
-                        "domain": [
-                            "domain:ir",
-                            "geosite:category-ir"
-                        ],
-                        "outboundTag": "direct",
-                        "type": "field"
-                    },
-                    {
-                        "ip": [
-                            "geoip:ir"
-                        ],
-                        "outboundTag": "direct",
-                        "type": "field"
-                    },
-                    {
-                        "inboundTag": [
-                            "domestic-dns"
-                        ],
-                        "outboundTag": "direct",
-                        "type": "field"
-                    },
-                    {
-                        "balancerTag": "proxy-round",
-                        "network": "tcp,udp",
-                        "type": "field"
-                    }
-                ]
-            }
-        }
 
     def convert_vmess(self, data: Dict) -> Dict:
         outbound = {
@@ -291,7 +152,7 @@ class ConfigToXrayFragment:
             logger.error(f"Error reading {self.input_file}: {e}")
             return
 
-        final_config = self.get_xray_template()
+        final_config = xray_template.get_xray_template("👽 Anonymous Multi Balanced + Fragment")
         temp_outbounds = []
 
         for line in lines:
@@ -331,11 +192,7 @@ class ConfigToXrayFragment:
             logger.error("No valid configs found to convert.")
             return
 
-        temp_outbounds.extend([
-            {"protocol": "freedom", "settings": {"domainStrategy": "UseIP"}, "tag": "direct"},
-            {"protocol": "blackhole", "settings": {"response": {"type": "http"}}, "tag": "block"},
-            {"protocol": "dns", "settings": {"rules": [{"action": "hijack"}]}, "tag": "dns-out"}
-        ])
+        temp_outbounds.extend(xray_template.get_utility_outbounds())
 
         final_config["outbounds"] = temp_outbounds
 
