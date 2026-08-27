@@ -425,7 +425,11 @@ run_step "Generate Clash YAML" "\$PYTHON_CMD src/singbox_to_clash.py"
 
 run_step "Generate Xray Balanced Config" "\$PYTHON_CMD src/xray_balancer.py"
 
+run_step "Generate Xray Fragment Balanced Config" "\$PYTHON_CMD src/xray_fragment_balancer.py"
+
 run_step "Generate Charts" "\$PYTHON_CMD src/generate_charts.py"
+
+run_step "Generate Pipeline Summary" "\$PYTHON_CMD src/generate_summary.py"
 
 echo "════════════════════════════════════════════════════════════════"
 echo "  🎉 Pipeline completed successfully!"
