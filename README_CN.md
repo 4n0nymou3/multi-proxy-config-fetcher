@@ -10,7 +10,7 @@
 
 [**🇺🇸English**](README.md) | [**<img src="https://raw.githubusercontent.com/4n0nymou3/multi-proxy-config-fetcher/refs/heads/main/flag/iran.svg" height="14" style="vertical-align:middle">فارسی**](README_FA.md) | [**🇨🇳中文**](README_CN.md) | [**🇷🇺Русский**](README_RU.md)
 
-一个高级的自动化代理配置管理系统，从多个来源抓取、验证、测试、丰富和过滤代理配置。该项目提供企业级的代理管理功能，包括实时健康监控、地理标记和多阶段安全过滤。
+一个高级的自动化代理配置管理系统，从多个来源抓取、验证、测试、丰富和过滤代理配置。该项目提供企业级的代理管理功能，包括实时健康监控、地理标记、多轮连接测试和多阶段安全过滤。
 
 ## 🌐 访问配置
 
@@ -19,13 +19,14 @@
 ### **[👉 Anonymous Proxy Hub - 访问所有端点](https://4n0nymou3.github.io/Anonymous-Proxy-Hub/)**
 
 Web 界面提供：
-- **7 个不同的端点** 以满足不同使用场景
+- **11 个不同的端点** 以满足不同使用场景
 - **原始配置** — 未过滤的原始配置
-- **Xray 测试** — 使用 Xray core 验证的配置（通过阶段 1）
+- **Xray 测试** — 使用 Xray core 验证的配置
 - **Xray 负载均衡** — 智能负载均衡的 JSON 配置
+- **Xray Fragment 负载均衡** — 在负载均衡 JSON 配置基础上加入了两阶段高级 TLS 分片，以增强抗 DPI 检测能力
 - **Xray 安全** — 高安全性过滤配置
 - **Sing-box 全部** — 以 Sing-box 格式提供的所有配置
-- **Sing-box 测试** — 使用 Sing-box 验证的配置（通过阶段 2）
+- **Sing-box 测试** — 使用 Sing-box 验证的配置
 - **Sing-box 安全** — 最高安全级别的 Sing-box 配置
 - **Clash 全部** — 以 Clash/Mihomo 格式提供的所有配置
 - **Clash 测试** — 使用 Clash 验证的测试配置
@@ -33,7 +34,7 @@ Web 界面提供：
 
 ## 📊 源性能监控
 
-对所有已配置来源（Telegram 频道和 URL）进行实时性能统计。该图表每 12 小时自动更新一次。
+对所有已配置来源（Telegram 频道和 URL）进行实时性能统计。该图表在每次运行后自动更新。
 
 ### 快速概览
 <div align="center">
@@ -59,26 +60,28 @@ Web 界面提供：
 ## ✨ 主要特性
 
 ### 多协议支持
-- **WireGuard** — 现代且快速的 VPN 协议
-- **Hysteria2** — 高性能代理协议
-- **VLESS** — 轻量级的 VMess 替代方案
+- **VLESS** — 轻量级的 VMess 替代方案，完整支持 Reality 与 XTLS Vision
 - **VMess** — 流行的 V2Ray 协议
-- **Shadowsocks** — 安全的 SOCKS5 代理
 - **Trojan** — 基于 TLS 的代理协议
-- **TUIC** — 基于 UDP 的代理协议
+- **Shadowsocks** — 安全的 SOCKS5 代理（仅 AEAD 加密方式）
+- **Hysteria2** — 高性能代理协议
+- **WireGuard** — 现代且快速的 VPN 协议（目前仅包含在原始/测试文本输出中；默认禁用，尚未加入 Sing-box、Xray 负载均衡或 Clash 转换）
+- **TUIC** — 基于 UDP 的代理协议（与上面 WireGuard 相同的当前限制；默认禁用）
 
 ### 高级处理流水线
 
 1. **智能抓取**
    - 支持 Telegram 频道、SSCONF 链接和自定义 URL
    - 自动 base64 解码与格式检测
-   - 去重与校验
+   - 语义级去重（按协议、地址、端口和凭据匹配，忽略名称或参数顺序）与校验
+   - 仅对临时性错误（超时、连接问题、HTTP 408/429/5xx）重试失败的来源；永久性错误会快速失败
 
-2. **两阶段测试系统**
-   - **阶段 1**：使用 Xray core 进行健康检查
-   - **阶段 2**：使用 Sing-box core 进行健康检查
-   - 支持并行测试与可配置 worker 数量
-   - 可自定义超时与测试 URL
+2. **多轮双核心测试系统**
+   - 同时使用 Xray core 与 Sing-box core 进行健康检查
+   - 每个 core 会进行多轮独立测试（默认 2 轮）——只有每一轮都通过的配置才会被保留，从而过滤掉不稳定的配置
+   - 测试 URL 会在各轮之间轮换，避免配置只依据单一目标被判定
+   - 每次运行前会自动预检测试 URL，当时不可用的端点会被跳过
+   - 支持并行测试，worker 数量、超时时间和测试 URL 均可配置
 
 3. **地理信息增强**
    - 自动检测服务器位置
@@ -96,13 +99,13 @@ Web 界面提供：
    - 移除不安全的加密方法
    - 验证 TLS/SSL 配置
    - 过滤已弃用的协议
-   - 生成单独的安全端点文件
+   - 为 Xray、Sing-box 和 Clash 分别生成安全端点文件
 
 6. **格式转换**
    - 自动转换为 Sing-box JSON 格式
-   - 生成 Xray 负载均衡配置
+   - 生成 Xray 负载均衡配置，包含带有两阶段高级 TLS 分片的版本
    - 生成 Clash/Mihomo YAML 配置
-   - 保持与三种 core 的兼容性
+   - 每种输出格式均完整支持 Reality 与 XTLS Vision
 
 ## 🚀 快速开始
 
@@ -122,8 +125,9 @@ Web 界面提供：
    - 启用的协议
    - 测试参数
    - 地理定位 API 优先级
-3. 在你的 fork 中启用 GitHub Actions  
-4. 配置将每 12 小时自动更新
+3. 如需自定义 Fragment 端点使用的高级 TLS 分片，可编辑 `src/fragment_settings.py`
+4. 在你的 fork 中启用 GitHub Actions  
+5. 配置将按照项目的计划自动更新
 
 #### 本地部署
 
@@ -170,13 +174,23 @@ MAX_CONFIG_AGE_DAYS = 1
 ENABLE_SINGBOX_TESTER = True
 SINGBOX_TESTER_MAX_WORKERS = 8
 SINGBOX_TESTER_TIMEOUT_SECONDS = 10
-SINGBOX_TESTER_URLS = ['https://www.youtube.com/generate_204']
+SINGBOX_TESTER_URLS = [
+    'https://www.youtube.com/generate_204',
+    'https://www.gstatic.com/generate_204',
+    'https://cp.cloudflare.com'
+]
+SINGBOX_TESTER_ROUNDS = 2
 
 # Xray Testing
 ENABLE_XRAY_TESTER = True
 XRAY_TESTER_MAX_WORKERS = 8
 XRAY_TESTER_TIMEOUT_SECONDS = 10
-XRAY_TESTER_URLS = ['https://www.youtube.com/generate_204']
+XRAY_TESTER_URLS = [
+    'https://www.youtube.com/generate_204',
+    'https://www.gstatic.com/generate_204',
+    'https://cp.cloudflare.com'
+]
+XRAY_TESTER_ROUNDS = 2
 
 # Geolocation APIs (in priority order)
 LOCATION_APIS = [
@@ -186,6 +200,35 @@ LOCATION_APIS = [
     'ipapi.co'
 ]
 ```
+
+关闭任意一个测试器（`ENABLE_SINGBOX_TESTER = False` 或 `ENABLE_XRAY_TESTER = False`）会使该次运行完全跳过对应阶段的连接检测——上一阶段的文件会被原样复制过去。这样可以加快流水线速度，但请注意，Sing-box、Clash 以及 Xray 安全版这几个输出都依赖 Sing-box 测试阶段，关闭它会降低这些输出的可靠性；而普通的 Xray 与 Xray Fragment 输出不受影响。
+
+### `src/fragment_settings.py`
+
+```python
+FRAGMENT_ENABLED = True
+
+FRAGMENT_STAGE_1 = {
+    "packets": "tlshello",
+    "lengths": ["5", "94", "1"],
+    "delays": ["0"],
+    "max_split": "0"
+}
+
+FRAGMENT_STAGE_2_ENABLED = True
+
+FRAGMENT_STAGE_2 = {
+    "packets": "1-1",
+    "lengths": ["109", "1"],
+    "delays": ["1"],
+    "max_split": "355"
+}
+
+FRAGMENT_TLS_FINGERPRINT = "unsafe"
+FRAGMENT_TLS_CIPHER_SUITES = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:..."
+```
+
+该文件控制应用于 `xray_fragment_loadbalanced_config.json` 端点中每个配置的高级两阶段 TLS ClientHello 分片。你可以直接在这里调整各阶段参数、指纹或密码套件，无需修改任何其他文件。
 
 ## 📁 输出文件
 
@@ -200,6 +243,7 @@ LOCATION_APIS = [
 - `configs/clash_configs_tested.yaml` - Clash 测试通过的配置
 - `configs/clash_configs_secure.yaml` - 安全过滤后的 Clash 配置
 - `configs/xray_loadbalanced_config.json` - Xray 负载均衡配置
+- `configs/xray_fragment_loadbalanced_config.json` - 带高级 TLS 分片的 Xray 负载均衡配置
 - `configs/xray_secure_loadbalanced_config.json` - 安全的 Xray 负载均衡配置
 - `configs/location_cache.json` - 地理位置缓存数据
 - `configs/channel_stats.json` - 源性能指标
@@ -208,10 +252,10 @@ LOCATION_APIS = [
 
 该项目使用 GitHub Actions 进行自动更新：
 
-- 每日两次运行（08:00 和 20:00 UTC）
+- 每 3 小时运行一次（每天 8 次）
 - 可通过 workflow_dispatch 手动触发
 - 自动提交并推送更新的配置
-- 生成性能报告和图表
+- 生成性能报告、图表以及每次运行的流水线摘要
 
 ### GitHub Actions 流程
 
@@ -219,14 +263,16 @@ LOCATION_APIS = [
 1. 从所有来源抓取配置
 2. 使用地理位置数据进行丰富
 3. 以描述性标签重命名
-4. 使用 Xray core 测试（阶段 1）
+4. 使用 Xray core 测试（多轮）
 5. 转换为 Sing-box 格式
-6. 使用 Sing-box core 测试（阶段 2）
-7. 进行安全过滤
+6. 使用 Sing-box core 测试（多轮）
+7. 进行安全过滤，并生成安全版的 Sing-box 与 Xray 输出
 8. 生成 Clash/Mihomo YAML 配置
-9. 生成负载均衡配置
-10. 更新图表和报告
-11. 提交并推送更改
+9. 生成 Xray 负载均衡配置
+10. 生成带 Fragment 的 Xray 负载均衡配置
+11. 更新图表和报告
+12. 生成流水线运行摘要
+13. 提交并推送更改
 
 ## 🛡️ 安全功能
 
@@ -253,7 +299,7 @@ LOCATION_APIS = [
 - **智能缓存** 用于地理数据
 - **连接池** 提高 HTTP 请求效率
 - **可配置超时** 在速度与稳定性之间平衡
-- **智能重试策略**（指数退避）
+- **智能重试策略**（指数退避），仅针对临时性错误
 - **资源清理** 防止内存泄漏
 
 ## 🌍 地理定位系统
@@ -294,6 +340,7 @@ LOCATION_APIS = [
   - 协议分布
   - 响应时间分析
   - 历史趋势
+- **流水线运行摘要** — 在每次 GitHub Actions 运行页面上直接显示各阶段与各输出文件的配置数量
 
 ## 🤝 贡献
 
