@@ -1,79 +1,69 @@
-# ⚙️ Anonymous Wizard — Руководство на русском
+# ⚙️ Anonymous Wizard — руководство по установке на русском
 
 <p align="center">
   <img src="https://img.shields.io/badge/Anonymous-Wizard-blue?style=for-the-badge" />
 </p>
 
-Полное пошаговое руководство по установке, запуску и управлению проектом **Multi Proxy Config Fetcher** на вашей локальной системе — включая Termux (Android), Linux, macOS, iSH (iOS) и Windows (WSL2).
+Полное пошаговое руководство по установке, запуску и управлению проектом **Multi Proxy Config Fetcher** на вашей локальной системе — включая Termux (Android), Linux, macOS, iSH (iOS) и Windows (через WSL2).
 
 ---
 
 ## 📋 Содержание
 
-- [Предварительные требования](#предварительные-требования)
-- [Автоматическая установка через Wizard](#автоматическая-установка)
-- [Ручная установка](#ручная-установка)
-- [Запуск проекта](#запуск-проекта)
-- [Выходные файлы](#выходные-файлы)
-- [Использование конфигураций](#использование-конфигураций)
-- [Управление](#управление)
-- [Меры безопасности](#меры-безопасности)
-- [Устранение неполадок](#устранение-неполадок)
-- [FAQ](#faq)
-- [Обновление](#обновление)
-- [Быстрый старт для Termux](#быстрый-старт-для-termux)
+- [Предварительные требования](#-предварительные-требования)
+- [Автоматическая установка с Wizard](#-автоматическая-установка-с-wizard)
+- [Ручная установка](#-ручная-установка)
+- [Запуск проекта](#️-запуск-проекта)
+- [Выходные файлы](#-выходные-файлы)
+- [Использование конфигураций](#-использование-конфигураций)
+- [Скрипт управления](#️-скрипт-управления)
+- [Расписание автоматического запуска](#-расписание-автоматического-запуска)
+- [Настройка источников и параметров](#-настройка-источников-и-параметров)
+- [Настройка конечной точки Fragment](#-настройка-конечной-точки-fragment)
+- [Заметки по безопасности](#-заметки-по-безопасности)
+- [Решение проблем](#-решение-проблем)
+- [Часто задаваемые вопросы](#-часто-задаваемые-вопросы)
+- [Обновление](#-обновление)
+- [Быстрый старт для Termux](#-быстрый-старт-для-termux)
 
 ---
 
 ## 📦 Предварительные требования
 
-Перед началом убедитесь, что установлены следующие инструменты:
+Wizard устанавливает всё нижеперечисленное автоматически. Если вы устанавливаете вручную, убедитесь, что у вас есть:
 
 | Инструмент | Версия | Назначение |
 |-----------|--------|-----------|
-| Python | 3.9+ | Основной язык |
-| pip | Последняя | Менеджер пакетов |
+| Python | 3.9+ | Запуск пайплайна |
+| pip | Последняя | Установка Python-зависимостей |
 | git | Любая | Клонирование репозитория |
-| curl | Любая | Загрузка инструментов |
-| cron | Любая | Запуск по расписанию |
+| curl | Любая | Загрузка Xray/Sing-box |
+| cron (Linux) / launchd (macOS) | Любая | Запуск по расписанию |
 
-### Termux (Android):
-```bash
-pkg update && pkg upgrade -y
-pkg install git python curl wget unzip -y
-```
-
-### Linux (Ubuntu/Debian):
-```bash
-sudo apt update
-sudo apt install git python3 python3-pip curl wget unzip cron -y
-```
-
-### macOS:
-```bash
-brew install git python3 curl wget
-```
+**Пользователи Windows:** установщик не работает нативно на Windows. Используйте **WSL2** (подсистема Windows для Linux) и выполняйте все команды из этого руководства внутри вашего Linux-дистрибутива WSL2.
 
 ---
 
-## 🚀 Автоматическая установка через Wizard
+## 🚀 Автоматическая установка с Wizard
 
-Wizard автоматически устанавливает всё одной командой:
+Одна команда определяет вашу платформу и устанавливает всё необходимое: Xray-core, Sing-box, Python-зависимости, сам репозиторий, скрипт запуска, скрипт управления и запланированную задачу (cron / служба Termux / launchd — в зависимости от платформы).
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/4n0nymou3/multi-proxy-config-fetcher/main/install.sh | bash
 ```
 
-### Что делает Wizard:
-1. Определяет вашу операционную систему
-2. Автоматически устанавливает Xray-core
-3. Автоматически устанавливает Sing-box
-4. Устанавливает зависимости Python
-5. Клонирует репозиторий
-6. Создаёт скрипты запуска
-7. Настраивает инструменты управления
+### Что делает Wizard, шаг за шагом:
+1. Определяет вашу операционную систему (Termux, Linux или macOS)
+2. Устанавливает системные зависимости (git, Python, curl, cron и т.д.)
+3. Клонирует (или обновляет) репозиторий в `~/multi-proxy-config-fetcher`
+4. Создаёт виртуальное окружение Python и устанавливает `requirements.txt`
+5. Устанавливает Xray-core
+6. Устанавливает Sing-box
+7. Генерирует `run.sh` — скрипт, запускающий весь пайплайн
+8. Генерирует `manage.sh` — скрипт для повседневного использования
+9. Настраивает автоматическое расписание для вашей платформы (см. [Расписание](#-расписание-автоматического-запуска))
 
-### После установки:
+### После установки запустите пайплайн вручную один раз:
 ```bash
 cd ~/multi-proxy-config-fetcher
 bash run.sh
@@ -83,7 +73,7 @@ bash run.sh
 
 ## 🔧 Ручная установка
 
-Если вы предпочитаете установку вручную:
+Если вы предпочитаете не запускать однострочную команду, вот что именно она делает "под капотом".
 
 ### Шаг 1: Клонирование репозитория
 ```bash
@@ -91,23 +81,32 @@ git clone https://github.com/4n0nymou3/multi-proxy-config-fetcher.git
 cd multi-proxy-config-fetcher
 ```
 
-### Шаг 2: Установка зависимостей Python
+### Шаг 2: Установка Python-зависимостей
 ```bash
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
 ### Шаг 3: Установка Xray-core
 
-**Linux/Termux:**
+**Linux/macOS:**
 ```bash
-bash <(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)
+bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
 ```
+
+**Termux:** скачайте подходящую сборку для архитектуры вашего процессора напрямую со [страницы релизов Xray-core](https://github.com/XTLS/Xray-core/releases) и поместите бинарный файл `xray` куда-нибудь в `$PATH` (например, `$PREFIX/bin`).
 
 ### Шаг 4: Установка Sing-box
 
 **Linux:**
 ```bash
-bash <(curl -fsSL https://sing-box.app/deb-install.sh)
+bash <(curl -fsSL https://sing-box.app/install.sh)
+```
+
+**macOS:**
+```bash
+brew install sing-box
 ```
 
 **Termux:**
@@ -119,18 +118,20 @@ pkg install sing-box -y
 
 ## ▶️ Запуск проекта
 
-### Шаги конвейера:
+### Шаги пайплайна (в точном порядке):
 ```
-➤ Fetch Configs              ✓ Получение из всех источников
-➤ Enrich Configs             ✓ Геолокационное обогащение
-➤ Rename Configs             ✓ Переименование с метками
-➤ Test with Xray             ✓ Проверка работоспособности - Этап 1
-➤ Convert to Sing-box        ✓ Конвертация в формат Sing-box
-➤ Test with Sing-box         ✓ Проверка работоспособности - Этап 2
-➤ Security Filter            ✓ Фильтрация по безопасности
-➤ Generate Clash YAML        ✓ Генерация конфигураций Clash/Mihomo
-➤ Generate Balanced          ✓ Генерация балансировщика Xray
-➤ Generate Charts            ✓ Генерация графиков
+1.  Fetch Configs                    Получение из всех настроенных источников
+2.  Enrich Configs                   Определение геолокации серверов
+3.  Rename Configs                   Применение описательных тегов
+4.  Test with Xray                   Многораундовое тестирование - ядро Xray
+5.  Convert to Sing-box              Построение формата JSON для Sing-box
+6.  Test with Sing-box               Многораундовое тестирование - ядро Sing-box
+7.  Security Filter                  Удаление небезопасных конфигов, пересборка безопасных версий
+8.  Generate Clash YAML              Построение конфигураций Clash/Mihomo
+9.  Generate Xray Balanced Config     Построение сбалансированной конфигурации Xray
+10. Generate Xray Fragment Config     Построение конфигурации Xray с Fragment (анти-DPI)
+11. Generate Charts                  Построение диаграмм производительности
+12. Generate Pipeline Summary         Вывод количества конфигураций на каждом этапе
 ```
 
 ### Однократный запуск:
@@ -139,289 +140,310 @@ cd ~/multi-proxy-config-fetcher
 bash run.sh
 ```
 
-### Запуск через cron (каждые 12 часов):
-```bash
-crontab -e
-```
-Добавьте строку:
-```
-0 */12 * * * cd ~/multi-proxy-config-fetcher && bash run.sh >> logs/cron.log 2>&1
-```
+Каждый запуск также создаёт лог-файл с временной меткой в `logs/run_<дата>.log`, а логи старше 7 дней удаляются автоматически.
 
 ---
 
 ## 📁 Выходные файлы
 
-| Файл | Описание | Совместимые клиенты |
-|------|---------|-------------------|
-| `proxy_configs.txt` | Исходные конфигурации | v2rayNG, v2rayN |
-| `proxy_configs_tested.txt` | Проверено Xray | v2rayNG, v2rayN ⭐ |
-| `singbox_configs_all.json` | Все Sing-box | SFA, Hiddify, NekoBox |
-| `singbox_configs_tested.json` | Sing-box проверено | SFA, Hiddify, NekoBox ⭐ |
-| `singbox_configs_secure.json` | Проверено и безопасно | SFA, Hiddify 🛡️⭐ |
-| `clash_configs_all.yaml` | Все Clash | Clash Verge, Mihomo |
-| `clash_configs_tested.yaml` | Clash проверено | Clash Verge, Mihomo ⭐ |
-| `clash_configs_secure.yaml` | Проверено и безопасно | Clash Verge, Mihomo 🛡️⭐ |
-| `xray_loadbalanced_config.json` | Балансировщик Xray | v2rayNG, v2rayN ⭐ |
-| `xray_secure_loadbalanced_config.json` | Безопасный балансировщик | v2rayNG, v2rayN 🛡️⭐ |
+| Файл | Описание | Совместимые приложения |
+|------|----------|------------------------|
+| `proxy_configs.txt` | Сырые конфигурации | v2rayNG, v2rayN |
+| `proxy_configs_tested.txt` | Протестировано Xray | v2rayNG, v2rayN ⭐ |
+| `singbox_configs_all.json` | Все конфигурации, формат Sing-box | SFA, Hiddify, NekoBox |
+| `singbox_configs_tested.json` | Протестировано Sing-box | SFA, Hiddify, NekoBox ⭐ |
+| `singbox_configs_secure.json` | Протестировано и отфильтровано по безопасности | SFA, Hiddify 🛡️⭐ |
+| `clash_configs_all.yaml` | Все конфигурации, формат Clash | Clash Verge, Mihomo |
+| `clash_configs_tested.yaml` | Протестировано для Clash | Clash Verge, Mihomo ⭐ |
+| `clash_configs_secure.yaml` | Протестировано и отфильтровано по безопасности | Clash Verge, Mihomo 🛡️⭐ |
+| `xray_loadbalanced_config.json` | Балансировщик нагрузки Xray | v2rayNG, v2rayN, Nekoray ⭐ |
+| `xray_fragment_loadbalanced_config.json` | Балансировщик нагрузки Xray с продвинутой двухэтапной фрагментацией TLS для большей устойчивости к DPI | v2rayNG, v2rayN, Nekoray 🧩⭐ |
+| `xray_secure_loadbalanced_config.json` | Безопасный балансировщик нагрузки Xray | v2rayNG, v2rayN, Nekoray 🛡️⭐ |
 
-⭐ = Рекомендуется
-🛡️ = Высокий уровень безопасности
+⭐ = Рекомендуется · 🛡️ = Повышенная безопасность · 🧩 = Фрагментация против цензуры
 
 ---
 
 ## 📱 Использование конфигураций
 
----
-
 ### 🐱 Использование в Clash / Mihomo (Android, iOS, Windows, macOS, Linux)
 
-#### Способ 1: Импорт из локального файла
-
+**Способ 1: импорт из локального файла**
 ```bash
 # Termux
 termux-setup-storage
 cp ~/multi-proxy-config-fetcher/configs/clash_configs_secure.yaml ~/storage/downloads/
 ```
+В Clash Verge или Mihomo: **Profiles → Import → выбрать файл → `clash_configs_secure.yaml` → Import**
 
-**В Clash Verge или Mihomo:**
-1. Profiles → Import → Select file
-2. Выберите `clash_configs_secure.yaml`
-3. Импортируйте
-
----
-
-#### Способ 2: HTTP-сервер (доступ из сети)
-
+**Способ 2: раздача по HTTP (доступ с любого устройства в вашей сети)**
 ```bash
 cd ~/multi-proxy-config-fetcher/configs
-python -m http.server 8080
+python3 -m http.server 8080
 ```
-
-**Ссылка на подписку Clash:**
+Ссылка подписки Clash:
 ```
 http://YOUR_IP:8080/clash_configs_tested.yaml
 ```
 
 ---
 
-### 📦 Использование в приложениях Sing-box
+### 📦 Использование в приложениях Sing-box (SFA, Hiddify, NekoBox)
 
-#### Способ 1: Импорт из локального файла
-
-**Termux:**
+**Способ 1: импорт из локального файла**
 ```bash
 termux-setup-storage
 cp ~/multi-proxy-config-fetcher/configs/singbox_configs_secure.json ~/storage/downloads/
 ```
+В Sing-box For Android (SFA): **Profiles → New Profile → Import → `singbox_configs_secure.json` → Import**
 
-**В Sing-box For Android (SFA):**
-1. Profiles → New Profile → Import
-2. Выберите `singbox_configs_secure.json`
-3. Импортируйте
-
----
-
-#### Способ 2: HTTP-сервер
-
+**Способ 2: раздача по HTTP**
 ```bash
 cd ~/multi-proxy-config-fetcher/configs
-python -m http.server 8080
+python3 -m http.server 8080
 ```
-
-**Ссылка на подписку Sing-box:**
+Ссылка подписки Sing-box:
 ```
 http://YOUR_IP:8080/singbox_configs_tested.json
 ```
 
 ---
 
-### 🚀 Использование в v2rayNG / v2rayN
+### 🚀 Использование в v2rayNG / v2rayN / Nekoray
 
-#### Способ 1: Ссылка на подписку
-
+**Способ 1: ссылка подписки**
 ```bash
 cd ~/multi-proxy-config-fetcher/configs
-python -m http.server 8080
+python3 -m http.server 8080
 ```
-
-**URL подписки:**
+URL подписки:
 ```
 http://YOUR_IP:8080/proxy_configs_tested.txt
 ```
+В v2rayNG: **Subscription → Add Subscription → ввести URL → Update**
 
-В v2rayNG:
-1. Подписки → Добавить подписку
-2. Введите URL
-3. Обновить
-
----
-
-#### Способ 2: Прямой импорт JSON (Xray)
-
+**Способ 2: прямой импорт JSON**
 ```bash
 termux-setup-storage
 cp ~/multi-proxy-config-fetcher/configs/xray_secure_loadbalanced_config.json ~/storage/downloads/
 ```
+Нужна более сильная устойчивость к блокировкам? Скопируйте таким же образом `xray_fragment_loadbalanced_config.json`.
 
 ---
 
-## 🛠️ Управление
+## 🛠️ Скрипт управления
 
-### manage.sh
-
-После установки доступен инструмент `manage.sh`:
+После установки `manage.sh` — ваш основной инструмент для повседневной работы:
 
 ```bash
-bash ~/multi-proxy-config-fetcher/manage.sh status     # Проверить статус
-bash ~/multi-proxy-config-fetcher/manage.sh run        # Запустить конвейер
-bash ~/multi-proxy-config-fetcher/manage.sh update     # Обновить код
-bash ~/multi-proxy-config-fetcher/manage.sh logs       # Просмотр логов
-bash ~/multi-proxy-config-fetcher/manage.sh cron       # Управление cron
-bash ~/multi-proxy-config-fetcher/manage.sh clean      # Очистить старые файлы
+bash ~/multi-proxy-config-fetcher/manage.sh start            # Запустить пайплайн вручную
+bash ~/multi-proxy-config-fetcher/manage.sh status           # Показать версии Xray/Sing-box, статус службы, выходные файлы, последние логи
+bash ~/multi-proxy-config-fetcher/manage.sh logs             # Показать последний лог
+bash ~/multi-proxy-config-fetcher/manage.sh clean            # Удалить логи старше 7 дней
+bash ~/multi-proxy-config-fetcher/manage.sh update           # Получить последний код с GitHub
+bash ~/multi-proxy-config-fetcher/manage.sh restart-service  # Только Termux: перезапустить фоновую службу
+bash ~/multi-proxy-config-fetcher/manage.sh help             # Показать этот список команд
 ```
 
-**Пример вывода:**
+**Пример вывода `status`:**
 ```
 📊 System Status:
 
-✓ Xray: Xray 1.8.9
-✓ Sing-box: sing-box version 1.8.0
+✓ Xray: Xray 26.7.28
+✓ Sing-box: sing-box version 1.13.0
 
 🔄 Service Status:
-✓ Service is running
+run: multiproxy: (pid 4821) 3600s
 
 📁 Output files:
-   configs/proxy_configs.txt - 45K
-   configs/singbox_configs_secure.json - 156K
-   configs/clash_configs_secure.yaml - 148K
+    configs/proxy_configs.txt - 62K
+    configs/singbox_configs_secure.json - 178K
+
+📝 Recent logs:
+    logs/run_2026-08-27_06-00-01.log
 ```
 
 ---
 
-### Настройка cron (автозапуск каждые 12 часов)
+## ⏰ Расписание автоматического запуска
 
-```bash
-bash ~/multi-proxy-config-fetcher/manage.sh cron
-```
+Wizard настраивает автоматические запуски за вас, но механизм отличается в зависимости от платформы:
 
-Или вручную:
+| Платформа | Механизм | Интервал |
+|-----------|----------|----------|
+| Termux (Android) | Фоновая служба (`sv`), запускается при загрузке | Каждые 12 часов |
+| Linux | `cron` | Каждые 12 часов (`0 */12 * * *`) |
+| macOS | `launchd` (LaunchAgent) | Дважды в день, в 08:00 и 20:00 (по местному времени системы) |
+
+### ⚠️ Termux — критически важный дополнительный шаг
+
+Фоновая служба Termux **не** переживает перезагрузку телефона сама по себе. Чтобы автоматические запуски продолжали работать после перезагрузки, необходимо:
+1. Установить **Termux:Boot** из F-Droid (не из Google Play)
+2. **Один раз** открыть приложение Termux:Boot, чтобы Android его зарегистрировал
+3. Перейти в **Настройки Android → Приложения → Termux → Батарея → Без ограничений**, чтобы Android не убивал фоновую службу
+
+Без этих трёх шагов служба перестаёт работать после каждой перезагрузки, и вам придётся снова вручную запускать `bash run.sh`.
+
+### Изменение интервала
+
+**Linux (cron):**
 ```bash
 crontab -e
 ```
-Добавьте:
+Отредактируйте строку, добавленную установщиком, например, чтобы запускать каждые 6 часов вместо 12:
 ```
-0 */12 * * * cd ~/multi-proxy-config-fetcher && bash run.sh >> logs/cron.log 2>&1
+0 */6 * * * /bin/bash ~/multi-proxy-config-fetcher/run.sh >> ~/multi-proxy-config-fetcher/logs/cron.log 2>&1
+```
+
+**Termux:** отредактируйте `INTERVAL=43200` (в секундах) внутри файла `$PREFIX/var/service/multiproxy/run`, затем выполните `bash manage.sh restart-service`.
+
+**macOS:** отредактируйте блок `StartCalendarInterval` внутри `~/Library/LaunchAgents/com.anonymous.multiproxy.plist`, затем выполните:
+```bash
+launchctl unload ~/Library/LaunchAgents/com.anonymous.multiproxy.plist
+launchctl load ~/Library/LaunchAgents/com.anonymous.multiproxy.plist
 ```
 
 ---
 
-## 🔒 Меры безопасности
+## 🎛️ Настройка источников и параметров
 
-**Всегда используйте файлы secure:**
-- ✅ `xray_secure_loadbalanced_config.json`
-- ✅ `singbox_configs_secure.json`
-- ✅ `clash_configs_secure.yaml`
+Отредактируйте `src/user_settings.py`, чтобы контролировать поведение сборщика:
 
-**Не используйте эти файлы:**
-- ❌ `proxy_configs.txt` (не проверено)
-- ❌ `singbox_configs_all.json` (не проверено)
-- ❌ `clash_configs_all.yaml` (не проверено)
-
-### Что делает фильтр безопасности:
-- Удаляет конфигурации с недействительным TLS
-- Удаляет устаревшее или небезопасное шифрование
-- Удаляет устаревшие протоколы
-- Создаёт отдельные файлы для безопасных узлов
-
----
-
-## 🔧 Устранение неполадок
-
-### Xray не найден:
-```bash
-which xray || ls ~/.local/share/xray/xray 2>/dev/null || ls /usr/local/bin/xray 2>/dev/null
-```
-
-**Решение — переустановить:**
-```bash
-bash <(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)
-```
-
-### Sing-box не найден:
-```bash
-which sing-box || ls ~/go/bin/sing-box 2>/dev/null
-```
-
-**Решение — переустановить (Termux):**
-```bash
-pkg install sing-box -y
-```
-
-### Ошибки Python:
-```bash
-pip install -r requirements.txt --upgrade
-```
-
-### Нет выходных файлов:
-```bash
-ls -la configs/
-cat logs/run_*.log | tail -50
-```
-
-### Cron не работает:
-```bash
-crontab -l
-service cron status
-```
-
----
-
-## ❓ FAQ
-
-**В: Как понять, какой файл конфигурации работает?**
-Файлы с суффиксом `_tested` или `_secure` прошли проверку:
-- `proxy_configs_tested.txt` ✅
-- `singbox_configs_tested.json` ✅
-- `singbox_configs_secure.json` ✅ (наиболее безопасный)
-- `clash_configs_tested.yaml` ✅
-- `clash_configs_secure.yaml` ✅ (наиболее безопасный)
-- `xray_secure_loadbalanced_config.json` ✅ (наиболее безопасный)
-
----
-
-**В: Как часто обновляются конфигурации?**
-При использовании cron — автоматически каждые 12 часов. Интервал можно изменить в crontab.
-
----
-
-**В: Сколько конфигураций получает система?**
-Зависит от `USE_MAXIMUM_POWER` в `src/user_settings.py`. При значении `True` загружается максимально возможное количество.
-
----
-
-**В: Можно ли добавить собственные источники?**
-Да, добавьте их в `SOURCE_URLS` в `src/user_settings.py`:
 ```python
 SOURCE_URLS = [
     "https://t.me/s/your_channel",
     "https://raw.githubusercontent.com/user/repo/main/configs.txt",
 ]
+
+USE_MAXIMUM_POWER = True   # Получать максимально возможное количество конфигураций
+ENABLED_PROTOCOLS = {
+    "vless://": True,
+    "vmess://": True,
+    "trojan://": True,
+    "ss://": True,
+    "hysteria2://": True,
+    "wireguard://": False,
+    "tuic://": False,
+}
+```
+
+После редактирования просто снова запустите `bash run.sh` (или дождитесь следующего запланированного запуска), чтобы применить изменения.
+
+---
+
+## 🧩 Настройка конечной точки Fragment
+
+`xray_fragment_loadbalanced_config.json` применяет продвинутую двухэтапную фрагментацию TLS ClientHello к каждой конфигурации, что может помочь против фильтрации на основе DPI. Все её параметры находятся в `src/fragment_settings.py`:
+
+```python
+FRAGMENT_ENABLED = True
+FRAGMENT_STAGE_1 = {"packets": "tlshello", "lengths": ["5", "94", "1"], "delays": ["0"], "max_split": "0"}
+FRAGMENT_STAGE_2_ENABLED = True
+FRAGMENT_STAGE_2 = {"packets": "1-1", "lengths": ["109", "1"], "delays": ["1"], "max_split": "355"}
+FRAGMENT_TLS_FINGERPRINT = "unsafe"
+FRAGMENT_TLS_CIPHER_SUITES = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:..."
+```
+
+Измените значения здесь и снова запустите `bash run.sh`, чтобы пересобрать файл с вашими собственными настройками фрагментации.
+
+---
+
+## 🔒 Заметки по безопасности
+
+**Отдавайте предпочтение этим файлам:**
+- ✅ `xray_secure_loadbalanced_config.json`
+- ✅ `singbox_configs_secure.json`
+- ✅ `clash_configs_secure.yaml`
+
+**Избегайте прямого использования этих файлов** (они содержат непротестированные или неотфильтрованные конфигурации):
+- ❌ `proxy_configs.txt`
+- ❌ `singbox_configs_all.json`
+- ❌ `clash_configs_all.yaml`
+
+### Что удаляет фильтр безопасности:
+- Конфигурации Shadowsocks с не-AEAD (небезопасными) шифрами
+- Конфигурации VMess с устаревшим, ненулевым `alterId`
+- Конфигурации VLESS/Trojan без TLS
+- Конфигурации с `insecure=true` (отключена проверка сертификата)
+- Конфигурации VMess с `security=none`
+
+---
+
+## 🔧 Решение проблем
+
+### Xray не найден
+```bash
+which xray
+```
+**Решение:**
+```bash
+bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
+```
+
+### Sing-box не найден
+```bash
+which sing-box
+```
+**Решение (Termux):**
+```bash
+pkg install sing-box -y
+```
+**Решение (Linux):**
+```bash
+bash <(curl -fsSL https://sing-box.app/install.sh)
+```
+
+### Ошибки Python
+```bash
+source ~/multi-proxy-config-fetcher/venv/bin/activate
+pip install -r ~/multi-proxy-config-fetcher/requirements.txt --upgrade
+```
+
+### Нет выходных файлов / пайплайн, похоже, прервался на середине
+```bash
+ls -la ~/multi-proxy-config-fetcher/configs/
+tail -100 ~/multi-proxy-config-fetcher/logs/run_*.log
+```
+Последний лог-файл точно покажет, на каком шаге произошёл сбой.
+
+### Запланированные запуски не выполняются
+```bash
+# Linux
+crontab -l
+systemctl status cron
+
+# Termux
+sv status multiproxy
 ```
 
 ---
 
-**В: Работает ли это на старых Android-устройствах?**
-Да. Проверено на Android 7+. Требуется Termux, установленный из F-Droid (не из Google Play).
+## ❓ Часто задаваемые вопросы
 
----
+**В: Какой файл конфигурации мне на самом деле использовать?**
+Любой файл с суффиксом `_tested` или `_secure` прошёл тесты работоспособности. Для наибольшей уверенности используйте файлы `_secure`, либо `xray_fragment_loadbalanced_config.json`, если вам нужна повышенная устойчивость к блокировкам.
 
-**В: Чем отличаются конфигурации Sing-box, Clash и Xray?**
-- **Xray** — совместим с v2rayNG, v2rayN, Nekoray
-- **Sing-box** — совместим с SFA, Hiddify, NekoBox
-- **Clash/Mihomo** — совместим с Clash Verge, Mihomo, Clash Meta
+**В: Как часто обновляются конфигурации?**
+По умолчанию каждые 12 часов на Linux/Termux, или дважды в день (08:00/20:00) на macOS. См. [Расписание](#-расписание-автоматического-запуска), чтобы изменить это.
 
-Все три генерируются из одного списка прокси и функционально эквивалентны.
+**В: Сколько конфигураций собирает система?**
+Зависит от `USE_MAXIMUM_POWER` в `src/user_settings.py`. При значении `True` собирается максимально возможное количество из ваших настроенных источников.
+
+**В: Могу ли я добавить свои источники?**
+Да — добавьте их в `SOURCE_URLS` в `src/user_settings.py` (см. [Настройка источников и параметров](#-настройка-источников-и-параметров)).
+
+**В: Работает ли это на старых телефонах Android?**
+Да, протестировано на Android 7+. Вам нужно установить Termux из **F-Droid**, а не из Google Play (версия из Play Store устарела и больше не поддерживается самой командой Termux).
+
+**В: В чём разница между выходными файлами Xray, Sing-box и Clash?**
+- Файлы **Xray** работают с v2rayNG, v2rayN, Nekoray
+- Файлы **Sing-box** работают с SFA, Hiddify, NekoBox
+- Файлы **Clash/Mihomo** работают с Clash Verge, Mihomo, Clash Meta
+
+Все три генерируются из одного и того же списка прокси и функционально эквивалентны — выбирайте тот, что подходит вашему клиентскому приложению.
+
+**В: Что именно делает вывод Fragment по-другому?**
+Он строит ту же сбалансированную конфигурацию Xray, что и `xray_loadbalanced_config.json`, но разбивает TLS-рукопожатие на небольшие фрагменты с задержками, в два этапа. Это может затруднить распознавание соединения системами DPI, блокирующими по паттернам TLS ClientHello.
 
 ---
 
@@ -435,15 +457,16 @@ bash manage.sh update
 Или вручную:
 ```bash
 git pull origin main
+source venv/bin/activate
 pip install -r requirements.txt --upgrade
 ```
 
 ---
 
-## 🤝 Участие в разработке
+## 🤝 Вклад в проект
 
-Мы приветствуем любой вклад:
-1. Сделайте fork репозитория
+Вклады приветствуются:
+1. Форкните репозиторий
 2. Создайте ветку для новой функции
 3. Внесите изменения
 4. Отправьте Pull Request
@@ -452,11 +475,10 @@ pip install -r requirements.txt --upgrade
 
 ## 🙏 Благодарности
 
-### Участники:
-- **Xray-core Team** — высокопроизводительный прокси-движок
-- **Sing-box Team** — универсальный прокси-движок
-- **Clash/Mihomo Team** — современная прокси-платформа
-- **Сообщество Open Source** — поддержка и обратная связь
+- **Команда Xray-core** — высокопроизводительный прокси-движок
+- **Команда Sing-box** — универсальный прокси-движок
+- **Команда Clash/Mihomo** — современная прокси-платформа
+- **Сообщество open source** — поддержка и обратная связь
 
 ---
 
@@ -469,20 +491,20 @@ pip install -r requirements.txt --upgrade
 - **Clash/Mihomo**: https://github.com/MetaCubeX/mihomo
 - **v2rayNG**: https://github.com/2dust/v2rayNG
 - **Termux**: https://termux.dev
-- **Crontab Guru** (проверка формата cron): https://crontab.guru
+- **Crontab Guru** (проверка синтаксиса cron): https://crontab.guru
 
 ---
 
 ## 📄 Лицензия
 
-Лицензия MIT — подробности в файле [LICENSE](LICENSE).
+Лицензия MIT — см. файл [LICENSE](LICENSE) для подробностей.
 
 ---
 
 ## 📬 Контакты
 
 - **GitHub**: https://github.com/4n0nymou3
-- **Twitter**: https://x.com/4n0nymou3
+- **Twitter/X**: https://x.com/4n0nymou3
 
 ---
 
@@ -490,7 +512,6 @@ pip install -r requirements.txt --upgrade
 
 Для новых пользователей, которые хотят начать немедленно:
 
-### Termux:
 ```bash
 pkg update && pkg upgrade -y
 pkg install curl git -y
@@ -502,6 +523,8 @@ cp configs/xray_secure_loadbalanced_config.json ~/storage/downloads/
 cp configs/clash_configs_secure.yaml ~/storage/downloads/
 ```
 
+Затем не забудьте выполнить три критически важных шага Termux:Boot из раздела [Расписание](#-расписание-автоматического-запуска), чтобы автоматические запуски работали после перезагрузки телефона.
+
 ---
 
-> 🎉 **Поздравляем!** Ваш загрузчик конфигураций прокси настроен и работает. Конфигурации будут автоматически обновляться каждые 12 часов. При возникновении проблем проверьте логи с помощью `bash manage.sh logs`.
+> 🎉 **Поздравляем!** Ваш сборщик прокси-конфигураций установлен и работает. При любых проблемах проверьте логи с помощью `bash manage.sh logs`.
