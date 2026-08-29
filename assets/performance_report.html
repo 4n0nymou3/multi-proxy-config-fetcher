@@ -1,308 +1,459 @@
 <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Channel Performance Report</title>
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    </head>
-    <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
-        <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-            <header class="bg-white rounded-lg shadow-lg p-6 mb-8">
-                <h1 class="text-3xl font-bold text-gray-900 text-center">Proxy Channel Performance Dashboard</h1>
-                <p class="text-center text-gray-600 mt-2">Last Updated: 2026-08-29T11:45:09.034522+00:00</p>
-                <div class="mt-6 bg-blue-50 rounded-lg p-4 flex flex-col items-center justify-center">
-                    <h2 class="text-lg font-semibold text-blue-800">Developer Information</h2>
-                    <div class="flex items-center space-x-6 mt-2">
-                        <a href="https://github.com/4n0nymou3" target="_blank" class="flex items-center text-gray-700 hover:text-blue-600">
-                            <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
-                            </svg>
-                            GitHub Profile
-                        </a>
-                        <a href="https://github.com/4n0nymou3/multi-proxy-config-fetcher" target="_blank" class="flex items-center text-gray-700 hover:text-blue-600">
-                            <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
-                            </svg>
-                            Project Repository
-                        </a>
-                        <a href="https://x.com/4n0nymou3" target="_blank" class="flex items-center text-gray-700 hover:text-blue-600">
-                            <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                            </svg>
-                            X (Twitter)
-                        </a>
-                    </div>
-                </div>
-            </header>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multi — Source Intelligence Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+:root {
+    --bg: #0a0e14;
+    --surface: #121826;
+    --surface-2: #1a2233;
+    --border: #232d40;
+    --text: #e6edf7;
+    --muted: #8b96ab;
+    --accent: #38bdf8;
+    --good: #34d399;
+    --warn: #fbbf24;
+    --risk: #fb923c;
+    --bad: #f87171;
+    --radius: 14px;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    background: radial-gradient(circle at 15% 0%, #101a2e 0%, var(--bg) 45%);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1280px; margin: 0 auto; padding: 28px 20px 60px; }
+h1, h2, h3 { font-family: 'Space Grotesk', 'Inter', sans-serif; margin: 0; }
+.mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+header.top {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+    padding-bottom: 22px; border-bottom: 1px solid var(--border); margin-bottom: 28px;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.pulse {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--good);
+    box-shadow: 0 0 0 0 rgba(52,211,153,0.6); animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(52,211,153,0.55); }
+    70% { box-shadow: 0 0 0 9px rgba(52,211,153,0); }
+    100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .pulse { animation: none; }
+    * { scroll-behavior: auto !important; }
+}
+.brand-title { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+.brand-sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.links { display: flex; gap: 10px; }
+.links a {
+    display: flex; align-items: center; justify-content: center; width: 36px; height: 36px;
+    border-radius: 10px; background: var(--surface); border: 1px solid var(--border);
+    color: var(--muted); transition: 0.15s ease;
+}
+.links a:hover { color: var(--accent); border-color: var(--accent); }
+.links svg { width: 17px; height: 17px; }
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Active Channels</h3>
-                    <div class="text-3xl font-bold text-blue-600">
-                        8
-                        <span class="text-sm font-normal text-gray-500">/ 8</span>
-                    </div>
-                </div>
+.hero {
+    display: grid; grid-template-columns: 220px 1fr; gap: 28px; align-items: center;
+    background: linear-gradient(150deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-bottom: 24px;
+}
+.gauge-wrap { display: flex; align-items: center; justify-content: center; position: relative; }
+.gauge-num { position: absolute; text-align: center; }
+.gauge-num .val { font-family: 'Space Grotesk', sans-serif; font-size: 34px; font-weight: 700; }
+.gauge-num .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.stat-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.stat-card .n { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; }
+.stat-card .l { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Total Valid Configs</h3>
-                    <div class="text-3xl font-bold text-green-600">
-                        533
-                    </div>
-                </div>
+.grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; margin-bottom: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }
+@media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
 
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Average Success Rate</h3>
-                    <div class="text-3xl font-bold text-yellow-600">
-                        100.0%
-                    </div>
-                </div>
+.card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;
+}
+.card h3 { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+.card .chart-box { position: relative; height: 220px; }
 
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">Average Response Time</h3>
-                    <div class="text-3xl font-bold text-purple-600">
-                        0.08s
-                    </div>
-                </div>
-            </div>
+.perf-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+.perf-row:last-child { border-bottom: none; }
+.perf-name { color: var(--text); }
+.good-text { color: var(--good); font-family: 'JetBrains Mono', monospace; }
+.bad-text { color: var(--bad); font-family: 'JetBrains Mono', monospace; }
 
-            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-                <h3 class="text-xl font-semibold text-gray-800 mb-6">Detailed Channel Statistics</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Channel</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Success Rate</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Response Time</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valid/Total</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Success</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    vless_universal.txt
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Active
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        90.1%
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    100.0%
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    0.04s
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    65/107
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    2026-08-29T11:45:00.252940+00:00
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    sub.html
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Active
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        89.0%
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    100.0%
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    0.03s
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    215/301
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    2026-08-29T11:45:06.530490+00:00
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    Sub.txt
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Active
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        88.4%
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    100.0%
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    0.04s
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    30/47
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    2026-08-29T11:45:04.470204+00:00
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    persianvpnhub
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Active
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        84.3%
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    100.0%
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    0.44s
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    10/20
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    2026-08-29T11:45:09.033450+00:00
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    proxies.txt
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Active
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        82.9%
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    100.0%
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    0.00s
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    37/117
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    2026-08-29T11:44:58.184385+00:00
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    base64.txt
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Active
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        81.6%
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    100.0%
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    0.04s
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    169/636
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    2026-08-29T11:45:02.429397+00:00
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    sub_1.txt
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Active
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        80.3%
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    100.0%
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    0.03s
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    3/14
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    2026-08-29T11:44:54.116703+00:00
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    sub_1.txt
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                        Active
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                        69.6%
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    100.0%
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    0.05s
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    4/14
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    2026-08-29T11:44:56.166153+00:00
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+.table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.table-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+#search {
+    background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+    padding: 9px 14px; border-radius: 8px; font-size: 13.5px; width: 260px; outline: none;
+}
+#search:focus { border-color: var(--accent); }
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th {
+    text-align: left; padding: 10px 12px; color: var(--muted); font-weight: 600; font-size: 11.5px;
+    text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
+    white-space: nowrap;
+}
+th:hover { color: var(--accent); }
+th.sorted::after { content: ' ↓'; }
+th.sorted.asc::after { content: ' ↑'; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.c-name { display: flex; align-items: center; gap: 9px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-good { background: var(--good); }
+.dot-warn { background: var(--warn); }
+.dot-risk { background: var(--risk); }
+.dot-bad { background: var(--bad); }
+.pill { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 600; }
+.pill-good { background: rgba(52,211,153,0.14); color: var(--good); }
+.pill-warn { background: rgba(251,191,36,0.14); color: var(--warn); }
+.pill-risk { background: rgba(251,146,60,0.14); color: var(--risk); }
+.pill-bad { background: rgba(248,113,113,0.14); color: var(--bad); }
+.legend-note { font-size: 11.5px; color: var(--muted); margin-top: 14px; }
+
+footer { margin-top: 32px; text-align: center; color: var(--muted); font-size: 12.5px; }
+footer a { color: var(--accent); text-decoration: none; }
+.empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+    <header class="top">
+        <div class="brand">
+            <span class="pulse"></span>
+            <div>
+                <div class="brand-title">Multi — Source Intelligence Report</div>
+                <div class="brand-sub mono">Last run: 2026-08-29T12:25:26.530379+00:00</div>
             </div>
         </div>
-    </body>
-    </html>
+        <div class="links">
+            <a href="https://github.com/4n0nymou3" target="_blank" title="GitHub Profile"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg></a>
+            <a href="https://github.com/4n0nymou3/multi-proxy-config-fetcher" target="_blank" title="Repository"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4a2 2 0 012-2h10.5A1.5 1.5 0 0118 3.5V21l-6-3-6 3V6a2 2 0 00-2-2z"/></svg></a>
+            <a href="https://x.com/4n0nymou3" target="_blank" title="X (Twitter)"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+        </div>
+    </header>
+
+    <div class="hero">
+        <div class="gauge-wrap">
+            <svg width="180" height="180" viewBox="0 0 180 180">
+                <circle cx="90" cy="90" r="80" fill="none" stroke="var(--surface-2)" stroke-width="14"/>
+                <circle id="gauge-ring" cx="90" cy="90" r="80" fill="none" stroke="var(--accent)" stroke-width="14"
+                    stroke-linecap="round" transform="rotate(-90 90 90)"
+                    stroke-dasharray="502.65" stroke-dashoffset="502.65"
+                    data-target-offset="82.44"/>
+            </svg>
+            <div class="gauge-num">
+                <div class="val mono" id="gauge-value">0%</div>
+                <div class="lbl">Avg Health</div>
+            </div>
+        </div>
+        <div class="stat-grid">
+            <div class="stat-card"><div class="n">8<span class="muted" style="font-size:15px"> / 8</span></div><div class="l">Active Sources</div></div>
+            <div class="stat-card"><div class="n mono">531</div><div class="l">Valid Configs Fetched</div></div>
+            <div class="stat-card"><div class="n mono">495</div><div class="l">Unique Configs</div></div>
+            <div class="stat-card"><div class="n mono">0.09s</div><div class="l">Avg Response Time</div></div>
+        </div>
+    </div>
+
+    <div class="grid-3">
+        <div class="card">
+            <h3>Protocol Distribution</h3>
+            <div class="chart-box"><canvas id="chart-protocol"></canvas></div>
+        </div>
+        <div class="card">
+            <h3>Source Health Distribution</h3>
+            <div class="chart-box"><canvas id="chart-score"></canvas></div>
+            <div class="legend-note">Sources scoring under 30% are auto-disabled by the pipeline.</div>
+        </div>
+        <div class="card">
+            <h3>Fastest Sources (avg response)</h3>
+            <div class="chart-box"><canvas id="chart-speed"></canvas></div>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <div class="card">
+            <h3>Health Score Trend</h3>
+            <div class="chart-box" id="trend-box"><canvas id="chart-trend"></canvas></div>
+        </div>
+        <div class="card">
+            <h3>Top &amp; Bottom Performers</h3>
+            <div style="margin-bottom:14px"><div class="perf-row"><span class="perf-name">vless_universal.txt</span><span class="perf-score good-text">90.1%</span></div><div class="perf-row"><span class="perf-name">Sub.txt</span><span class="perf-score good-text">89.2%</span></div><div class="perf-row"><span class="perf-name">sub.html</span><span class="perf-score good-text">89.1%</span></div><div class="perf-row"><span class="perf-name">persianvpnhub</span><span class="perf-score good-text">84.3%</span></div><div class="perf-row"><span class="perf-name">proxies.txt</span><span class="perf-score good-text">82.9%</span></div></div>
+            <div style="border-top:1px dashed var(--border);padding-top:10px"><div class="perf-row"><span class="perf-name">sub_1.txt</span><span class="perf-score bad-text">72.9%</span></div><div class="perf-row"><span class="perf-name">sub_1.txt</span><span class="perf-score bad-text">78.5%</span></div><div class="perf-row"><span class="perf-name">base64.txt</span><span class="perf-score bad-text">81.6%</span></div><div class="perf-row"><span class="perf-name">proxies.txt</span><span class="perf-score bad-text">82.9%</span></div><div class="perf-row"><span class="perf-name">persianvpnhub</span><span class="perf-score bad-text">84.3%</span></div></div>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <div class="table-top">
+            <h3>All Sources</h3>
+            <input id="search" type="text" placeholder="Search sources...">
+        </div>
+        <div class="table-scroll">
+            <table id="main-table">
+                <thead>
+                    <tr>
+                        <th data-key="name">Source</th>
+                        <th data-key="status_class">Status</th>
+                        <th data-key="score" class="sorted">Score</th>
+                        <th data-key="success">Success Rate</th>
+                        <th data-key="response">Response</th>
+                        <th data-key="valid">Valid/Total</th>
+                        <th>Last Success</th>
+                    </tr>
+                </thead>
+                <tbody>
+                        <tr class="t-row" data-name="vless_universal.txt" data-score="90.1" data-success="100.0" data-response="0.04" data-valid="65">
+                            <td class="c-name">
+                                <span class="dot dot-good"></span>
+                                <span>vless_universal.txt</span>
+                            </td>
+                            <td><span class="pill pill-good">Healthy</span></td>
+                            <td class="mono">90.1%</td>
+                            <td class="mono">100.0%</td>
+                            <td class="mono">0.04s</td>
+                            <td class="mono">65/107</td>
+                            <td class="mono muted">2026-08-29T12:25:17.747468+00:00</td>
+                        </tr>
+                        <tr class="t-row" data-name="sub.txt" data-score="89.2" data-success="100.0" data-response="0.05" data-valid="30">
+                            <td class="c-name">
+                                <span class="dot dot-good"></span>
+                                <span>Sub.txt</span>
+                            </td>
+                            <td><span class="pill pill-good">Healthy</span></td>
+                            <td class="mono">89.2%</td>
+                            <td class="mono">100.0%</td>
+                            <td class="mono">0.05s</td>
+                            <td class="mono">30/47</td>
+                            <td class="mono muted">2026-08-29T12:25:21.947125+00:00</td>
+                        </tr>
+                        <tr class="t-row" data-name="sub.html" data-score="89.1" data-success="100.0" data-response="0.04" data-valid="215">
+                            <td class="c-name">
+                                <span class="dot dot-good"></span>
+                                <span>sub.html</span>
+                            </td>
+                            <td><span class="pill pill-good">Healthy</span></td>
+                            <td class="mono">89.1%</td>
+                            <td class="mono">100.0%</td>
+                            <td class="mono">0.04s</td>
+                            <td class="mono">215/301</td>
+                            <td class="mono muted">2026-08-29T12:25:24.012987+00:00</td>
+                        </tr>
+                        <tr class="t-row" data-name="persianvpnhub" data-score="84.3" data-success="100.0" data-response="0.46" data-valid="10">
+                            <td class="c-name">
+                                <span class="dot dot-good"></span>
+                                <span>persianvpnhub</span>
+                            </td>
+                            <td><span class="pill pill-good">Healthy</span></td>
+                            <td class="mono">84.3%</td>
+                            <td class="mono">100.0%</td>
+                            <td class="mono">0.46s</td>
+                            <td class="mono">10/20</td>
+                            <td class="mono muted">2026-08-29T12:25:26.529068+00:00</td>
+                        </tr>
+                        <tr class="t-row" data-name="proxies.txt" data-score="82.9" data-success="100.0" data-response="0.01" data-valid="37">
+                            <td class="c-name">
+                                <span class="dot dot-good"></span>
+                                <span>proxies.txt</span>
+                            </td>
+                            <td><span class="pill pill-good">Healthy</span></td>
+                            <td class="mono">82.9%</td>
+                            <td class="mono">100.0%</td>
+                            <td class="mono">0.01s</td>
+                            <td class="mono">37/117</td>
+                            <td class="mono muted">2026-08-29T12:25:15.689587+00:00</td>
+                        </tr>
+                        <tr class="t-row" data-name="base64.txt" data-score="81.6" data-success="100.0" data-response="0.01" data-valid="169">
+                            <td class="c-name">
+                                <span class="dot dot-good"></span>
+                                <span>base64.txt</span>
+                            </td>
+                            <td><span class="pill pill-good">Healthy</span></td>
+                            <td class="mono">81.6%</td>
+                            <td class="mono">100.0%</td>
+                            <td class="mono">0.01s</td>
+                            <td class="mono">169/636</td>
+                            <td class="mono muted">2026-08-29T12:25:19.892873+00:00</td>
+                        </tr>
+                        <tr class="t-row" data-name="sub_1.txt" data-score="78.5" data-success="100.0" data-response="0.06" data-valid="2">
+                            <td class="c-name">
+                                <span class="dot dot-good"></span>
+                                <span>sub_1.txt</span>
+                            </td>
+                            <td><span class="pill pill-good">Healthy</span></td>
+                            <td class="mono">78.5%</td>
+                            <td class="mono">100.0%</td>
+                            <td class="mono">0.06s</td>
+                            <td class="mono">2/14</td>
+                            <td class="mono muted">2026-08-29T12:25:11.653412+00:00</td>
+                        </tr>
+                        <tr class="t-row" data-name="sub_1.txt" data-score="72.9" data-success="100.0" data-response="0.01" data-valid="3">
+                            <td class="c-name">
+                                <span class="dot dot-good"></span>
+                                <span>sub_1.txt</span>
+                            </td>
+                            <td><span class="pill pill-good">Healthy</span></td>
+                            <td class="mono">72.9%</td>
+                            <td class="mono">100.0%</td>
+                            <td class="mono">0.01s</td>
+                            <td class="mono">3/12</td>
+                            <td class="mono muted">2026-08-29T12:25:13.665844+00:00</td>
+                        </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        Generated automatically by <a href="https://github.com/4n0nymou3/multi-proxy-config-fetcher" target="_blank">multi-proxy-config-fetcher</a> · Made with 💚 by Anonymous
+    </footer>
+</div>
+<script>
+const REPORT_DATA = {"generated_at": "2026-08-29T12:25:26.530379+00:00", "summary": {"total_channels": 8, "active_channels": 8, "total_valid_configs": 531, "total_unique_configs": 495, "avg_score": 83.6, "avg_success_rate": 100.0, "avg_response_time": 0.09}, "protocol_totals": {"wireguard://": 0, "hysteria2://": 83, "vless://": 424, "vmess://": 0, "ss://": 0, "trojan://": 24, "tuic://": 0}, "score_buckets": {"90-100": 1, "70-89": 7, "50-69": 0, "30-49": 0, "0-29": 0}, "fastest": [{"name": "sub_1.txt", "response_time": 0.01}, {"name": "proxies.txt", "response_time": 0.01}, {"name": "base64.txt", "response_time": 0.01}, {"name": "vless_universal.txt", "response_time": 0.04}, {"name": "sub.html", "response_time": 0.04}, {"name": "Sub.txt", "response_time": 0.05}, {"name": "sub_1.txt", "response_time": 0.06}, {"name": "persianvpnhub", "response_time": 0.46}], "top_performers": [{"name": "vless_universal.txt", "score": 90.1}, {"name": "Sub.txt", "score": 89.2}, {"name": "sub.html", "score": 89.1}, {"name": "persianvpnhub", "score": 84.3}, {"name": "proxies.txt", "score": 82.9}], "bottom_performers": [{"name": "sub_1.txt", "score": 72.9}, {"name": "sub_1.txt", "score": 78.5}, {"name": "base64.txt", "score": 81.6}, {"name": "proxies.txt", "score": 82.9}, {"name": "persianvpnhub", "score": 84.3}], "table_rows": [{"name": "vless_universal.txt", "url": "https://raw.githubusercontent.com/zieng2/wl/refs/heads/main/vless_universal.txt", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 90.1, "success_rate": 100.0, "response_time": 0.04, "valid_configs": 65, "total_configs": 107, "unique_configs": 65, "last_success": "2026-08-29T12:25:17.747468+00:00"}, {"name": "Sub.txt", "url": "https://raw.githubusercontent.com/Ashkan-m/v2ray/main/Sub.txt", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 89.2, "success_rate": 100.0, "response_time": 0.05, "valid_configs": 30, "total_configs": 47, "unique_configs": 28, "last_success": "2026-08-29T12:25:21.947125+00:00"}, {"name": "sub.html", "url": "https://raw.githubusercontent.com/arshiacomplus/v2rayExtractor/refs/heads/main/mix/sub.html", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 89.1, "success_rate": 100.0, "response_time": 0.04, "valid_configs": 215, "total_configs": 301, "unique_configs": 183, "last_success": "2026-08-29T12:25:24.012987+00:00"}, {"name": "persianvpnhub", "url": "https://t.me/s/persianvpnhub", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 84.3, "success_rate": 100.0, "response_time": 0.46, "valid_configs": 10, "total_configs": 20, "unique_configs": 9, "last_success": "2026-08-29T12:25:26.529068+00:00"}, {"name": "proxies.txt", "url": "https://raw.githubusercontent.com/Mahdi0024/ProxyCollector/master/sub/proxies.txt", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 82.9, "success_rate": 100.0, "response_time": 0.01, "valid_configs": 37, "total_configs": 117, "unique_configs": 37, "last_success": "2026-08-29T12:25:15.689587+00:00"}, {"name": "base64.txt", "url": "https://raw.githubusercontent.com/iampedii/whitedns-sub/refs/heads/main/base64.txt", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 81.6, "success_rate": 100.0, "response_time": 0.01, "valid_configs": 169, "total_configs": 636, "unique_configs": 169, "last_success": "2026-08-29T12:25:19.892873+00:00"}, {"name": "sub_1.txt", "url": "https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mci/sub_1.txt", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 78.5, "success_rate": 100.0, "response_time": 0.06, "valid_configs": 2, "total_configs": 14, "unique_configs": 2, "last_success": "2026-08-29T12:25:11.653412+00:00"}, {"name": "sub_1.txt", "url": "https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mtn/sub_1.txt", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 72.9, "success_rate": 100.0, "response_time": 0.01, "valid_configs": 3, "total_configs": 12, "unique_configs": 2, "last_success": "2026-08-29T12:25:13.665844+00:00"}], "trend": [{"timestamp": "2026-08-29T12:25:26.530379+00:00", "avg_score": 83.58, "total_valid_configs": 531, "active_channels": 8}]};
+
+(function() {
+    const ring = document.getElementById('gauge-ring');
+    const valueEl = document.getElementById('gauge-value');
+    const target = parseFloat(ring.dataset.targetOffset);
+    const total = parseFloat(ring.getAttribute('stroke-dasharray'));
+    const finalScore = 83.6;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const duration = reduced ? 0 : 900;
+    const start = performance.now();
+    function frame(now) {
+        const p = duration === 0 ? 1 : Math.min(1, (now - start) / duration);
+        ring.setAttribute('stroke-dashoffset', total - (total - target) * p);
+        valueEl.textContent = (finalScore * p).toFixed(1) + '%';
+        if (p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+})();
+
+Chart.defaults.color = '#8b96ab';
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.borderColor = '#232d40';
+
+const protoEntries = Object.entries(REPORT_DATA.protocol_totals).sort((a,b) => b[1]-a[1]);
+new Chart(document.getElementById('chart-protocol'), {
+    type: 'doughnut',
+    data: {
+        labels: protoEntries.map(e => e[0].replace('://','')),
+        datasets: [{
+            data: protoEntries.map(e => e[1]),
+            backgroundColor: ['#38bdf8','#34d399','#fbbf24','#fb923c','#f87171','#a78bfa','#f472b6'],
+            borderColor: '#121826',
+            borderWidth: 2
+        }]
+    },
+    options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 11 } } } } }
+});
+
+const buckets = REPORT_DATA.score_buckets;
+new Chart(document.getElementById('chart-score'), {
+    type: 'bar',
+    data: {
+        labels: Object.keys(buckets),
+        datasets: [{
+            data: Object.values(buckets),
+            backgroundColor: ['#34d399','#38bdf8','#fbbf24','#fb923c','#f87171'],
+            borderRadius: 6,
+            maxBarThickness: 34
+        }]
+    },
+    options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#1a2233' } }, x: { grid: { display: false } } } }
+});
+
+const fastest = REPORT_DATA.fastest;
+new Chart(document.getElementById('chart-speed'), {
+    type: 'bar',
+    data: {
+        labels: fastest.map(f => f.name.length > 16 ? f.name.slice(0,16)+'…' : f.name),
+        datasets: [{
+            data: fastest.map(f => f.response_time),
+            backgroundColor: '#38bdf8',
+            borderRadius: 6,
+            maxBarThickness: 16
+        }]
+    },
+    options: {
+        indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } },
+        scales: { x: { grid: { color: '#1a2233' } }, y: { grid: { display: false }, ticks: { font: { size: 10.5 } } } }
+    }
+});
+
+const trend = REPORT_DATA.trend;
+if (trend.length >= 2) {
+    new Chart(document.getElementById('chart-trend'), {
+        type: 'line',
+        data: {
+            labels: trend.map(t => new Date(t.timestamp).toLocaleString(undefined, {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})),
+            datasets: [
+                { label: 'Avg Score', data: trend.map(t => t.avg_score), borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,0.12)', fill: true, tension: 0.35, yAxisID: 'y' },
+                { label: 'Valid Configs', data: trend.map(t => t.total_valid_configs), borderColor: '#34d399', backgroundColor: 'transparent', tension: 0.35, yAxisID: 'y1' }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
+            scales: {
+                y: { position: 'left', grid: { color: '#1a2233' } },
+                y1: { position: 'right', grid: { display: false } },
+                x: { grid: { display: false }, ticks: { maxRotation: 0, font: { size: 10 } } }
+            }
+        }
+    });
+} else {
+    document.getElementById('trend-box').innerHTML = '<div class="empty">Trend needs at least 2 runs of history. Check back after the next scheduled run.</div>';
+}
+
+const table = document.getElementById('main-table');
+const tbody = table.querySelector('tbody');
+const searchInput = document.getElementById('search');
+searchInput.addEventListener('input', () => {
+    const q = searchInput.value.toLowerCase();
+    tbody.querySelectorAll('.t-row').forEach(row => {
+        row.style.display = row.dataset.name.includes(q) ? '' : 'none';
+    });
+});
+
+let currentSort = { key: 'score', asc: false };
+table.querySelectorAll('th[data-key]').forEach(th => {
+    th.addEventListener('click', () => {
+        const key = th.dataset.key;
+        const asc = currentSort.key === key ? !currentSort.asc : false;
+        currentSort = { key, asc };
+        table.querySelectorAll('th[data-key]').forEach(h => h.classList.remove('sorted','asc'));
+        th.classList.add('sorted');
+        if (asc) th.classList.add('asc');
+        const rows = Array.from(tbody.querySelectorAll('.t-row'));
+        const attrMap = { name: 'name', status_class: 'name', score: 'score', success: 'success', response: 'response', valid: 'valid' };
+        rows.sort((a, b) => {
+            const attr = attrMap[key] || key;
+            let av = a.dataset[attr], bv = b.dataset[attr];
+            if (!isNaN(parseFloat(av)) && key !== 'name') { av = parseFloat(av); bv = parseFloat(bv); }
+            if (av < bv) return asc ? -1 : 1;
+            if (av > bv) return asc ? 1 : -1;
+            return 0;
+        });
+        rows.forEach(r => tbody.appendChild(r));
+    });
+});
+</script>
+</body>
+</html>
