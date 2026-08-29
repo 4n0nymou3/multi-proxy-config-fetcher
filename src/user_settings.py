@@ -63,10 +63,12 @@ SINGBOX_TESTER_MAX_WORKERS = 16
 
 # Maximum time (in seconds) to wait for a sing-box config to respond during testing.
 # Configs that take longer than this will be marked as failed.
-SINGBOX_TESTER_TIMEOUT_SECONDS = 10
+# Kept short on purpose: most of the total testing time in a large batch is spent
+# waiting out this timeout for the many dead/unreachable configs, not for the
+# working ones, so a lower value here speeds up the whole run substantially.
+SINGBOX_TESTER_TIMEOUT_SECONDS = 6
 
 # List of URLs to test sing-box configs against.
-# The tester will try each URL in order until one succeeds.
 # Before testing starts, this list is automatically checked and any URL that is
 # currently unreachable (from the runner itself, without a proxy) is skipped.
 SINGBOX_TESTER_URLS = [
@@ -78,8 +80,9 @@ SINGBOX_TESTER_URLS = [
 # Number of independent test rounds a config must pass to be marked as working.
 # A config is only kept if it succeeds in every round, which filters out
 # "flaky" configs that only appear to work when tested a single time.
-# Each round also rotates which test URL is tried first, so a config is
-# checked against more than one destination overall.
+# Each round tests against exactly one URL, and that URL changes between
+# rounds, so a config is checked against more than one destination overall
+# without paying the cost of trying multiple URLs within the same round.
 # Higher values are more accurate but take longer to run. 2 is a good default.
 SINGBOX_TESTER_ROUNDS = 3
 
@@ -96,10 +99,12 @@ XRAY_TESTER_MAX_WORKERS = 16
 
 # Maximum time (in seconds) to wait for an Xray config to respond during testing.
 # Configs that take longer than this will be marked as failed.
-XRAY_TESTER_TIMEOUT_SECONDS = 10
+# Kept short on purpose: most of the total testing time in a large batch is spent
+# waiting out this timeout for the many dead/unreachable configs, not for the
+# working ones, so a lower value here speeds up the whole run substantially.
+XRAY_TESTER_TIMEOUT_SECONDS = 6
 
 # List of URLs to test Xray configs against.
-# The tester will try each URL in order until one succeeds.
 # Before testing starts, this list is automatically checked and any URL that is
 # currently unreachable (from the runner itself, without a proxy) is skipped.
 XRAY_TESTER_URLS = [
@@ -111,8 +116,9 @@ XRAY_TESTER_URLS = [
 # Number of independent test rounds a config must pass to be marked as working.
 # A config is only kept if it succeeds in every round, which filters out
 # "flaky" configs that only appear to work when tested a single time.
-# Each round also rotates which test URL is tried first, so a config is
-# checked against more than one destination overall.
+# Each round tests against exactly one URL, and that URL changes between
+# rounds, so a config is checked against more than one destination overall
+# without paying the cost of trying multiple URLs within the same round.
 # Higher values are more accurate but take longer to run. 2 is a good default.
 XRAY_TESTER_ROUNDS = 3
 
