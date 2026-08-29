@@ -9,7 +9,7 @@ import time
 import requests
 import sys
 from config import ProxyConfig
-from testing_utils import find_free_port, get_usable_test_urls, rotate_urls, median_of, managed_process
+from testing_utils import find_free_port, get_usable_test_urls, rotate_urls, median_of, managed_process, wait_for_port
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -19,7 +19,8 @@ class SingBoxTester:
     def __init__(self, singbox_path: str = 'sing-box', timeout: int = 10, test_urls: List[str] = None):
         self.singbox_path = singbox_path
         self.timeout = timeout
-        self.test_urls = test_urls if test_urls else ['https://www.youtube.com/generate_204']
+        initial_urls = test_urls if test_urls else ['https://www.youtube.com/generate_204']
+        self.test_url = initial_urls[0]
         self._verify_singbox()
     
     def _verify_singbox(self):
@@ -79,11 +80,9 @@ class SingBoxTester:
             with managed_process(
                 [self.singbox_path, 'run', '-c', config_file]
             ) as process:
-                time.sleep(3)
-                
-                if process.poll() is not None:
+                if not wait_for_port(process, mixed_port, max_wait=3.0):
                     stderr = process.stderr.read().decode('utf-8', errors='ignore') if process.stderr else ''
-                    logger.warning(f"✗ {tag} - Process crashed: {stderr[:200]}")
+                    logger.warning(f"✗ {tag} - Process crashed or never started listening: {stderr[:200]}")
                     return False, None, tag
                 
                 proxies = {
@@ -94,34 +93,35 @@ class SingBoxTester:
                 session = requests.Session()
                 session.proxies.update(proxies)
                 
-                for url in self.test_urls:
-                    domain = url.split('/')[2] if '/' in url[8:] else 'unknown'
-                    start_time = time.time()
-                    try:
-                        response = session.get(
-                            url,
-                            timeout=self.timeout
-                        )
-                        delay = int((time.time() - start_time) * 1000)
-                        
-                        if response.status_code in [200, 204]:
-                            logger.info(f"✓ {tag} - OK ({delay}ms via {domain})")
-                            return True, delay, tag
-                        else:
-                            logger.warning(f"✗ {tag} - HTTP {response.status_code} on {domain}")
-                            
-                    except requests.exceptions.ProxyError as e:
-                        logger.warning(f"✗ {tag} - Proxy error: {str(e)[:100]}")
+                url = self.test_url
+                domain = url.split('/')[2] if '/' in url[8:] else 'unknown'
+                start_time = time.time()
+                try:
+                    response = session.get(
+                        url,
+                        timeout=self.timeout
+                    )
+                    delay = int((time.time() - start_time) * 1000)
+                    
+                    if response.status_code in [200, 204]:
+                        logger.info(f"✓ {tag} - OK ({delay}ms via {domain})")
+                        return True, delay, tag
+                    else:
+                        logger.warning(f"✗ {tag} - HTTP {response.status_code} on {domain}")
                         return False, None, tag
-                    except requests.exceptions.Timeout:
-                        logger.warning(f"✗ {tag} - Timeout on {domain}")
-                    except requests.exceptions.ConnectionError as e:
-                        logger.warning(f"✗ {tag} - Connection error on {domain}: {str(e)[:100]}")
-                    except Exception as e:
-                        logger.warning(f"✗ {tag} - {type(e).__name__} on {domain}: {str(e)[:100]}")
-                
-                logger.warning(f"✗ {tag} - Failed all test URLs")
-                return False, None, tag
+                        
+                except requests.exceptions.ProxyError as e:
+                    logger.warning(f"✗ {tag} - Proxy error: {str(e)[:100]}")
+                    return False, None, tag
+                except requests.exceptions.Timeout:
+                    logger.warning(f"✗ {tag} - Timeout on {domain}")
+                    return False, None, tag
+                except requests.exceptions.ConnectionError as e:
+                    logger.warning(f"✗ {tag} - Connection error on {domain}: {str(e)[:100]}")
+                    return False, None, tag
+                except Exception as e:
+                    logger.warning(f"✗ {tag} - {type(e).__name__} on {domain}: {str(e)[:100]}")
+                    return False, None, tag
                 
         except Exception as e:
             logger.error(f"✗ {tag} - Setup error: {str(e)}")
@@ -134,7 +134,7 @@ class SingBoxTester:
                 except Exception as e:
                     logger.debug(f"Failed to remove temp file {config_file}: {e}")
             
-            time.sleep(0.3)
+            time.sleep(0.1)
 
 
 class ParallelConfigTester:
@@ -181,8 +181,9 @@ class ParallelConfigTester:
             if not candidates:
                 break
             
-            self.tester.test_urls = rotate_urls(self.base_test_urls, round_num - 1)
-            logger.info(f"--- Round {round_num}/{self.rounds}: {len(candidates)} configs, endpoint order {self.tester.test_urls} ---")
+            round_urls = rotate_urls(self.base_test_urls, round_num - 1)
+            self.tester.test_url = round_urls[0]
+            logger.info(f"--- Round {round_num}/{self.rounds}: {len(candidates)} configs, endpoint {self.tester.test_url} ---")
             
             round_results = self._run_single_round(candidates)
             candidates = [ob for ob in candidates if ob.get('tag') in round_results]
