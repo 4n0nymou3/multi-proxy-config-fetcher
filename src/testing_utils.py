@@ -34,7 +34,7 @@ def find_free_port() -> int:
                 continue
     raise RuntimeError("Could not find a free port")
 
-def wait_for_port(process, port: int, max_wait: float = 3.0, poll_interval: float = 0.1) -> bool:
+def wait_for_port(process, port: int, max_wait: float = 3.0, poll_interval: float = 0.05) -> bool:
     elapsed = 0.0
     while elapsed < max_wait:
         if process.poll() is not None:
