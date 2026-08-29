@@ -66,7 +66,7 @@ SINGBOX_TESTER_MAX_WORKERS = 16
 # Kept short on purpose: most of the total testing time in a large batch is spent
 # waiting out this timeout for the many dead/unreachable configs, not for the
 # working ones, so a lower value here speeds up the whole run substantially.
-SINGBOX_TESTER_TIMEOUT_SECONDS = 6
+SINGBOX_TESTER_TIMEOUT_SECONDS = 5
 
 # List of URLs to test sing-box configs against.
 # Before testing starts, this list is automatically checked and any URL that is
@@ -102,7 +102,7 @@ XRAY_TESTER_MAX_WORKERS = 16
 # Kept short on purpose: most of the total testing time in a large batch is spent
 # waiting out this timeout for the many dead/unreachable configs, not for the
 # working ones, so a lower value here speeds up the whole run substantially.
-XRAY_TESTER_TIMEOUT_SECONDS = 6
+XRAY_TESTER_TIMEOUT_SECONDS = 5
 
 # List of URLs to test Xray configs against.
 # Before testing starts, this list is automatically checked and any URL that is
