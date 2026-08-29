@@ -6,7 +6,6 @@
 <title>Multi — Source Intelligence Report</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
 :root {
     --bg: #0a0e14;
@@ -22,7 +21,8 @@
     --bad: #f87171;
     --radius: 14px;
 }
-* { box-sizing: border-box; }
+* { box-sizing: border-box; min-width: 0; }
+html, body { overflow-x: hidden; width: 100%; }
 body {
     margin: 0;
     background: radial-gradient(circle at 15% 0%, #101a2e 0%, var(--bg) 45%);
@@ -30,7 +30,7 @@ body {
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
 }
-.wrap { max-width: 1280px; margin: 0 auto; padding: 28px 20px 60px; }
+.wrap { max-width: 1280px; width: 100%; margin: 0 auto; padding: 28px 20px 60px; overflow-x: hidden; }
 h1, h2, h3 { font-family: 'Space Grotesk', 'Inter', sans-serif; margin: 0; }
 .mono { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
 .muted { color: var(--muted); }
@@ -40,7 +40,7 @@ header.top {
 }
 .brand { display: flex; align-items: center; gap: 12px; }
 .pulse {
-    width: 10px; height: 10px; border-radius: 50%; background: var(--good);
+    width: 10px; height: 10px; border-radius: 50%; background: var(--good); flex-shrink: 0;
     box-shadow: 0 0 0 0 rgba(52,211,153,0.6); animation: pulse 2s infinite;
 }
 @keyframes pulse {
@@ -50,11 +50,10 @@ header.top {
 }
 @media (prefers-reduced-motion: reduce) {
     .pulse { animation: none; }
-    * { scroll-behavior: auto !important; }
 }
 .brand-title { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
-.brand-sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
-.links { display: flex; gap: 10px; }
+.brand-sub { font-size: 12px; color: var(--muted); margin-top: 2px; word-break: break-all; }
+.links { display: flex; gap: 10px; flex-shrink: 0; }
 .links a {
     display: flex; align-items: center; justify-content: center; width: 36px; height: 36px;
     border-radius: 10px; background: var(--surface); border: 1px solid var(--border);
@@ -64,48 +63,67 @@ header.top {
 .links svg { width: 17px; height: 17px; }
 
 .hero {
-    display: grid; grid-template-columns: 220px 1fr; gap: 28px; align-items: center;
+    display: grid; grid-template-columns: minmax(160px, 220px) minmax(0, 1fr); gap: 24px; align-items: center;
     background: linear-gradient(150deg, var(--surface) 0%, var(--surface-2) 100%);
-    border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-bottom: 24px;
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px;
 }
 .gauge-wrap { display: flex; align-items: center; justify-content: center; position: relative; }
 .gauge-num { position: absolute; text-align: center; }
-.gauge-num .val { font-family: 'Space Grotesk', sans-serif; font-size: 34px; font-weight: 700; }
-.gauge-num .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
-.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-.stat-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-.stat-card .n { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; }
-.stat-card .l { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.gauge-num .val { font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700; }
+.gauge-num .lbl { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+.stat-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+.stat-card .n { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; overflow-wrap: break-word; }
+.stat-card .l { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
 
-.grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; margin-bottom: 20px; }
-.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }
-@media (max-width: 900px) {
-    .hero { grid-template-columns: 1fr; }
-    .stat-grid { grid-template-columns: repeat(2, 1fr); }
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
-}
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 20px; }
 
 .card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; min-width: 0;
 }
 .card h3 { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
-.card .chart-box { position: relative; height: 220px; }
 
-.perf-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+.donut-wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.legend-list { flex: 1; min-width: 140px; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 4px 0; }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.legend-label { flex: 1; color: var(--text); }
+.legend-val { color: var(--muted); font-size: 11.5px; }
+
+.vbar-chart { display: flex; align-items: flex-end; gap: 10px; height: 180px; }
+.vbar-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }
+.vbar-track { flex: 1; width: 100%; display: flex; align-items: flex-end; }
+.vbar-fill { width: 100%; border-radius: 5px 5px 0 0; min-height: 3px; position: relative; display: flex; justify-content: center; }
+.vbar-val { position: absolute; top: -18px; font-size: 11px; color: var(--text); }
+.vbar-label { font-size: 10px; color: var(--muted); margin-top: 8px; text-align: center; }
+
+.hbar-chart { display: flex; flex-direction: column; gap: 10px; }
+.hbar-row { display: grid; grid-template-columns: 90px 1fr 48px; align-items: center; gap: 8px; }
+.hbar-label { font-size: 11.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hbar-track { background: var(--surface-2); border-radius: 5px; height: 10px; overflow: hidden; }
+.hbar-fill { background: var(--accent); height: 100%; border-radius: 5px; }
+.hbar-val { font-size: 11px; text-align: right; color: var(--text); }
+
+.trend-chart { width: 100%; }
+.trend-labels { position: relative; height: 16px; margin-top: 4px; }
+.trend-tick { position: absolute; font-size: 9.5px; color: var(--muted); transform: translateX(-50%); white-space: nowrap; }
+
+.perf-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; gap: 10px; }
 .perf-row:last-child { border-bottom: none; }
-.perf-name { color: var(--text); }
-.good-text { color: var(--good); font-family: 'JetBrains Mono', monospace; }
-.bad-text { color: var(--bad); font-family: 'JetBrains Mono', monospace; }
+.perf-name { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.good-text { color: var(--good); font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }
+.bad-text { color: var(--bad); font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }
 
-.table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; max-width: 100%; }
 .table-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
 #search {
     background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
-    padding: 9px 14px; border-radius: 8px; font-size: 13.5px; width: 260px; outline: none;
+    padding: 9px 14px; border-radius: 8px; font-size: 13.5px; width: 100%; max-width: 260px; outline: none;
 }
 #search:focus { border-color: var(--accent); }
-.table-scroll { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.table-scroll { overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }
+table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 13.5px; }
 th {
     text-align: left; padding: 10px 12px; color: var(--muted); font-weight: 600; font-size: 11.5px;
     text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
@@ -130,7 +148,12 @@ td { padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: no
 
 footer { margin-top: 32px; text-align: center; color: var(--muted); font-size: 12.5px; }
 footer a { color: var(--accent); text-decoration: none; }
-.empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 12.5px; }
+
+@media (max-width: 640px) {
+    .hero { grid-template-columns: 1fr; }
+    .gauge-wrap svg { width: 150px; height: 150px; }
+}
 </style>
 </head>
 <body>
@@ -140,7 +163,7 @@ footer a { color: var(--accent); text-decoration: none; }
             <span class="pulse"></span>
             <div>
                 <div class="brand-title">Multi — Source Intelligence Report</div>
-                <div class="brand-sub mono">Last run: 2026-08-29T19:56:44.235348+00:00</div>
+                <div class="brand-sub mono">Last run: 2026-08-29T22:18:37.910337+00:00</div>
             </div>
         </div>
         <div class="links">
@@ -157,7 +180,7 @@ footer a { color: var(--accent); text-decoration: none; }
                 <circle id="gauge-ring" cx="90" cy="90" r="80" fill="none" stroke="var(--accent)" stroke-width="14"
                     stroke-linecap="round" transform="rotate(-90 90 90)"
                     stroke-dasharray="502.65" stroke-dashoffset="502.65"
-                    data-target-offset="107.57"/>
+                    data-target-offset="111.09"/>
             </svg>
             <div class="gauge-num">
                 <div class="val mono" id="gauge-value">0%</div>
@@ -165,38 +188,89 @@ footer a { color: var(--accent); text-decoration: none; }
             </div>
         </div>
         <div class="stat-grid">
-            <div class="stat-card"><div class="n">11<span class="muted" style="font-size:15px"> / 12</span></div><div class="l">Active Sources</div></div>
-            <div class="stat-card"><div class="n mono">4145</div><div class="l">Valid Configs Fetched</div></div>
-            <div class="stat-card"><div class="n mono">4002</div><div class="l">Unique Configs</div></div>
-            <div class="stat-card"><div class="n mono">0.3s</div><div class="l">Avg Response Time</div></div>
+            <div class="stat-card"><div class="n">11<span class="muted" style="font-size:14px"> / 12</span></div><div class="l">Active Sources</div></div>
+            <div class="stat-card"><div class="n mono">4171</div><div class="l">Valid Configs Fetched</div></div>
+            <div class="stat-card"><div class="n mono">4011</div><div class="l">Unique Configs</div></div>
+            <div class="stat-card"><div class="n mono">0.12s</div><div class="l">Avg Response Time</div></div>
         </div>
     </div>
 
     <div class="grid-3">
         <div class="card">
             <h3>Protocol Distribution</h3>
-            <div class="chart-box"><canvas id="chart-protocol"></canvas></div>
+            <div class="donut-wrap"><div><svg viewBox="0 0 160 160" width="150" height="150"><circle cx="80.0" cy="80.0" r="64.0" fill="none" stroke="#38bdf8" stroke-width="20" stroke-dasharray="199.76 402.12" stroke-dashoffset="-0.00" transform="rotate(-90 80.0 80.0)"/><circle cx="80.0" cy="80.0" r="64.0" fill="none" stroke="#34d399" stroke-width="20" stroke-dasharray="193.88 402.12" stroke-dashoffset="-199.76" transform="rotate(-90 80.0 80.0)"/><circle cx="80.0" cy="80.0" r="64.0" fill="none" stroke="#fbbf24" stroke-width="20" stroke-dasharray="8.48 402.12" stroke-dashoffset="-393.64" transform="rotate(-90 80.0 80.0)"/></svg></div><div class="legend-list"><div class="legend-item"><span class="legend-dot" style="background:#38bdf8"></span><span class="legend-label">trojan</span><span class="legend-val mono">2072 (49.7%)</span></div><div class="legend-item"><span class="legend-dot" style="background:#34d399"></span><span class="legend-label">vless</span><span class="legend-val mono">2011 (48.2%)</span></div><div class="legend-item"><span class="legend-dot" style="background:#fbbf24"></span><span class="legend-label">hysteria2</span><span class="legend-val mono">88 (2.1%)</span></div></div></div>
         </div>
         <div class="card">
             <h3>Source Health Distribution</h3>
-            <div class="chart-box"><canvas id="chart-score"></canvas></div>
+            <div class="vbar-chart"><div class="vbar-col">
+            <div class="vbar-track"><div class="vbar-fill" style="height:11.1%;background:#34d399"><span class="vbar-val mono">1</span></div></div>
+            <div class="vbar-label mono">90-100</div>
+        </div><div class="vbar-col">
+            <div class="vbar-track"><div class="vbar-fill" style="height:100.0%;background:#38bdf8"><span class="vbar-val mono">9</span></div></div>
+            <div class="vbar-label mono">70-89</div>
+        </div><div class="vbar-col">
+            <div class="vbar-track"><div class="vbar-fill" style="height:11.1%;background:#fbbf24"><span class="vbar-val mono">1</span></div></div>
+            <div class="vbar-label mono">50-69</div>
+        </div><div class="vbar-col">
+            <div class="vbar-track"><div class="vbar-fill" style="height:0.0%;background:#fb923c"><span class="vbar-val mono">0</span></div></div>
+            <div class="vbar-label mono">30-49</div>
+        </div><div class="vbar-col">
+            <div class="vbar-track"><div class="vbar-fill" style="height:11.1%;background:#f87171"><span class="vbar-val mono">1</span></div></div>
+            <div class="vbar-label mono">0-29</div>
+        </div></div>
             <div class="legend-note">Sources scoring under 30% are auto-disabled by the pipeline.</div>
         </div>
         <div class="card">
             <h3>Fastest Sources (avg response)</h3>
-            <div class="chart-box"><canvas id="chart-speed"></canvas></div>
+            <div class="hbar-chart"><div class="hbar-row">
+            <div class="hbar-label" title="base64.txt">base64.txt</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:4.0%"></div></div>
+            <div class="hbar-val mono">0.01s</div>
+        </div><div class="hbar-row">
+            <div class="hbar-label" title="sub_1.txt">sub_1.txt</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:16.0%"></div></div>
+            <div class="hbar-val mono">0.04s</div>
+        </div><div class="hbar-row">
+            <div class="hbar-label" title="proxies.txt">proxies.txt</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:24.0%"></div></div>
+            <div class="hbar-val mono">0.06s</div>
+        </div><div class="hbar-row">
+            <div class="hbar-label" title="Sub.txt">Sub.txt</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:24.0%"></div></div>
+            <div class="hbar-val mono">0.06s</div>
+        </div><div class="hbar-row">
+            <div class="hbar-label" title="sub.html">sub.html</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:24.0%"></div></div>
+            <div class="hbar-val mono">0.06s</div>
+        </div><div class="hbar-row">
+            <div class="hbar-label" title="vless_universal.txt">vless_universal.t…</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:48.0%"></div></div>
+            <div class="hbar-val mono">0.12s</div>
+        </div><div class="hbar-row">
+            <div class="hbar-label" title="configs.txt">configs.txt</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:76.0%"></div></div>
+            <div class="hbar-val mono">0.19s</div>
+        </div><div class="hbar-row">
+            <div class="hbar-label" title="mix">mix</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:100.0%"></div></div>
+            <div class="hbar-val mono">0.25s</div>
+        </div></div>
         </div>
     </div>
 
     <div class="grid-2">
         <div class="card">
             <h3>Health Score Trend</h3>
-            <div class="chart-box" id="trend-box"><canvas id="chart-trend"></canvas></div>
+            <div class="trend-chart"><svg viewBox="0 0 600 180" width="100%" height="180" preserveAspectRatio="none">
+        <polygon points="0,180 0.0,29.6 75.0,29.9 150.0,26.4 225.0,25.4 300.0,25.5 375.0,25.5 450.0,31.1 525.0,38.6 600.0,39.8 600,180" fill="rgba(56,189,248,0.12)"/>
+        <polyline points="0.0,29.6 75.0,29.9 150.0,26.4 225.0,25.4 300.0,25.5 375.0,25.5 450.0,31.1 525.0,38.6 600.0,39.8" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+        <circle cx="0.0" cy="29.6" r="3.5" fill="#38bdf8"/><circle cx="75.0" cy="29.9" r="3.5" fill="#38bdf8"/><circle cx="150.0" cy="26.4" r="3.5" fill="#38bdf8"/><circle cx="225.0" cy="25.4" r="3.5" fill="#38bdf8"/><circle cx="300.0" cy="25.5" r="3.5" fill="#38bdf8"/><circle cx="375.0" cy="25.5" r="3.5" fill="#38bdf8"/><circle cx="450.0" cy="31.1" r="3.5" fill="#38bdf8"/><circle cx="525.0" cy="38.6" r="3.5" fill="#38bdf8"/><circle cx="600.0" cy="39.8" r="3.5" fill="#38bdf8"/>
+    </svg><div class="trend-labels"><span class="trend-tick mono" style="left:0.0%">08/29 12:25</span><span class="trend-tick mono" style="left:25.0%">08/29 15:44</span><span class="trend-tick mono" style="left:37.5%">08/29 17:27</span><span class="trend-tick mono" style="left:62.5%">08/29 18:00</span><span class="trend-tick mono" style="left:75.0%">08/29 18:18</span><span class="trend-tick mono" style="left:100.0%">08/29 22:18</span></div></div>
         </div>
         <div class="card">
             <h3>Top &amp; Bottom Performers</h3>
-            <div style="margin-bottom:14px"><div class="perf-row"><span class="perf-name">all_configs.txt</span><span class="perf-score good-text">90.4%</span></div><div class="perf-row"><span class="perf-name">persianvpnhub</span><span class="perf-score good-text">89.4%</span></div><div class="perf-row"><span class="perf-name">proxies.txt</span><span class="perf-score good-text">88.5%</span></div><div class="perf-row"><span class="perf-name">vless_universal.txt</span><span class="perf-score good-text">88.0%</span></div><div class="perf-row"><span class="perf-name">mix</span><span class="perf-score good-text">86.2%</span></div></div>
-            <div style="border-top:1px dashed var(--border);padding-top:10px"><div class="perf-row"><span class="perf-name">V2RAY_RAW.txt</span><span class="perf-score bad-text">15.2%</span></div><div class="perf-row"><span class="perf-name">configs.txt</span><span class="perf-score bad-text">74.4%</span></div><div class="perf-row"><span class="perf-name">sub_1.txt</span><span class="perf-score bad-text">78.8%</span></div><div class="perf-row"><span class="perf-name">sub_1.txt</span><span class="perf-score bad-text">80.3%</span></div><div class="perf-row"><span class="perf-name">base64.txt</span><span class="perf-score bad-text">81.2%</span></div></div>
+            <div style="margin-bottom:14px"><div class="perf-row"><span class="perf-name">all_configs.txt</span><span class="perf-score good-text">91.3%</span></div><div class="perf-row"><span class="perf-name">vless_universal.txt</span><span class="perf-score good-text">88.7%</span></div><div class="perf-row"><span class="perf-name">proxies.txt</span><span class="perf-score good-text">88.4%</span></div><div class="perf-row"><span class="perf-name">persianvpnhub</span><span class="perf-score good-text">88.2%</span></div><div class="perf-row"><span class="perf-name">mix</span><span class="perf-score good-text">86.3%</span></div></div>
+            <div style="border-top:1px dashed var(--border);padding-top:10px"><div class="perf-row"><span class="perf-name">V2RAY_RAW.txt</span><span class="perf-score bad-text">15.3%</span></div><div class="perf-row"><span class="perf-name">sub_1.txt</span><span class="perf-score bad-text">66.7%</span></div><div class="perf-row"><span class="perf-name">configs.txt</span><span class="perf-score bad-text">75.1%</span></div><div class="perf-row"><span class="perf-name">base64.txt</span><span class="perf-score bad-text">81.6%</span></div><div class="perf-row"><span class="perf-name">sub_1.txt</span><span class="perf-score bad-text">82.1%</span></div></div>
         </div>
     </div>
 
@@ -219,148 +293,148 @@ footer a { color: var(--accent); text-decoration: none; }
                     </tr>
                 </thead>
                 <tbody>
-                        <tr class="t-row" data-name="all_configs.txt" data-score="90.4" data-success="100.0" data-response="0.93" data-valid="3392">
+                        <tr class="t-row" data-name="all_configs.txt" data-score="91.3" data-success="100.0" data-response="0.27" data-valid="3392">
                             <td class="c-name">
                                 <span class="dot dot-good"></span>
                                 <span>all_configs.txt</span>
                             </td>
                             <td><span class="pill pill-good">Healthy</span></td>
-                            <td class="mono">90.4%</td>
+                            <td class="mono">91.3%</td>
                             <td class="mono">100.0%</td>
-                            <td class="mono">0.93s</td>
+                            <td class="mono">0.27s</td>
                             <td class="mono">3392/4895</td>
-                            <td class="mono muted">2026-08-29T19:56:34.643984+00:00</td>
+                            <td class="mono muted">2026-08-29T22:18:29.068598+00:00</td>
                         </tr>
-                        <tr class="t-row" data-name="persianvpnhub" data-score="89.4" data-success="100.0" data-response="0.59" data-valid="13">
-                            <td class="c-name">
-                                <span class="dot dot-good"></span>
-                                <span>persianvpnhub</span>
-                            </td>
-                            <td><span class="pill pill-good">Healthy</span></td>
-                            <td class="mono">89.4%</td>
-                            <td class="mono">100.0%</td>
-                            <td class="mono">0.59s</td>
-                            <td class="mono">13/17</td>
-                            <td class="mono muted">2026-08-29T19:56:44.228510+00:00</td>
-                        </tr>
-                        <tr class="t-row" data-name="proxies.txt" data-score="88.5" data-success="100.0" data-response="0.01" data-valid="55">
-                            <td class="c-name">
-                                <span class="dot dot-good"></span>
-                                <span>proxies.txt</span>
-                            </td>
-                            <td><span class="pill pill-good">Healthy</span></td>
-                            <td class="mono">88.5%</td>
-                            <td class="mono">100.0%</td>
-                            <td class="mono">0.01s</td>
-                            <td class="mono">55/102</td>
-                            <td class="mono muted">2026-08-29T19:56:21.261001+00:00</td>
-                        </tr>
-                        <tr class="t-row" data-name="vless_universal.txt" data-score="88.0" data-success="100.0" data-response="0.26" data-valid="64">
+                        <tr class="t-row" data-name="vless_universal.txt" data-score="88.7" data-success="100.0" data-response="0.12" data-valid="78">
                             <td class="c-name">
                                 <span class="dot dot-good"></span>
                                 <span>vless_universal.txt</span>
                             </td>
                             <td><span class="pill pill-good">Healthy</span></td>
-                            <td class="mono">88.0%</td>
+                            <td class="mono">88.7%</td>
                             <td class="mono">100.0%</td>
-                            <td class="mono">0.26s</td>
-                            <td class="mono">64/120</td>
-                            <td class="mono muted">2026-08-29T19:56:23.546451+00:00</td>
+                            <td class="mono">0.12s</td>
+                            <td class="mono">78/141</td>
+                            <td class="mono muted">2026-08-29T22:18:18.620411+00:00</td>
                         </tr>
-                        <tr class="t-row" data-name="mix" data-score="86.2" data-success="100.0" data-response="0.31" data-valid="148">
+                        <tr class="t-row" data-name="proxies.txt" data-score="88.4" data-success="100.0" data-response="0.06" data-valid="55">
+                            <td class="c-name">
+                                <span class="dot dot-good"></span>
+                                <span>proxies.txt</span>
+                            </td>
+                            <td><span class="pill pill-good">Healthy</span></td>
+                            <td class="mono">88.4%</td>
+                            <td class="mono">100.0%</td>
+                            <td class="mono">0.06s</td>
+                            <td class="mono">55/102</td>
+                            <td class="mono muted">2026-08-29T22:18:16.465524+00:00</td>
+                        </tr>
+                        <tr class="t-row" data-name="persianvpnhub" data-score="88.2" data-success="100.0" data-response="0.44" data-valid="11">
+                            <td class="c-name">
+                                <span class="dot dot-good"></span>
+                                <span>persianvpnhub</span>
+                            </td>
+                            <td><span class="pill pill-good">Healthy</span></td>
+                            <td class="mono">88.2%</td>
+                            <td class="mono">100.0%</td>
+                            <td class="mono">0.44s</td>
+                            <td class="mono">11/17</td>
+                            <td class="mono muted">2026-08-29T22:18:37.905615+00:00</td>
+                        </tr>
+                        <tr class="t-row" data-name="mix" data-score="86.3" data-success="100.0" data-response="0.25" data-valid="146">
                             <td class="c-name">
                                 <span class="dot dot-good"></span>
                                 <span>mix</span>
                             </td>
                             <td><span class="pill pill-good">Healthy</span></td>
-                            <td class="mono">86.2%</td>
+                            <td class="mono">86.3%</td>
                             <td class="mono">100.0%</td>
-                            <td class="mono">0.31s</td>
-                            <td class="mono">148/314</td>
-                            <td class="mono muted">2026-08-29T19:56:30.736923+00:00</td>
+                            <td class="mono">0.25s</td>
+                            <td class="mono">146/313</td>
+                            <td class="mono muted">2026-08-29T22:18:25.433954+00:00</td>
                         </tr>
-                        <tr class="t-row" data-name="sub.txt" data-score="85.5" data-success="100.0" data-response="0.28" data-valid="30">
+                        <tr class="t-row" data-name="sub.txt" data-score="85.9" data-success="100.0" data-response="0.06" data-valid="30">
                             <td class="c-name">
                                 <span class="dot dot-good"></span>
                                 <span>Sub.txt</span>
                             </td>
                             <td><span class="pill pill-good">Healthy</span></td>
-                            <td class="mono">85.5%</td>
+                            <td class="mono">85.9%</td>
                             <td class="mono">100.0%</td>
-                            <td class="mono">0.28s</td>
+                            <td class="mono">0.06s</td>
                             <td class="mono">30/47</td>
-                            <td class="mono muted">2026-08-29T19:56:39.192131+00:00</td>
+                            <td class="mono muted">2026-08-29T22:18:33.309364+00:00</td>
                         </tr>
-                        <tr class="t-row" data-name="sub.html" data-score="85.0" data-success="100.0" data-response="0.36" data-valid="215">
+                        <tr class="t-row" data-name="sub.html" data-score="85.2" data-success="100.0" data-response="0.06" data-valid="215">
                             <td class="c-name">
                                 <span class="dot dot-good"></span>
                                 <span>sub.html</span>
                             </td>
                             <td><span class="pill pill-good">Healthy</span></td>
-                            <td class="mono">85.0%</td>
+                            <td class="mono">85.2%</td>
                             <td class="mono">100.0%</td>
-                            <td class="mono">0.36s</td>
+                            <td class="mono">0.06s</td>
                             <td class="mono">215/301</td>
-                            <td class="mono muted">2026-08-29T19:56:41.577024+00:00</td>
+                            <td class="mono muted">2026-08-29T22:18:35.399494+00:00</td>
                         </tr>
-                        <tr class="t-row" data-name="base64.txt" data-score="81.2" data-success="100.0" data-response="0.26" data-valid="165">
+                        <tr class="t-row" data-name="sub_1.txt" data-score="82.1" data-success="100.0" data-response="0.04" data-valid="4">
+                            <td class="c-name">
+                                <span class="dot dot-good"></span>
+                                <span>sub_1.txt</span>
+                            </td>
+                            <td><span class="pill pill-good">Healthy</span></td>
+                            <td class="mono">82.1%</td>
+                            <td class="mono">100.0%</td>
+                            <td class="mono">0.04s</td>
+                            <td class="mono">4/14</td>
+                            <td class="mono muted">2026-08-29T22:18:12.385006+00:00</td>
+                        </tr>
+                        <tr class="t-row" data-name="base64.txt" data-score="81.6" data-success="100.0" data-response="0.01" data-valid="165">
                             <td class="c-name">
                                 <span class="dot dot-good"></span>
                                 <span>base64.txt</span>
                             </td>
                             <td><span class="pill pill-good">Healthy</span></td>
-                            <td class="mono">81.2%</td>
+                            <td class="mono">81.6%</td>
                             <td class="mono">100.0%</td>
-                            <td class="mono">0.26s</td>
+                            <td class="mono">0.01s</td>
                             <td class="mono">165/622</td>
-                            <td class="mono muted">2026-08-29T19:56:25.991743+00:00</td>
+                            <td class="mono muted">2026-08-29T22:18:20.809931+00:00</td>
                         </tr>
-                        <tr class="t-row" data-name="sub_1.txt" data-score="80.3" data-success="100.0" data-response="0.05" data-valid="3">
-                            <td class="c-name">
-                                <span class="dot dot-good"></span>
-                                <span>sub_1.txt</span>
-                            </td>
-                            <td><span class="pill pill-good">Healthy</span></td>
-                            <td class="mono">80.3%</td>
-                            <td class="mono">100.0%</td>
-                            <td class="mono">0.05s</td>
-                            <td class="mono">3/14</td>
-                            <td class="mono muted">2026-08-29T19:56:16.959696+00:00</td>
-                        </tr>
-                        <tr class="t-row" data-name="sub_1.txt" data-score="78.8" data-success="100.0" data-response="0.27" data-valid="2">
-                            <td class="c-name">
-                                <span class="dot dot-good"></span>
-                                <span>sub_1.txt</span>
-                            </td>
-                            <td><span class="pill pill-good">Healthy</span></td>
-                            <td class="mono">78.8%</td>
-                            <td class="mono">100.0%</td>
-                            <td class="mono">0.27s</td>
-                            <td class="mono">2/12</td>
-                            <td class="mono muted">2026-08-29T19:56:19.233958+00:00</td>
-                        </tr>
-                        <tr class="t-row" data-name="configs.txt" data-score="74.4" data-success="100.0" data-response="0.29" data-valid="57">
+                        <tr class="t-row" data-name="configs.txt" data-score="75.1" data-success="100.0" data-response="0.19" data-valid="71">
                             <td class="c-name">
                                 <span class="dot dot-good"></span>
                                 <span>configs.txt</span>
                             </td>
                             <td><span class="pill pill-good">Healthy</span></td>
-                            <td class="mono">74.4%</td>
+                            <td class="mono">75.1%</td>
                             <td class="mono">100.0%</td>
-                            <td class="mono">0.29s</td>
-                            <td class="mono">57/1288</td>
-                            <td class="mono muted">2026-08-29T19:56:28.384295+00:00</td>
+                            <td class="mono">0.19s</td>
+                            <td class="mono">71/1625</td>
+                            <td class="mono muted">2026-08-29T22:18:23.143933+00:00</td>
                         </tr>
-                        <tr class="t-row" data-name="v2ray_raw.txt" data-score="15.2" data-success="0.0" data-response="0" data-valid="1">
+                        <tr class="t-row" data-name="sub_1.txt" data-score="66.7" data-success="100.0" data-response="0.0" data-valid="2">
+                            <td class="c-name">
+                                <span class="dot dot-warn"></span>
+                                <span>sub_1.txt</span>
+                            </td>
+                            <td><span class="pill pill-warn">Degraded</span></td>
+                            <td class="mono">66.7%</td>
+                            <td class="mono">100.0%</td>
+                            <td class="mono">0.0s</td>
+                            <td class="mono">2/12</td>
+                            <td class="mono muted">2026-08-29T22:18:14.390895+00:00</td>
+                        </tr>
+                        <tr class="t-row" data-name="v2ray_raw.txt" data-score="15.3" data-success="0.0" data-response="0" data-valid="2">
                             <td class="c-name">
                                 <span class="dot dot-bad"></span>
                                 <span>V2RAY_RAW.txt</span>
                             </td>
                             <td><span class="pill pill-bad">Disabled Range</span></td>
-                            <td class="mono">15.2%</td>
+                            <td class="mono">15.3%</td>
                             <td class="mono">0.0%</td>
                             <td class="mono">0s</td>
-                            <td class="mono">1/147</td>
+                            <td class="mono">2/146</td>
                             <td class="mono muted">Never</td>
                         </tr>
                 </tbody>
@@ -373,14 +447,12 @@ footer a { color: var(--accent); text-decoration: none; }
     </footer>
 </div>
 <script>
-const REPORT_DATA = {"generated_at": "2026-08-29T19:56:44.235348+00:00", "summary": {"total_channels": 12, "active_channels": 11, "total_valid_configs": 4145, "total_unique_configs": 4002, "avg_score": 78.6, "avg_success_rate": 91.7, "avg_response_time": 0.3}, "protocol_totals": {"wireguard://": 0, "hysteria2://": 93, "vless://": 2000, "vmess://": 0, "ss://": 0, "trojan://": 2052, "tuic://": 0}, "score_buckets": {"90-100": 1, "70-89": 10, "50-69": 0, "30-49": 0, "0-29": 1}, "fastest": [{"name": "proxies.txt", "response_time": 0.01}, {"name": "sub_1.txt", "response_time": 0.05}, {"name": "vless_universal.txt", "response_time": 0.26}, {"name": "base64.txt", "response_time": 0.26}, {"name": "sub_1.txt", "response_time": 0.27}, {"name": "Sub.txt", "response_time": 0.28}, {"name": "configs.txt", "response_time": 0.29}, {"name": "mix", "response_time": 0.31}, {"name": "sub.html", "response_time": 0.36}, {"name": "persianvpnhub", "response_time": 0.59}, {"name": "all_configs.txt", "response_time": 0.93}], "top_performers": [{"name": "all_configs.txt", "score": 90.4}, {"name": "persianvpnhub", "score": 89.4}, {"name": "proxies.txt", "score": 88.5}, {"name": "vless_universal.txt", "score": 88.0}, {"name": "mix", "score": 86.2}], "bottom_performers": [{"name": "V2RAY_RAW.txt", "score": 15.2}, {"name": "configs.txt", "score": 74.4}, {"name": "sub_1.txt", "score": 78.8}, {"name": "sub_1.txt", "score": 80.3}, {"name": "base64.txt", "score": 81.2}], "table_rows": [{"name": "all_configs.txt", "url": "https://github.com/Delta-Kronecker/V2ray-Config/raw/refs/heads/main/config/all_configs.txt", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 90.4, "success_rate": 100.0, "response_time": 0.93, "valid_configs": 3392, "total_configs": 4895, "unique_configs": 3325, "last_success": "2026-08-29T19:56:34.643984+00:00"}, {"name": "persianvpnhub", "url": "https://t.me/s/persianvpnhub", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 89.4, "success_rate": 100.0, "response_time": 0.59, "valid_configs": 13, "total_configs": 17, "unique_configs": 11, "last_success": "2026-08-29T19:56:44.228510+00:00"}, {"name": "proxies.txt", "url": "https://raw.githubusercontent.com/Mahdi0024/ProxyCollector/master/sub/proxies.txt", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 88.5, "success_rate": 100.0, "response_time": 0.01, "valid_configs": 55, "total_configs": 102, "unique_configs": 55, "last_success": "2026-08-29T19:56:21.261001+00:00"}, {"name": "vless_universal.txt", "url": "https://raw.githubusercontent.com/zieng2/wl/refs/heads/main/vless_universal.txt", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 88.0, "success_rate": 100.0, "response_time": 0.26, "valid_configs": 64, "total_configs": 120, "unique_configs": 64, "last_success": "2026-08-29T19:56:23.546451+00:00"}, {"name": "mix", "url": "https://raw.githubusercontent.com/itsyebekhe/PSG/main/subscriptions/xray/mix", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 86.2, "success_rate": 100.0, "response_time": 0.31, "valid_configs": 148, "total_configs": 314, "unique_configs": 147, "last_success": "2026-08-29T19:56:30.736923+00:00"}, {"name": "Sub.txt", "url": "https://raw.githubusercontent.com/Ashkan-m/v2ray/main/Sub.txt", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 85.5, "success_rate": 100.0, "response_time": 0.28, "valid_configs": 30, "total_configs": 47, "unique_configs": 24, "last_success": "2026-08-29T19:56:39.192131+00:00"}, {"name": "sub.html", "url": "https://raw.githubusercontent.com/arshiacomplus/v2rayExtractor/refs/heads/main/mix/sub.html", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 85.0, "success_rate": 100.0, "response_time": 0.36, "valid_configs": 215, "total_configs": 301, "unique_configs": 152, "last_success": "2026-08-29T19:56:41.577024+00:00"}, {"name": "base64.txt", "url": "https://raw.githubusercontent.com/iampedii/whitedns-sub/refs/heads/main/base64.txt", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 81.2, "success_rate": 100.0, "response_time": 0.26, "valid_configs": 165, "total_configs": 622, "unique_configs": 165, "last_success": "2026-08-29T19:56:25.991743+00:00"}, {"name": "sub_1.txt", "url": "https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mci/sub_1.txt", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 80.3, "success_rate": 100.0, "response_time": 0.05, "valid_configs": 3, "total_configs": 14, "unique_configs": 3, "last_success": "2026-08-29T19:56:16.959696+00:00"}, {"name": "sub_1.txt", "url": "https://raw.githubusercontent.com/mahsanet/MahsaFreeConfig/refs/heads/main/mtn/sub_1.txt", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 78.8, "success_rate": 100.0, "response_time": 0.27, "valid_configs": 2, "total_configs": 12, "unique_configs": 2, "last_success": "2026-08-29T19:56:19.233958+00:00"}, {"name": "configs.txt", "url": "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/verified/configs.txt", "enabled": true, "status_class": "good", "status_label": "Healthy", "score": 74.4, "success_rate": 100.0, "response_time": 0.29, "valid_configs": 57, "total_configs": 1288, "unique_configs": 54, "last_success": "2026-08-29T19:56:28.384295+00:00"}, {"name": "V2RAY_RAW.txt", "url": "https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_RAW.txt", "enabled": false, "status_class": "bad", "status_label": "Disabled Range", "score": 15.2, "success_rate": 0.0, "response_time": 0, "valid_configs": 1, "total_configs": 147, "unique_configs": 0, "last_success": "Never"}], "trend": [{"timestamp": "2026-08-29T12:25:26.530379+00:00", "avg_score": 83.58, "total_valid_configs": 531, "active_channels": 8}, {"timestamp": "2026-08-29T13:54:37.503910+00:00", "avg_score": 83.37, "total_valid_configs": 518, "active_channels": 8}, {"timestamp": "2026-08-29T15:44:12.671801+00:00", "avg_score": 85.35, "total_valid_configs": 542, "active_channels": 8}, {"timestamp": "2026-08-29T17:27:00.923364+00:00", "avg_score": 85.89, "total_valid_configs": 567, "active_channels": 8}, {"timestamp": "2026-08-29T17:46:53.042688+00:00", "avg_score": 85.81, "total_valid_configs": 567, "active_channels": 8}, {"timestamp": "2026-08-29T18:00:23.844163+00:00", "avg_score": 85.85, "total_valid_configs": 567, "active_channels": 8}, {"timestamp": "2026-08-29T18:18:08.133118+00:00", "avg_score": 82.74, "total_valid_configs": 4134, "active_channels": 12}, {"timestamp": "2026-08-29T19:56:44.235348+00:00", "avg_score": 78.56, "total_valid_configs": 4145, "active_channels": 11}]};
-
 (function() {
     const ring = document.getElementById('gauge-ring');
     const valueEl = document.getElementById('gauge-value');
     const target = parseFloat(ring.dataset.targetOffset);
     const total = parseFloat(ring.getAttribute('stroke-dasharray'));
-    const finalScore = 78.6;
+    const finalScore = 77.9;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const duration = reduced ? 0 : 900;
     const start = performance.now();
@@ -393,115 +465,42 @@ const REPORT_DATA = {"generated_at": "2026-08-29T19:56:44.235348+00:00", "summar
     requestAnimationFrame(frame);
 })();
 
-Chart.defaults.color = '#8b96ab';
-Chart.defaults.font.family = "'Inter', sans-serif";
-Chart.defaults.borderColor = '#232d40';
-
-const protoEntries = Object.entries(REPORT_DATA.protocol_totals).sort((a,b) => b[1]-a[1]);
-new Chart(document.getElementById('chart-protocol'), {
-    type: 'doughnut',
-    data: {
-        labels: protoEntries.map(e => e[0].replace('://','')),
-        datasets: [{
-            data: protoEntries.map(e => e[1]),
-            backgroundColor: ['#38bdf8','#34d399','#fbbf24','#fb923c','#f87171','#a78bfa','#f472b6'],
-            borderColor: '#121826',
-            borderWidth: 2
-        }]
-    },
-    options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, padding: 10, font: { size: 11 } } } } }
-});
-
-const buckets = REPORT_DATA.score_buckets;
-new Chart(document.getElementById('chart-score'), {
-    type: 'bar',
-    data: {
-        labels: Object.keys(buckets),
-        datasets: [{
-            data: Object.values(buckets),
-            backgroundColor: ['#34d399','#38bdf8','#fbbf24','#fb923c','#f87171'],
-            borderRadius: 6,
-            maxBarThickness: 34
-        }]
-    },
-    options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#1a2233' } }, x: { grid: { display: false } } } }
-});
-
-const fastest = REPORT_DATA.fastest;
-new Chart(document.getElementById('chart-speed'), {
-    type: 'bar',
-    data: {
-        labels: fastest.map(f => f.name.length > 16 ? f.name.slice(0,16)+'…' : f.name),
-        datasets: [{
-            data: fastest.map(f => f.response_time),
-            backgroundColor: '#38bdf8',
-            borderRadius: 6,
-            maxBarThickness: 16
-        }]
-    },
-    options: {
-        indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } },
-        scales: { x: { grid: { color: '#1a2233' } }, y: { grid: { display: false }, ticks: { font: { size: 10.5 } } } }
-    }
-});
-
-const trend = REPORT_DATA.trend;
-if (trend.length >= 2) {
-    new Chart(document.getElementById('chart-trend'), {
-        type: 'line',
-        data: {
-            labels: trend.map(t => new Date(t.timestamp).toLocaleString(undefined, {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})),
-            datasets: [
-                { label: 'Avg Score', data: trend.map(t => t.avg_score), borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,0.12)', fill: true, tension: 0.35, yAxisID: 'y' },
-                { label: 'Valid Configs', data: trend.map(t => t.total_valid_configs), borderColor: '#34d399', backgroundColor: 'transparent', tension: 0.35, yAxisID: 'y1' }
-            ]
-        },
-        options: {
-            maintainAspectRatio: false,
-            plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } },
-            scales: {
-                y: { position: 'left', grid: { color: '#1a2233' } },
-                y1: { position: 'right', grid: { display: false } },
-                x: { grid: { display: false }, ticks: { maxRotation: 0, font: { size: 10 } } }
-            }
-        }
-    });
-} else {
-    document.getElementById('trend-box').innerHTML = '<div class="empty">Trend needs at least 2 runs of history. Check back after the next scheduled run.</div>';
-}
-
-const table = document.getElementById('main-table');
-const tbody = table.querySelector('tbody');
-const searchInput = document.getElementById('search');
-searchInput.addEventListener('input', () => {
-    const q = searchInput.value.toLowerCase();
-    tbody.querySelectorAll('.t-row').forEach(row => {
-        row.style.display = row.dataset.name.includes(q) ? '' : 'none';
-    });
-});
-
-let currentSort = { key: 'score', asc: false };
-table.querySelectorAll('th[data-key]').forEach(th => {
-    th.addEventListener('click', () => {
-        const key = th.dataset.key;
-        const asc = currentSort.key === key ? !currentSort.asc : false;
-        currentSort = { key, asc };
-        table.querySelectorAll('th[data-key]').forEach(h => h.classList.remove('sorted','asc'));
-        th.classList.add('sorted');
-        if (asc) th.classList.add('asc');
-        const rows = Array.from(tbody.querySelectorAll('.t-row'));
-        const attrMap = { name: 'name', status_class: 'name', score: 'score', success: 'success', response: 'response', valid: 'valid' };
-        rows.sort((a, b) => {
-            const attr = attrMap[key] || key;
-            let av = a.dataset[attr], bv = b.dataset[attr];
-            if (!isNaN(parseFloat(av)) && key !== 'name') { av = parseFloat(av); bv = parseFloat(bv); }
-            if (av < bv) return asc ? -1 : 1;
-            if (av > bv) return asc ? 1 : -1;
-            return 0;
+(function() {
+    const table = document.getElementById('main-table');
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    const searchInput = document.getElementById('search');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.toLowerCase();
+            tbody.querySelectorAll('.t-row').forEach(row => {
+                row.style.display = row.dataset.name.includes(q) ? '' : 'none';
+            });
         });
-        rows.forEach(r => tbody.appendChild(r));
+    }
+    let currentSort = { key: 'score', asc: false };
+    table.querySelectorAll('th[data-key]').forEach(th => {
+        th.addEventListener('click', () => {
+            const key = th.dataset.key;
+            const asc = currentSort.key === key ? !currentSort.asc : false;
+            currentSort = { key, asc };
+            table.querySelectorAll('th[data-key]').forEach(h => h.classList.remove('sorted','asc'));
+            th.classList.add('sorted');
+            if (asc) th.classList.add('asc');
+            const rows = Array.from(tbody.querySelectorAll('.t-row'));
+            const attrMap = { name: 'name', status_class: 'name', score: 'score', success: 'success', response: 'response', valid: 'valid' };
+            rows.sort((a, b) => {
+                const attr = attrMap[key] || key;
+                let av = a.dataset[attr], bv = b.dataset[attr];
+                if (!isNaN(parseFloat(av)) && key !== 'name') { av = parseFloat(av); bv = parseFloat(bv); }
+                if (av < bv) return asc ? -1 : 1;
+                if (av > bv) return asc ? 1 : -1;
+                return 0;
+            });
+            rows.forEach(r => tbody.appendChild(r));
+        });
     });
-});
+})();
 </script>
 </body>
 </html>
