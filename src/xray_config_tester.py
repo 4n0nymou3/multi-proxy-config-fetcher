@@ -233,7 +233,7 @@ class XrayTester:
                 except Exception as e:
                     logger.debug(f"Failed to remove temp file {config_file}: {e}")
             
-            time.sleep(0.1)
+            time.sleep(0.05)
 
 
 class ParallelXrayTester:
