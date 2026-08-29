@@ -350,6 +350,15 @@ def save_configs(configs: List[str], config: ProxyConfig):
 
 def save_channel_stats(config: ProxyConfig):
     try:
+        history = []
+        if os.path.exists(config.STATS_FILE):
+            try:
+                with open(config.STATS_FILE, 'r', encoding='utf-8') as f:
+                    previous_stats = json.load(f)
+                history = previous_stats.get('history', [])
+            except Exception:
+                history = []
+
         stats = {
             'timestamp': datetime.now(timezone.utc).isoformat(),
             'channels': []
@@ -372,6 +381,22 @@ def save_channel_stats(config: ProxyConfig):
                 }
             }
             stats['channels'].append(channel_stats)
+
+        total_channels = len(stats['channels'])
+        active_channels = sum(1 for c in stats['channels'] if c['enabled'])
+        total_valid_configs = sum(c['metrics']['valid_configs'] for c in stats['channels'])
+        avg_score = round(sum(c['metrics']['overall_score'] for c in stats['channels']) / max(1, total_channels), 2)
+        avg_response_time = round(sum(c['metrics']['avg_response_time'] for c in stats['channels']) / max(1, total_channels), 2)
+
+        history.append({
+            'timestamp': stats['timestamp'],
+            'active_channels': active_channels,
+            'total_channels': total_channels,
+            'total_valid_configs': total_valid_configs,
+            'avg_score': avg_score,
+            'avg_response_time': avg_response_time
+        })
+        stats['history'] = history[-100:]
             
         os.makedirs(os.path.dirname(config.STATS_FILE), exist_ok=True)
         with open(config.STATS_FILE, 'w', encoding='utf-8') as f:
