@@ -11,7 +11,7 @@ import sys
 from config import ProxyConfig
 import config_parser as parser
 import transport_builder
-from testing_utils import find_free_port, get_usable_test_urls, rotate_urls, managed_process
+from testing_utils import find_free_port, get_usable_test_urls, rotate_urls, managed_process, wait_for_port
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -21,7 +21,8 @@ class XrayTester:
     def __init__(self, xray_path: str = 'xray', timeout: int = 10, test_urls: List[str] = None):
         self.xray_path = xray_path
         self.timeout = timeout
-        self.test_urls = test_urls if test_urls else ['https://www.youtube.com/generate_204']
+        initial_urls = test_urls if test_urls else ['https://www.youtube.com/generate_204']
+        self.test_url = initial_urls[0]
         self.unsupported_protocols = ['tuic://', 'wireguard://']
         self._verify_xray()
     
@@ -178,11 +179,9 @@ class XrayTester:
             with managed_process(
                 [self.xray_path, 'run', '-c', config_file]
             ) as process:
-                time.sleep(3)
-                
-                if process.poll() is not None:
+                if not wait_for_port(process, http_port, max_wait=3.0):
                     stderr = process.stderr.read().decode('utf-8', errors='ignore') if process.stderr else ''
-                    logger.warning(f"✗ Process crashed: {stderr[:200]}")
+                    logger.warning(f"✗ Process crashed or never started listening: {stderr[:200]}")
                     return False, None, config_str
                 
                 proxies = {
@@ -193,34 +192,35 @@ class XrayTester:
                 session = requests.Session()
                 session.proxies.update(proxies)
                 
-                for url in self.test_urls:
-                    domain = url.split('/')[2] if '/' in url[8:] else 'unknown'
-                    start_time = time.time()
-                    try:
-                        response = session.get(
-                            url,
-                            timeout=self.timeout
-                        )
-                        delay = int((time.time() - start_time) * 1000)
-                        
-                        if response.status_code in [200, 204]:
-                            logger.info(f"✓ OK ({delay}ms via {domain})")
-                            return True, delay, config_str
-                        else:
-                            logger.warning(f"✗ HTTP {response.status_code} on {domain}")
-                            
-                    except requests.exceptions.ProxyError as e:
-                        logger.warning(f"✗ Proxy error: {str(e)[:100]}")
+                url = self.test_url
+                domain = url.split('/')[2] if '/' in url[8:] else 'unknown'
+                start_time = time.time()
+                try:
+                    response = session.get(
+                        url,
+                        timeout=self.timeout
+                    )
+                    delay = int((time.time() - start_time) * 1000)
+                    
+                    if response.status_code in [200, 204]:
+                        logger.info(f"✓ OK ({delay}ms via {domain})")
+                        return True, delay, config_str
+                    else:
+                        logger.warning(f"✗ HTTP {response.status_code} on {domain}")
                         return False, None, config_str
-                    except requests.exceptions.Timeout:
-                        logger.warning(f"✗ Timeout on {domain}")
-                    except requests.exceptions.ConnectionError as e:
-                        logger.warning(f"✗ Connection error on {domain}: {str(e)[:100]}")
-                    except Exception as e:
-                        logger.warning(f"✗ {type(e).__name__} on {domain}: {str(e)[:100]}")
-                
-                logger.warning(f"✗ Failed all test URLs")
-                return False, None, config_str
+                        
+                except requests.exceptions.ProxyError as e:
+                    logger.warning(f"✗ Proxy error: {str(e)[:100]}")
+                    return False, None, config_str
+                except requests.exceptions.Timeout:
+                    logger.warning(f"✗ Timeout on {domain}")
+                    return False, None, config_str
+                except requests.exceptions.ConnectionError as e:
+                    logger.warning(f"✗ Connection error on {domain}: {str(e)[:100]}")
+                    return False, None, config_str
+                except Exception as e:
+                    logger.warning(f"✗ {type(e).__name__} on {domain}: {str(e)[:100]}")
+                    return False, None, config_str
                 
         except Exception as e:
             logger.error(f"✗ Setup error: {str(e)}")
@@ -233,7 +233,7 @@ class XrayTester:
                 except Exception as e:
                     logger.debug(f"Failed to remove temp file {config_file}: {e}")
             
-            time.sleep(0.3)
+            time.sleep(0.1)
 
 
 class ParallelXrayTester:
@@ -280,8 +280,9 @@ class ParallelXrayTester:
             if not candidates:
                 break
             
-            self.tester.test_urls = rotate_urls(self.base_test_urls, round_num - 1)
-            logger.info(f"--- Round {round_num}/{self.rounds}: {len(candidates)} configs, endpoint order {self.tester.test_urls} ---")
+            round_urls = rotate_urls(self.base_test_urls, round_num - 1)
+            self.tester.test_url = round_urls[0]
+            logger.info(f"--- Round {round_num}/{self.rounds}: {len(candidates)} configs, endpoint {self.tester.test_url} ---")
             
             round_results = self._run_single_round(candidates)
             skipped = sum(1 for cfg in candidates if cfg in round_results and round_results[cfg] == 0)
