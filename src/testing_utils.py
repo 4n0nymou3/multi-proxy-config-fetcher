@@ -34,6 +34,22 @@ def find_free_port() -> int:
                 continue
     raise RuntimeError("Could not find a free port")
 
+def wait_for_port(process, port: int, max_wait: float = 3.0, poll_interval: float = 0.1) -> bool:
+    elapsed = 0.0
+    while elapsed < max_wait:
+        if process.poll() is not None:
+            return False
+        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+            s.settimeout(0.2)
+            try:
+                s.connect(('127.0.0.1', port))
+                return True
+            except (socket.error, socket.timeout):
+                pass
+        time.sleep(poll_interval)
+        elapsed += poll_interval
+    return process.poll() is None
+
 def get_usable_test_urls(candidate_urls: List[str], timeout: int = 6) -> List[str]:
     usable = []
     for url in candidate_urls:
