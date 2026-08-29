@@ -729,7 +729,9 @@ main() {
     fi
     
     if [ "$PLATFORM" = "windows" ]; then
-        print_error "Windows detected! Please use WSL2 or Git Bash."
+        print_error "Windows detected! This installer requires WSL2 (Windows Subsystem for Linux)."
+        print_error "Git Bash, MSYS2, and Cygwin are NOT supported - they cannot run the Linux Xray/Sing-box binaries this project needs."
+        print_error "Install WSL2 (Ubuntu), open a WSL2 terminal, and run this installer again from inside it."
         exit 1
     fi
     
