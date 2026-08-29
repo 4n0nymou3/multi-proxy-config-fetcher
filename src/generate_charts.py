@@ -101,7 +101,8 @@ def _build_report_dataset(stats_data):
     protocol_totals = {}
     for c in channels:
         for proto, count in (c['metrics'].get('protocol_counts') or {}).items():
-            protocol_totals[proto] = protocol_totals.get(proto, 0) + count
+            if count > 0:
+                protocol_totals[proto] = protocol_totals.get(proto, 0) + count
 
     score_buckets = {'90-100': 0, '70-89': 0, '50-69': 0, '30-49': 0, '0-29': 0}
     for c in channels:
@@ -118,7 +119,7 @@ def _build_report_dataset(stats_data):
             score_buckets['0-29'] += 1
 
     responsive_channels = [c for c in channels if c['metrics']['avg_response_time'] > 0]
-    fastest = sorted(responsive_channels, key=lambda x: x['metrics']['avg_response_time'])[:12]
+    fastest = sorted(responsive_channels, key=lambda x: x['metrics']['avg_response_time'])[:8]
 
     top_performers = sorted_channels[:5]
     bottom_performers = sorted_channels[-5:][::-1] if len(sorted_channels) > 5 else []
@@ -169,33 +170,130 @@ def _build_report_dataset(stats_data):
         'trend': trend
     }
 
+_PALETTE = ['#38bdf8', '#34d399', '#fbbf24', '#fb923c', '#f87171', '#a78bfa', '#f472b6', '#94a3b8']
+
+def _esc(text):
+    return str(text).replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+
+def _render_donut(protocol_totals):
+    entries = sorted(protocol_totals.items(), key=lambda x: x[1], reverse=True)
+    if not entries:
+        return '<div class="empty">No protocol data yet</div>'
+    total = sum(v for _, v in entries) or 1
+    size = 160
+    cx = cy = size / 2
+    r = size / 2 - 16
+    circumference = 2 * 3.14159265 * r
+    offset = 0.0
+    segments = ''
+    legend = ''
+    for i, (label, val) in enumerate(entries):
+        frac = val / total
+        length = frac * circumference
+        color = _PALETTE[i % len(_PALETTE)]
+        segments += f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{color}" stroke-width="20" stroke-dasharray="{length:.2f} {circumference:.2f}" stroke-dashoffset="{-offset:.2f}" transform="rotate(-90 {cx} {cy})"/>'
+        offset += length
+        pct = round(frac * 100, 1)
+        clean_label = label.replace('://', '')
+        legend += f'<div class="legend-item"><span class="legend-dot" style="background:{color}"></span><span class="legend-label">{_esc(clean_label)}</span><span class="legend-val mono">{val} ({pct}%)</span></div>'
+    svg = f'<svg viewBox="0 0 {size} {size}" width="150" height="150">{segments}</svg>'
+    return f'<div class="donut-wrap"><div>{svg}</div><div class="legend-list">{legend}</div></div>'
+
+def _render_score_bars(score_buckets):
+    colors = {'90-100': '#34d399', '70-89': '#38bdf8', '50-69': '#fbbf24', '30-49': '#fb923c', '0-29': '#f87171'}
+    max_val = max(score_buckets.values()) if score_buckets.values() and max(score_buckets.values()) > 0 else 1
+    bars = ''
+    for label, val in score_buckets.items():
+        pct = (val / max_val) * 100 if max_val else 0
+        bars += f'''<div class="vbar-col">
+            <div class="vbar-track"><div class="vbar-fill" style="height:{pct:.1f}%;background:{colors[label]}"><span class="vbar-val mono">{val}</span></div></div>
+            <div class="vbar-label mono">{label}</div>
+        </div>'''
+    return f'<div class="vbar-chart">{bars}</div>'
+
+def _render_speed_bars(fastest):
+    if not fastest:
+        return '<div class="empty">No response time data yet</div>'
+    max_val = max(f['response_time'] for f in fastest) or 1
+    rows = ''
+    for f in fastest:
+        pct = (f['response_time'] / max_val) * 100 if max_val else 0
+        pct = max(pct, 4)
+        name = f['name'] if len(f['name']) <= 18 else f['name'][:17] + '…'
+        rows += f'''<div class="hbar-row">
+            <div class="hbar-label" title="{_esc(f['name'])}">{_esc(name)}</div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:{pct:.1f}%"></div></div>
+            <div class="hbar-val mono">{f['response_time']}s</div>
+        </div>'''
+    return f'<div class="hbar-chart">{rows}</div>'
+
+def _render_trend(trend):
+    if len(trend) < 2:
+        return '<div class="empty">Trend needs at least 2 runs of history. Check back after the next scheduled run.</div>'
+    width, height = 600, 180
+    n = len(trend)
+    step = width / (n - 1)
+    values = [t['avg_score'] for t in trend]
+    min_v, max_v = 0, 100
+    span = max_v - min_v or 1
+
+    def y_for(v):
+        return height - ((v - min_v) / span) * height
+
+    coords = ' '.join(f'{i*step:.1f},{y_for(v):.1f}' for i, v in enumerate(values))
+    area = f'0,{height} ' + coords + f' {width},{height}'
+    dots = ''.join(f'<circle cx="{i*step:.1f}" cy="{y_for(v):.1f}" r="3.5" fill="#38bdf8"/>' for i, v in enumerate(values))
+
+    label_count = min(n, 6)
+    label_indices = sorted(set(round(i * (n - 1) / max(1, label_count - 1)) for i in range(label_count)))
+    labels_html = ''
+    for i in label_indices:
+        try:
+            dt = datetime.fromisoformat(trend[i]['timestamp'].replace('Z', '+00:00'))
+            label = dt.strftime('%m/%d %H:%M')
+        except Exception:
+            label = ''
+        left_pct = (i * step / width) * 100
+        labels_html += f'<span class="trend-tick mono" style="left:{left_pct:.1f}%">{label}</span>'
+
+    svg = f'''<svg viewBox="0 0 {width} {height}" width="100%" height="180" preserveAspectRatio="none">
+        <polygon points="{area}" fill="rgba(56,189,248,0.12)"/>
+        <polyline points="{coords}" fill="none" stroke="#38bdf8" stroke-width="2.5"/>
+        {dots}
+    </svg>'''
+    return f'<div class="trend-chart">{svg}<div class="trend-labels">{labels_html}</div></div>'
+
 def generate_html_report(stats_data):
     data = _build_report_dataset(stats_data)
     summary = data['summary']
-    data_json = json.dumps(data, ensure_ascii=False)
 
     table_rows_html = ''
     for row in data['table_rows']:
         table_rows_html += f'''
-                        <tr class="t-row" data-name="{row['name'].lower()}" data-score="{row['score']}" data-success="{row['success_rate']}" data-response="{row['response_time']}" data-valid="{row['valid_configs']}">
+                        <tr class="t-row" data-name="{_esc(row['name'].lower())}" data-score="{row['score']}" data-success="{row['success_rate']}" data-response="{row['response_time']}" data-valid="{row['valid_configs']}">
                             <td class="c-name">
                                 <span class="dot dot-{row['status_class']}"></span>
-                                <span>{row['name']}</span>
+                                <span>{_esc(row['name'])}</span>
                             </td>
                             <td><span class="pill pill-{row['status_class']}">{row['status_label']}</span></td>
                             <td class="mono">{row['score']}%</td>
                             <td class="mono">{row['success_rate']}%</td>
                             <td class="mono">{row['response_time']}s</td>
                             <td class="mono">{row['valid_configs']}/{row['total_configs']}</td>
-                            <td class="mono muted">{row['last_success']}</td>
+                            <td class="mono muted">{_esc(row['last_success'])}</td>
                         </tr>'''
 
-    top_html = ''.join(f'<div class="perf-row"><span class="perf-name">{p["name"]}</span><span class="perf-score good-text">{p["score"]}%</span></div>' for p in data['top_performers'])
-    bottom_html = ''.join(f'<div class="perf-row"><span class="perf-name">{p["name"]}</span><span class="perf-score bad-text">{p["score"]}%</span></div>' for p in data['bottom_performers'])
+    top_html = ''.join(f'<div class="perf-row"><span class="perf-name">{_esc(p["name"])}</span><span class="perf-score good-text">{p["score"]}%</span></div>' for p in data['top_performers'])
+    bottom_html = ''.join(f'<div class="perf-row"><span class="perf-name">{_esc(p["name"])}</span><span class="perf-score bad-text">{p["score"]}%</span></div>' for p in data['bottom_performers'])
 
     gauge_score = summary['avg_score']
     gauge_circumference = 2 * 3.14159265 * 80
     gauge_offset = gauge_circumference * (1 - min(100, max(0, gauge_score)) / 100)
+
+    donut_html = _render_donut(data['protocol_totals'])
+    score_bars_html = _render_score_bars(data['score_buckets'])
+    speed_bars_html = _render_speed_bars(data['fastest'])
+    trend_html = _render_trend(data['trend'])
 
     html = f'''<!DOCTYPE html>
 <html lang="en">
@@ -205,7 +303,6 @@ def generate_html_report(stats_data):
 <title>Multi — Source Intelligence Report</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
 :root {{
     --bg: #0a0e14;
@@ -221,7 +318,8 @@ def generate_html_report(stats_data):
     --bad: #f87171;
     --radius: 14px;
 }}
-* {{ box-sizing: border-box; }}
+* {{ box-sizing: border-box; min-width: 0; }}
+html, body {{ overflow-x: hidden; width: 100%; }}
 body {{
     margin: 0;
     background: radial-gradient(circle at 15% 0%, #101a2e 0%, var(--bg) 45%);
@@ -229,7 +327,7 @@ body {{
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
 }}
-.wrap {{ max-width: 1280px; margin: 0 auto; padding: 28px 20px 60px; }}
+.wrap {{ max-width: 1280px; width: 100%; margin: 0 auto; padding: 28px 20px 60px; overflow-x: hidden; }}
 h1, h2, h3 {{ font-family: 'Space Grotesk', 'Inter', sans-serif; margin: 0; }}
 .mono {{ font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }}
 .muted {{ color: var(--muted); }}
@@ -239,7 +337,7 @@ header.top {{
 }}
 .brand {{ display: flex; align-items: center; gap: 12px; }}
 .pulse {{
-    width: 10px; height: 10px; border-radius: 50%; background: var(--good);
+    width: 10px; height: 10px; border-radius: 50%; background: var(--good); flex-shrink: 0;
     box-shadow: 0 0 0 0 rgba(52,211,153,0.6); animation: pulse 2s infinite;
 }}
 @keyframes pulse {{
@@ -249,11 +347,10 @@ header.top {{
 }}
 @media (prefers-reduced-motion: reduce) {{
     .pulse {{ animation: none; }}
-    * {{ scroll-behavior: auto !important; }}
 }}
 .brand-title {{ font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }}
-.brand-sub {{ font-size: 12.5px; color: var(--muted); margin-top: 2px; }}
-.links {{ display: flex; gap: 10px; }}
+.brand-sub {{ font-size: 12px; color: var(--muted); margin-top: 2px; word-break: break-all; }}
+.links {{ display: flex; gap: 10px; flex-shrink: 0; }}
 .links a {{
     display: flex; align-items: center; justify-content: center; width: 36px; height: 36px;
     border-radius: 10px; background: var(--surface); border: 1px solid var(--border);
@@ -263,48 +360,67 @@ header.top {{
 .links svg {{ width: 17px; height: 17px; }}
 
 .hero {{
-    display: grid; grid-template-columns: 220px 1fr; gap: 28px; align-items: center;
+    display: grid; grid-template-columns: minmax(160px, 220px) minmax(0, 1fr); gap: 24px; align-items: center;
     background: linear-gradient(150deg, var(--surface) 0%, var(--surface-2) 100%);
-    border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; margin-bottom: 24px;
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px;
 }}
 .gauge-wrap {{ display: flex; align-items: center; justify-content: center; position: relative; }}
 .gauge-num {{ position: absolute; text-align: center; }}
-.gauge-num .val {{ font-family: 'Space Grotesk', sans-serif; font-size: 34px; font-weight: 700; }}
-.gauge-num .lbl {{ font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }}
-.stat-grid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }}
-.stat-card {{ background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }}
-.stat-card .n {{ font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; }}
-.stat-card .l {{ font-size: 12px; color: var(--muted); margin-top: 4px; }}
+.gauge-num .val {{ font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700; }}
+.gauge-num .lbl {{ font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }}
+.stat-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }}
+.stat-card {{ background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 0; }}
+.stat-card .n {{ font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; overflow-wrap: break-word; }}
+.stat-card .l {{ font-size: 11.5px; color: var(--muted); margin-top: 4px; }}
 
-.grid-2 {{ display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; margin-bottom: 20px; }}
-.grid-3 {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }}
-@media (max-width: 900px) {{
-    .hero {{ grid-template-columns: 1fr; }}
-    .stat-grid {{ grid-template-columns: repeat(2, 1fr); }}
-    .grid-2, .grid-3 {{ grid-template-columns: 1fr; }}
-}}
+.grid-2 {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 20px; }}
+.grid-3 {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 20px; }}
 
 .card {{
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; min-width: 0;
 }}
 .card h3 {{ font-size: 15px; font-weight: 600; margin-bottom: 14px; }}
-.card .chart-box {{ position: relative; height: 220px; }}
 
-.perf-row {{ display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }}
+.donut-wrap {{ display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }}
+.legend-list {{ flex: 1; min-width: 140px; }}
+.legend-item {{ display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 4px 0; }}
+.legend-dot {{ width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }}
+.legend-label {{ flex: 1; color: var(--text); }}
+.legend-val {{ color: var(--muted); font-size: 11.5px; }}
+
+.vbar-chart {{ display: flex; align-items: flex-end; gap: 10px; height: 180px; }}
+.vbar-col {{ flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }}
+.vbar-track {{ flex: 1; width: 100%; display: flex; align-items: flex-end; }}
+.vbar-fill {{ width: 100%; border-radius: 5px 5px 0 0; min-height: 3px; position: relative; display: flex; justify-content: center; }}
+.vbar-val {{ position: absolute; top: -18px; font-size: 11px; color: var(--text); }}
+.vbar-label {{ font-size: 10px; color: var(--muted); margin-top: 8px; text-align: center; }}
+
+.hbar-chart {{ display: flex; flex-direction: column; gap: 10px; }}
+.hbar-row {{ display: grid; grid-template-columns: 90px 1fr 48px; align-items: center; gap: 8px; }}
+.hbar-label {{ font-size: 11.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
+.hbar-track {{ background: var(--surface-2); border-radius: 5px; height: 10px; overflow: hidden; }}
+.hbar-fill {{ background: var(--accent); height: 100%; border-radius: 5px; }}
+.hbar-val {{ font-size: 11px; text-align: right; color: var(--text); }}
+
+.trend-chart {{ width: 100%; }}
+.trend-labels {{ position: relative; height: 16px; margin-top: 4px; }}
+.trend-tick {{ position: absolute; font-size: 9.5px; color: var(--muted); transform: translateX(-50%); white-space: nowrap; }}
+
+.perf-row {{ display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; gap: 10px; }}
 .perf-row:last-child {{ border-bottom: none; }}
-.perf-name {{ color: var(--text); }}
-.good-text {{ color: var(--good); font-family: 'JetBrains Mono', monospace; }}
-.bad-text {{ color: var(--bad); font-family: 'JetBrains Mono', monospace; }}
+.perf-name {{ color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
+.good-text {{ color: var(--good); font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }}
+.bad-text {{ color: var(--bad); font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }}
 
-.table-card {{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }}
+.table-card {{ background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; max-width: 100%; }}
 .table-top {{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }}
 #search {{
     background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
-    padding: 9px 14px; border-radius: 8px; font-size: 13.5px; width: 260px; outline: none;
+    padding: 9px 14px; border-radius: 8px; font-size: 13.5px; width: 100%; max-width: 260px; outline: none;
 }}
 #search:focus {{ border-color: var(--accent); }}
-.table-scroll {{ overflow-x: auto; }}
-table {{ width: 100%; border-collapse: collapse; font-size: 13.5px; }}
+.table-scroll {{ overflow-x: auto; max-width: 100%; -webkit-overflow-scrolling: touch; }}
+table {{ width: 100%; min-width: 640px; border-collapse: collapse; font-size: 13.5px; }}
 th {{
     text-align: left; padding: 10px 12px; color: var(--muted); font-weight: 600; font-size: 11.5px;
     text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
@@ -329,7 +445,12 @@ td {{ padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: n
 
 footer {{ margin-top: 32px; text-align: center; color: var(--muted); font-size: 12.5px; }}
 footer a {{ color: var(--accent); text-decoration: none; }}
-.empty {{ text-align: center; padding: 60px 20px; color: var(--muted); }}
+.empty {{ text-align: center; padding: 40px 20px; color: var(--muted); font-size: 12.5px; }}
+
+@media (max-width: 640px) {{
+    .hero {{ grid-template-columns: 1fr; }}
+    .gauge-wrap svg {{ width: 150px; height: 150px; }}
+}}
 </style>
 </head>
 <body>
@@ -364,7 +485,7 @@ footer a {{ color: var(--accent); text-decoration: none; }}
             </div>
         </div>
         <div class="stat-grid">
-            <div class="stat-card"><div class="n">{summary['active_channels']}<span class="muted" style="font-size:15px"> / {summary['total_channels']}</span></div><div class="l">Active Sources</div></div>
+            <div class="stat-card"><div class="n">{summary['active_channels']}<span class="muted" style="font-size:14px"> / {summary['total_channels']}</span></div><div class="l">Active Sources</div></div>
             <div class="stat-card"><div class="n mono">{summary['total_valid_configs']}</div><div class="l">Valid Configs Fetched</div></div>
             <div class="stat-card"><div class="n mono">{summary['total_unique_configs']}</div><div class="l">Unique Configs</div></div>
             <div class="stat-card"><div class="n mono">{summary['avg_response_time']}s</div><div class="l">Avg Response Time</div></div>
@@ -374,23 +495,23 @@ footer a {{ color: var(--accent); text-decoration: none; }}
     <div class="grid-3">
         <div class="card">
             <h3>Protocol Distribution</h3>
-            <div class="chart-box"><canvas id="chart-protocol"></canvas></div>
+            {donut_html}
         </div>
         <div class="card">
             <h3>Source Health Distribution</h3>
-            <div class="chart-box"><canvas id="chart-score"></canvas></div>
+            {score_bars_html}
             <div class="legend-note">Sources scoring under 30% are auto-disabled by the pipeline.</div>
         </div>
         <div class="card">
             <h3>Fastest Sources (avg response)</h3>
-            <div class="chart-box"><canvas id="chart-speed"></canvas></div>
+            {speed_bars_html}
         </div>
     </div>
 
     <div class="grid-2">
         <div class="card">
             <h3>Health Score Trend</h3>
-            <div class="chart-box" id="trend-box"><canvas id="chart-trend"></canvas></div>
+            {trend_html}
         </div>
         <div class="card">
             <h3>Top &amp; Bottom Performers</h3>
@@ -428,8 +549,6 @@ footer a {{ color: var(--accent); text-decoration: none; }}
     </footer>
 </div>
 <script>
-const REPORT_DATA = {data_json};
-
 (function() {{
     const ring = document.getElementById('gauge-ring');
     const valueEl = document.getElementById('gauge-value');
@@ -448,115 +567,42 @@ const REPORT_DATA = {data_json};
     requestAnimationFrame(frame);
 }})();
 
-Chart.defaults.color = '#8b96ab';
-Chart.defaults.font.family = "'Inter', sans-serif";
-Chart.defaults.borderColor = '#232d40';
-
-const protoEntries = Object.entries(REPORT_DATA.protocol_totals).sort((a,b) => b[1]-a[1]);
-new Chart(document.getElementById('chart-protocol'), {{
-    type: 'doughnut',
-    data: {{
-        labels: protoEntries.map(e => e[0].replace('://','')),
-        datasets: [{{
-            data: protoEntries.map(e => e[1]),
-            backgroundColor: ['#38bdf8','#34d399','#fbbf24','#fb923c','#f87171','#a78bfa','#f472b6'],
-            borderColor: '#121826',
-            borderWidth: 2
-        }}]
-    }},
-    options: {{ maintainAspectRatio: false, plugins: {{ legend: {{ position: 'bottom', labels: {{ boxWidth: 10, padding: 10, font: {{ size: 11 }} }} }} }} }}
-}});
-
-const buckets = REPORT_DATA.score_buckets;
-new Chart(document.getElementById('chart-score'), {{
-    type: 'bar',
-    data: {{
-        labels: Object.keys(buckets),
-        datasets: [{{
-            data: Object.values(buckets),
-            backgroundColor: ['#34d399','#38bdf8','#fbbf24','#fb923c','#f87171'],
-            borderRadius: 6,
-            maxBarThickness: 34
-        }}]
-    }},
-    options: {{ maintainAspectRatio: false, plugins: {{ legend: {{ display: false }} }}, scales: {{ y: {{ beginAtZero: true, ticks: {{ precision: 0 }}, grid: {{ color: '#1a2233' }} }}, x: {{ grid: {{ display: false }} }} }} }}
-}});
-
-const fastest = REPORT_DATA.fastest;
-new Chart(document.getElementById('chart-speed'), {{
-    type: 'bar',
-    data: {{
-        labels: fastest.map(f => f.name.length > 16 ? f.name.slice(0,16)+'…' : f.name),
-        datasets: [{{
-            data: fastest.map(f => f.response_time),
-            backgroundColor: '#38bdf8',
-            borderRadius: 6,
-            maxBarThickness: 16
-        }}]
-    }},
-    options: {{
-        indexAxis: 'y', maintainAspectRatio: false, plugins: {{ legend: {{ display: false }} }},
-        scales: {{ x: {{ grid: {{ color: '#1a2233' }} }}, y: {{ grid: {{ display: false }}, ticks: {{ font: {{ size: 10.5 }} }} }} }}
-    }}
-}});
-
-const trend = REPORT_DATA.trend;
-if (trend.length >= 2) {{
-    new Chart(document.getElementById('chart-trend'), {{
-        type: 'line',
-        data: {{
-            labels: trend.map(t => new Date(t.timestamp).toLocaleString(undefined, {{month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}})),
-            datasets: [
-                {{ label: 'Avg Score', data: trend.map(t => t.avg_score), borderColor: '#38bdf8', backgroundColor: 'rgba(56,189,248,0.12)', fill: true, tension: 0.35, yAxisID: 'y' }},
-                {{ label: 'Valid Configs', data: trend.map(t => t.total_valid_configs), borderColor: '#34d399', backgroundColor: 'transparent', tension: 0.35, yAxisID: 'y1' }}
-            ]
-        }},
-        options: {{
-            maintainAspectRatio: false,
-            plugins: {{ legend: {{ position: 'bottom', labels: {{ boxWidth: 10, font: {{ size: 11 }} }} }} }},
-            scales: {{
-                y: {{ position: 'left', grid: {{ color: '#1a2233' }} }},
-                y1: {{ position: 'right', grid: {{ display: false }} }},
-                x: {{ grid: {{ display: false }}, ticks: {{ maxRotation: 0, font: {{ size: 10 }} }} }}
-            }}
-        }}
-    }});
-}} else {{
-    document.getElementById('trend-box').innerHTML = '<div class="empty">Trend needs at least 2 runs of history. Check back after the next scheduled run.</div>';
-}}
-
-const table = document.getElementById('main-table');
-const tbody = table.querySelector('tbody');
-const searchInput = document.getElementById('search');
-searchInput.addEventListener('input', () => {{
-    const q = searchInput.value.toLowerCase();
-    tbody.querySelectorAll('.t-row').forEach(row => {{
-        row.style.display = row.dataset.name.includes(q) ? '' : 'none';
-    }});
-}});
-
-let currentSort = {{ key: 'score', asc: false }};
-table.querySelectorAll('th[data-key]').forEach(th => {{
-    th.addEventListener('click', () => {{
-        const key = th.dataset.key;
-        const asc = currentSort.key === key ? !currentSort.asc : false;
-        currentSort = {{ key, asc }};
-        table.querySelectorAll('th[data-key]').forEach(h => h.classList.remove('sorted','asc'));
-        th.classList.add('sorted');
-        if (asc) th.classList.add('asc');
-        const rows = Array.from(tbody.querySelectorAll('.t-row'));
-        const attrMap = {{ name: 'name', status_class: 'name', score: 'score', success: 'success', response: 'response', valid: 'valid' }};
-        rows.sort((a, b) => {{
-            const attr = attrMap[key] || key;
-            let av = a.dataset[attr], bv = b.dataset[attr];
-            if (!isNaN(parseFloat(av)) && key !== 'name') {{ av = parseFloat(av); bv = parseFloat(bv); }}
-            if (av < bv) return asc ? -1 : 1;
-            if (av > bv) return asc ? 1 : -1;
-            return 0;
+(function() {{
+    const table = document.getElementById('main-table');
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    const searchInput = document.getElementById('search');
+    if (searchInput) {{
+        searchInput.addEventListener('input', () => {{
+            const q = searchInput.value.toLowerCase();
+            tbody.querySelectorAll('.t-row').forEach(row => {{
+                row.style.display = row.dataset.name.includes(q) ? '' : 'none';
+            }});
         }});
-        rows.forEach(r => tbody.appendChild(r));
+    }}
+    let currentSort = {{ key: 'score', asc: false }};
+    table.querySelectorAll('th[data-key]').forEach(th => {{
+        th.addEventListener('click', () => {{
+            const key = th.dataset.key;
+            const asc = currentSort.key === key ? !currentSort.asc : false;
+            currentSort = {{ key, asc }};
+            table.querySelectorAll('th[data-key]').forEach(h => h.classList.remove('sorted','asc'));
+            th.classList.add('sorted');
+            if (asc) th.classList.add('asc');
+            const rows = Array.from(tbody.querySelectorAll('.t-row'));
+            const attrMap = {{ name: 'name', status_class: 'name', score: 'score', success: 'success', response: 'response', valid: 'valid' }};
+            rows.sort((a, b) => {{
+                const attr = attrMap[key] || key;
+                let av = a.dataset[attr], bv = b.dataset[attr];
+                if (!isNaN(parseFloat(av)) && key !== 'name') {{ av = parseFloat(av); bv = parseFloat(bv); }}
+                if (av < bv) return asc ? -1 : 1;
+                if (av > bv) return asc ? 1 : -1;
+                return 0;
+            }});
+            rows.forEach(r => tbody.appendChild(r));
+        }});
     }});
-}});
+}})();
 </script>
 </body>
 </html>'''
