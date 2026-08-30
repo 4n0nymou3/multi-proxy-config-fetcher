@@ -120,12 +120,12 @@ Sources scoring below 30% are automatically disabled to maintain system quality.
 #### Fork and Customize
 
 1. Fork this repository
-2. Edit `src/user_settings.py` to configure:
+2. Edit `settings/user_settings.py` to configure:
    - Source URLs (Telegram channels, SSCONF links, etc.)
    - Enabled protocols
    - Testing parameters
    - Geolocation API preferences
-3. Edit `src/fragment_settings.py` if you want to customize the advanced TLS fragmentation used in the Fragment endpoint
+3. Edit `settings/fragment_settings.py` if you want to customize the advanced TLS fragmentation used in the Fragment endpoint
 4. Enable GitHub Actions in your forked repository
 5. Configurations will auto-update automatically on the project's schedule
 
@@ -142,7 +142,7 @@ Sources scoring below 30% are automatically disabled to maintain system quality.
 
 ## ⚙️ Configuration Options
 
-### `src/user_settings.py`
+### `settings/user_settings.py`
 
 ```python
 # Source URLs
@@ -203,7 +203,7 @@ LOCATION_APIS = [
 
 Turning either tester off (`ENABLE_SINGBOX_TESTER = False` or `ENABLE_XRAY_TESTER = False`) skips that connectivity check entirely for that run - the previous file for that stage is simply copied through unchanged. This speeds up the workflow, but note that the Sing-box, Clash, and Xray Secure outputs all depend on the Sing-box test stage, so turning it off reduces their reliability even though the plain Xray and Xray Fragment outputs stay unaffected.
 
-### `src/fragment_settings.py`
+### `settings/fragment_settings.py`
 
 ```python
 FRAGMENT_ENABLED = True
