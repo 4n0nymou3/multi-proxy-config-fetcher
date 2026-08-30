@@ -63,38 +63,6 @@
       "settings": {
         "vnext": [
           {
-            "address": "89.248.193.115",
-            "port": 52006,
-            "users": [
-              {
-                "id": "009a2cdd-5a85-07d0-8d11-d26ed3207707",
-                "flow": "xtls-rprx-vision",
-                "encryption": "none",
-                "level": 8
-              }
-            ]
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "tcp",
-        "security": "tls",
-        "tlsSettings": {
-          "serverName": "sliver-sosi-hui.fastaichat.ru",
-          "fingerprint": "qq",
-          "alpn": [
-            "h2",
-            "http/1.1"
-          ]
-        }
-      }
-    },
-    {
-      "tag": "proxy-2",
-      "protocol": "vless",
-      "settings": {
-        "vnext": [
-          {
             "address": "31.58.181.88",
             "port": 8443,
             "users": [
@@ -116,6 +84,43 @@
           "publicKey": "AERbWB2uslqIzm1hSlOZZEH3Y9qg_zlWRRyLfh97kXc",
           "shortId": "",
           "fingerprint": "firefox"
+        }
+      }
+    },
+    {
+      "tag": "proxy-2",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [
+          {
+            "address": "94.156.232.254",
+            "port": 443,
+            "users": [
+              {
+                "id": "03c48eca-e0aa-4e18-998c-1f53f1de293c",
+                "flow": "",
+                "encryption": "none",
+                "level": 8
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "tls",
+        "wsSettings": {
+          "path": "/cdn/v3/live",
+          "headers": {
+            "Host": "cf6.rumedia-cdn.com"
+          }
+        },
+        "tlsSettings": {
+          "serverName": "cf6.rumedia-cdn.com",
+          "fingerprint": "chrome",
+          "alpn": [
+            "http/1.1"
+          ]
         }
       }
     },
