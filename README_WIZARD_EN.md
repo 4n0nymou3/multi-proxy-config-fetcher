@@ -307,7 +307,7 @@ launchctl load ~/Library/LaunchAgents/com.anonymous.multiproxy.plist
 
 ## 🎛️ Customizing Sources and Settings
 
-Edit `src/user_settings.py` to control what the fetcher does:
+Edit `settings/user_settings.py` to control what the fetcher does:
 
 ```python
 SOURCE_URLS = [
@@ -333,7 +333,7 @@ After editing, just run `bash run.sh` again (or wait for the next scheduled run)
 
 ## 🧩 Customizing the Fragment Endpoint
 
-`xray_fragment_loadbalanced_config.json` applies an advanced, two-stage TLS ClientHello fragmentation to every config, which can help against DPI-based filtering. All of its parameters live in `src/fragment_settings.py`:
+`xray_fragment_loadbalanced_config.json` applies an advanced, two-stage TLS ClientHello fragmentation to every config, which can help against DPI-based filtering. All of its parameters live in `settings/fragment_settings.py`:
 
 ```python
 FRAGMENT_ENABLED = True
@@ -427,10 +427,10 @@ Anything with a `_tested` or `_secure` suffix has passed the health tests. For t
 Every 12 hours by default on Linux/Termux, or twice daily (08:00/20:00) on macOS. See [Scheduling](#-scheduling) to change this.
 
 **Q: How many configs does the system fetch?**
-Depends on `USE_MAXIMUM_POWER` in `src/user_settings.py`. With `True`, it fetches the maximum available from your configured sources.
+Depends on `USE_MAXIMUM_POWER` in `settings/user_settings.py`. With `True`, it fetches the maximum available from your configured sources.
 
 **Q: Can I add my own sources?**
-Yes — add them to `SOURCE_URLS` in `src/user_settings.py` (see [Customizing Sources and Settings](#-customizing-sources-and-settings)).
+Yes — add them to `SOURCE_URLS` in `settings/user_settings.py` (see [Customizing Sources and Settings](#-customizing-sources-and-settings)).
 
 **Q: Does this work on older Android phones?**
 Yes, it's been tested on Android 7+. You need Termux installed from **F-Droid**, not the Google Play Store (the Play Store build is outdated and unsupported by the Termux project itself).
