@@ -15,8 +15,8 @@ SOURCE_URLS = [
     "https://raw.githubusercontent.com/Mahdi0024/ProxyCollector/master/sub/proxies.txt",
     "https://raw.githubusercontent.com/zieng2/wl/refs/heads/main/vless_universal.txt",
     "https://raw.githubusercontent.com/iampedii/whitedns-sub/refs/heads/main/base64.txt",
-    #"https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/verified/configs.txt",
-    #"https://raw.githubusercontent.com/itsyebekhe/PSG/main/subscriptions/xray/mix",
+    "https://raw.githubusercontent.com/0xRadikal/Free-v2ray-Configs/main/verified/configs.txt",
+    "https://raw.githubusercontent.com/itsyebekhe/PSG/main/subscriptions/xray/mix",
     "https://github.com/Delta-Kronecker/V2ray-Config/raw/refs/heads/main/config/all_configs.txt",
     #"https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_RAW.txt",
     "https://raw.githubusercontent.com/Ashkan-m/v2ray/main/Sub.txt",
@@ -31,7 +31,7 @@ USE_MAXIMUM_POWER = False
 
 # Desired number of configurations to fetch.
 # This is used only if USE_MAXIMUM_POWER is False.
-SPECIFIC_CONFIG_COUNT = 600
+SPECIFIC_CONFIG_COUNT = 200
 
 # Dictionary of protocols to enable or disable.
 # Set each protocol to True to enable, False to disable.
