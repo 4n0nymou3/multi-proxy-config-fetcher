@@ -307,7 +307,7 @@ launchctl load ~/Library/LaunchAgents/com.anonymous.multiproxy.plist
 
 ## 🎛️ 自定义来源与设置
 
-编辑 `src/user_settings.py` 来控制抓取器的行为：
+编辑 `settings/user_settings.py` 来控制抓取器的行为：
 
 ```python
 SOURCE_URLS = [
@@ -333,7 +333,7 @@ ENABLED_PROTOCOLS = {
 
 ## 🧩 自定义 Fragment 端点
 
-`xray_fragment_loadbalanced_config.json` 会对每个配置应用一种高级的两阶段 TLS ClientHello 分片机制，有助于对抗基于 DPI 的过滤。它的所有参数都保存在 `src/fragment_settings.py` 中：
+`xray_fragment_loadbalanced_config.json` 会对每个配置应用一种高级的两阶段 TLS ClientHello 分片机制，有助于对抗基于 DPI 的过滤。它的所有参数都保存在 `settings/fragment_settings.py` 中：
 
 ```python
 FRAGMENT_ENABLED = True
@@ -427,10 +427,10 @@ sv status multiproxy
 Linux/Termux 默认每 12 小时更新一次，macOS 上为每天两次（08:00/20:00）。修改方式见 [自动运行的时间表](#-自动运行的时间表)。
 
 **问：系统会抓取多少配置？**
-取决于 `src/user_settings.py` 中的 `USE_MAXIMUM_POWER`。设为 `True` 时，会从你配置的来源中尽可能多地抓取。
+取决于 `settings/user_settings.py` 中的 `USE_MAXIMUM_POWER`。设为 `True` 时，会从你配置的来源中尽可能多地抓取。
 
 **问：我可以添加自己的来源吗？**
-可以 —— 将它们添加到 `src/user_settings.py` 中的 `SOURCE_URLS`（见 [自定义来源与设置](#-自定义来源与设置)）。
+可以 —— 将它们添加到 `settings/user_settings.py` 中的 `SOURCE_URLS`（见 [自定义来源与设置](#-自定义来源与设置)）。
 
 **问：老款 Android 手机能用吗？**
 可以，已在 Android 7+ 上测试通过。你需要从 **F-Droid** 安装 Termux，而不是 Google Play（Play 商店版本已过时，且 Termux 团队本身也不再支持它）。
