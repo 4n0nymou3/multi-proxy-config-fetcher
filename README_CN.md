@@ -120,12 +120,12 @@ Web 界面提供：
 #### Fork 与定制
 
 1. Fork 本仓库  
-2. 编辑 `src/user_settings.py` 配置：
+2. 编辑 `settings/user_settings.py` 配置：
    - 源 URL（Telegram 频道、SSCONF 链接等）
    - 启用的协议
    - 测试参数
    - 地理定位 API 优先级
-3. 如需自定义 Fragment 端点使用的高级 TLS 分片，可编辑 `src/fragment_settings.py`
+3. 如需自定义 Fragment 端点使用的高级 TLS 分片，可编辑 `settings/fragment_settings.py`
 4. 在你的 fork 中启用 GitHub Actions  
 5. 配置将按照项目的计划自动更新
 
@@ -142,7 +142,7 @@ Web 界面提供：
 
 ## ⚙️ 配置选项
 
-### `src/user_settings.py`
+### `settings/user_settings.py`
 
 ```python
 # Source URLs
@@ -203,7 +203,7 @@ LOCATION_APIS = [
 
 关闭任意一个测试器（`ENABLE_SINGBOX_TESTER = False` 或 `ENABLE_XRAY_TESTER = False`）会使该次运行完全跳过对应阶段的连接检测——上一阶段的文件会被原样复制过去。这样可以加快流水线速度，但请注意，Sing-box、Clash 以及 Xray 安全版这几个输出都依赖 Sing-box 测试阶段，关闭它会降低这些输出的可靠性；而普通的 Xray 与 Xray Fragment 输出不受影响。
 
-### `src/fragment_settings.py`
+### `settings/fragment_settings.py`
 
 ```python
 FRAGMENT_ENABLED = True
