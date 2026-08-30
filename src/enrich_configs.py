@@ -9,6 +9,7 @@ import time
 from typing import Dict, Optional, Tuple, List
 from urllib.parse import urlparse, parse_qs
 from collections import OrderedDict
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'settings'))
 from user_settings import LOCATION_APIS
 import config_parser as parser
 
