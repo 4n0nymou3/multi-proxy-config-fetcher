@@ -1,10 +1,12 @@
 import json
 import os
+import sys
 import logging
 from typing import Dict, Optional, List
 import config_parser as parser
 import transport_builder
 import xray_template
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'settings'))
 from fragment_settings import (
     FRAGMENT_ENABLED, FRAGMENT_STAGE_1, FRAGMENT_STAGE_2_ENABLED, FRAGMENT_STAGE_2,
     FRAGMENT_TLS_FINGERPRINT, FRAGMENT_TLS_CIPHER_SUITES
