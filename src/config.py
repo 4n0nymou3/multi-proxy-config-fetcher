@@ -1,11 +1,14 @@
 from typing import Dict, List, Optional
 from datetime import datetime
 import re
+import os
+import sys
 from urllib.parse import urlparse
 from dataclasses import dataclass
 import logging
 from math import inf
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'settings'))
 from user_settings import (
     SOURCE_URLS, USE_MAXIMUM_POWER, SPECIFIC_CONFIG_COUNT, ENABLED_PROTOCOLS,
     MAX_CONFIG_AGE_DAYS, ENABLE_SINGBOX_TESTER, SINGBOX_TESTER_MAX_WORKERS,
