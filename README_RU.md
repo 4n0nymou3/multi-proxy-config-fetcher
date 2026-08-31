@@ -180,6 +180,7 @@ SINGBOX_TESTER_URLS = [
     'https://cp.cloudflare.com'
 ]
 SINGBOX_TESTER_ROUNDS = 2
+SINGBOX_TESTER_BATCH_SIZE = 200
 
 # Xray Testing
 ENABLE_XRAY_TESTER = True
@@ -191,6 +192,7 @@ XRAY_TESTER_URLS = [
     'https://cp.cloudflare.com'
 ]
 XRAY_TESTER_ROUNDS = 2
+XRAY_TESTER_BATCH_SIZE = 200
 
 # Geolocation APIs (in priority order)
 LOCATION_APIS = [
@@ -341,6 +343,17 @@ FRAGMENT_TLS_CIPHER_SUITES = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA25
   - Анализом времени ответа
   - Историческими трендами
 - **Сводка по запуску пайплайна** — количество конфигураций на каждом этапе и в каждом выходном файле прямо на странице каждого запуска GitHub Actions
+
+## 🧪 Тестирование
+
+Папка `tests/` содержит набор автоматических тестов, покрывающих логику парсинга, безопасности и пакетного (batch) тестирования. Они автоматически запускаются при каждом push и pull request через `.github/workflows/tests.yml` и полностью отделены от запланированного workflow сбора конфигураций, поэтому никак не влияют на обычные автоматические запуски и не замедляют их.
+
+Локальный запуск:
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest tests/ -v
+```
 
 ## 🤝 Вклад в проект
 
