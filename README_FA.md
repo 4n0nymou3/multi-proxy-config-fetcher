@@ -180,6 +180,7 @@ SINGBOX_TESTER_URLS = [
     'https://cp.cloudflare.com'
 ]
 SINGBOX_TESTER_ROUNDS = 2
+SINGBOX_TESTER_BATCH_SIZE = 200
 
 # Xray Testing
 ENABLE_XRAY_TESTER = True
@@ -191,6 +192,7 @@ XRAY_TESTER_URLS = [
     'https://cp.cloudflare.com'
 ]
 XRAY_TESTER_ROUNDS = 2
+XRAY_TESTER_BATCH_SIZE = 200
 
 # Geolocation APIs (in priority order)
 LOCATION_APIS = [
@@ -341,6 +343,17 @@ FRAGMENT_TLS_CIPHER_SUITES = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA25
   - تحلیل زمان پاسخ
   - روندهای تاریخی
 - **خلاصه‌ی اجرای پایپ‌لاین** — تعداد کانفیگ در هر مرحله و هر فایل خروجی، مستقیم روی صفحه‌ی هر اجرای GitHub Actions
+
+## 🧪 تست‌ها
+
+پوشه‌ی `tests/` شامل مجموعه‌ای از تست‌های خودکار است که منطق تجزیه، امنیت و تست‌های دسته‌ای (batch) را بررسی می‌کند. این تست‌ها به‌طور خودکار در هر push و pull request از طریق `.github/workflows/tests.yml` اجرا می‌شوند و کاملاً جدا از جریان کاری زمان‌بندی‌شده‌ی دریافت کانفیگ هستند، پس هیچ تأثیری روی اجراهای خودکار معمول ندارند و آن‌ها را کند نمی‌کنند.
+
+برای اجرای محلی:
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest tests/ -v
+```
 
 ## 🤝 مشارکت
 
