@@ -208,6 +208,14 @@ jobs:
         run: python src/xray_config_tester.py configs/proxy_configs.txt configs/proxy_configs_tested.txt
         continue-on-error: true
       
+      # ENABLE THIS STEP to make the Hiddify default subscription link (proxy_configs.txt) serve
+      # Xray-tested configs instead of raw untested ones, by overwriting proxy_configs.txt with
+      # the contents of proxy_configs_tested.txt after testing completes.
+      # To enable: remove the '#' from the start of the next two lines.
+      # To disable again: put the '#' back at the start of the next two lines.
+      - name: Replace raw configs with tested configs for default subscription link
+        run: cp configs/proxy_configs_tested.txt configs/proxy_configs.txt
+      
       - name: Convert configs to sing-box format
         run: python src/config_to_singbox.py
       
