@@ -1,6 +1,5 @@
 import os
 import json
-import subprocess
 import tempfile
 import logging
 from typing import List, Dict, Optional, Tuple
@@ -17,16 +16,17 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
-class XrayTester:
-    def __init__(self, xray_path: str = 'xray', timeout: int = 10, test_urls: List[str] = None):
+class XrayBatchTester:
+    def __init__(self, xray_path: str = 'xray', timeout: int = 10, test_url: str = None, concurrency: int = 16):
         self.xray_path = xray_path
         self.timeout = timeout
-        initial_urls = test_urls if test_urls else ['https://www.youtube.com/generate_204']
-        self.test_url = initial_urls[0]
+        self.test_url = test_url if test_url else 'https://www.youtube.com/generate_204'
+        self.concurrency = max(1, concurrency)
         self.unsupported_protocols = ['tuic://', 'wireguard://']
         self._verify_xray()
-    
+
     def _verify_xray(self):
+        import subprocess
         try:
             result = subprocess.run(
                 [self.xray_path, 'version'],
@@ -39,23 +39,24 @@ class XrayTester:
             raise RuntimeError(f"xray not found at: {self.xray_path}")
         except Exception as e:
             raise RuntimeError(f"xray verification error: {e}")
-        
+
     def is_supported_protocol(self, config_str: str) -> bool:
         config_lower = config_str.lower()
         for protocol in self.unsupported_protocols:
             if config_lower.startswith(protocol):
                 return False
         return True
-        
+
     def parse_config_string(self, config_str: str) -> Optional[Dict]:
         try:
             config_lower = config_str.lower()
             data = None
             outbound = None
-            
+
             if config_lower.startswith('vmess://'):
                 data = parser.decode_vmess(config_str)
-                if not data: return None
+                if not data:
+                    return None
                 outbound = {
                     "protocol": "vmess",
                     "settings": {
@@ -71,10 +72,11 @@ class XrayTester:
                     },
                     "streamSettings": transport_builder.build_xray_settings(data)
                 }
-            
+
             elif config_lower.startswith('vless://'):
                 data = parser.parse_vless(config_str)
-                if not data: return None
+                if not data:
+                    return None
                 outbound = {
                     "protocol": "vless",
                     "settings": {
@@ -90,10 +92,11 @@ class XrayTester:
                     },
                     "streamSettings": transport_builder.build_xray_settings(data)
                 }
-                
+
             elif config_lower.startswith('trojan://'):
                 data = parser.parse_trojan(config_str)
-                if not data: return None
+                if not data:
+                    return None
                 outbound = {
                     "protocol": "trojan",
                     "settings": {
@@ -105,10 +108,11 @@ class XrayTester:
                     },
                     "streamSettings": transport_builder.build_xray_settings(data)
                 }
-                
+
             elif config_lower.startswith('ss://'):
                 data = parser.parse_shadowsocks(config_str)
-                if not data: return None
+                if not data:
+                    return None
                 outbound = {
                     "protocol": "shadowsocks",
                     "settings": {
@@ -120,180 +124,178 @@ class XrayTester:
                         }]
                     }
                 }
-            
+
             return outbound
-            
+
         except Exception as e:
             logger.debug(f"Failed to parse config: {str(e)}")
             return None
-    
-    def create_xray_config(self, outbound: Dict, socks_port: int, http_port: int) -> Dict:
+
+    def build_batch_config(self, items: List[Tuple[int, int, Dict]]) -> Dict:
+        inbounds = []
+        outbounds = []
+        rules = []
+        for tag_id, port, outbound in items:
+            inbounds.append({
+                "port": port,
+                "listen": "127.0.0.1",
+                "protocol": "http",
+                "tag": f"in-{tag_id}"
+            })
+            ob = dict(outbound)
+            ob["tag"] = f"out-{tag_id}"
+            outbounds.append(ob)
+            rules.append({
+                "type": "field",
+                "inboundTag": [f"in-{tag_id}"],
+                "outboundTag": f"out-{tag_id}"
+            })
         return {
-            "log": {
-                "loglevel": "error"
-            },
-            "inbounds": [
-                {
-                    "port": socks_port,
-                    "protocol": "socks",
-                    "settings": {
-                        "auth": "noauth",
-                        "udp": False
-                    }
-                },
-                {
-                    "port": http_port,
-                    "protocol": "http"
-                }
-            ],
-            "outbounds": [outbound]
+            "log": {"loglevel": "error"},
+            "inbounds": inbounds,
+            "outbounds": outbounds,
+            "routing": {"rules": rules}
         }
-    
-    def test_config(self, config_str: str) -> Tuple[bool, Optional[int], str]:
-        if not self.is_supported_protocol(config_str):
-            protocol = config_str.split('://')[0].upper()
-            logger.info(f"⊘ Skipping {protocol} (not supported by Xray core)")
-            return True, 0, config_str
-        
-        config_file = None
-        
+
+    def _test_one(self, port: int, config_str: str) -> Tuple[str, bool, Optional[int]]:
+        proxies = {
+            'http': f'http://127.0.0.1:{port}',
+            'https': f'http://127.0.0.1:{port}'
+        }
+        session = requests.Session()
+        session.proxies.update(proxies)
+        start_time = time.time()
         try:
-            outbound = self.parse_config_string(config_str)
-            if not outbound:
-                logger.warning(f"✗ Failed to parse config")
-                return False, None, config_str
-            
-            socks_port = find_free_port()
-            http_port = find_free_port()
-            
-            xray_config = self.create_xray_config(outbound, socks_port, http_port)
-            
-            fd, config_file = tempfile.mkstemp(suffix='.json', text=True, prefix='xray_')
+            response = session.get(self.test_url, timeout=self.timeout)
+            delay = int((time.time() - start_time) * 1000)
+            if response.status_code in (200, 204):
+                return config_str, True, delay
+            return config_str, False, None
+        except Exception:
+            return config_str, False, None
+
+    def run_batch(self, entries: List[Tuple[str, Dict]]) -> Dict[str, Tuple[bool, Optional[int]]]:
+        results: Dict[str, Tuple[bool, Optional[int]]] = {}
+        if not entries:
+            return results
+
+        prepared = []
+        for tag_id, (config_str, outbound) in enumerate(entries):
             try:
-                with os.fdopen(fd, 'w') as f:
-                    json.dump(xray_config, f, indent=2)
+                port = find_free_port()
             except Exception as e:
-                os.close(fd)
-                raise
-            
-            with managed_process(
-                [self.xray_path, 'run', '-c', config_file]
-            ) as process:
-                if not wait_for_port(process, http_port, max_wait=3.0):
-                    stderr = process.stderr.read().decode('utf-8', errors='ignore') if process.stderr else ''
-                    logger.warning(f"✗ Process crashed or never started listening: {stderr[:200]}")
-                    return False, None, config_str
-                
-                proxies = {
-                    'http': f'http://127.0.0.1:{http_port}',
-                    'https': f'http://127.0.0.1:{http_port}'
-                }
-                
-                session = requests.Session()
-                session.proxies.update(proxies)
-                
-                url = self.test_url
-                domain = url.split('/')[2] if '/' in url[8:] else 'unknown'
-                start_time = time.time()
-                try:
-                    response = session.get(
-                        url,
-                        timeout=self.timeout
-                    )
-                    delay = int((time.time() - start_time) * 1000)
-                    
-                    if response.status_code in [200, 204]:
-                        logger.info(f"✓ OK ({delay}ms via {domain})")
-                        return True, delay, config_str
-                    else:
-                        logger.warning(f"✗ HTTP {response.status_code} on {domain}")
-                        return False, None, config_str
-                        
-                except requests.exceptions.ProxyError as e:
-                    logger.warning(f"✗ Proxy error: {str(e)[:100]}")
-                    return False, None, config_str
-                except requests.exceptions.Timeout:
-                    logger.warning(f"✗ Timeout on {domain}")
-                    return False, None, config_str
-                except requests.exceptions.ConnectionError as e:
-                    logger.warning(f"✗ Connection error on {domain}: {str(e)[:100]}")
-                    return False, None, config_str
-                except Exception as e:
-                    logger.warning(f"✗ {type(e).__name__} on {domain}: {str(e)[:100]}")
-                    return False, None, config_str
-                
+                logger.error(f"Port allocation failed: {e}")
+                results[config_str] = (False, None)
+                continue
+            prepared.append((tag_id, port, outbound, config_str))
+
+        if not prepared:
+            return results
+
+        batch_config = self.build_batch_config([(t, p, o) for t, p, o, _ in prepared])
+
+        fd, config_file = tempfile.mkstemp(suffix='.json', text=True, prefix='xray_batch_')
+        try:
+            with os.fdopen(fd, 'w') as f:
+                json.dump(batch_config, f)
         except Exception as e:
-            logger.error(f"✗ Setup error: {str(e)}")
-            return False, None, config_str
-            
+            os.close(fd)
+            logger.error(f"Failed to write batch config: {e}")
+            for _, _, _, cs in prepared:
+                results[cs] = (False, None)
+            return results
+
+        try:
+            with managed_process([self.xray_path, 'run', '-c', config_file]) as process:
+                probe_port = prepared[0][1]
+                if not wait_for_port(process, probe_port, max_wait=5.0):
+                    stderr = process.stderr.read().decode('utf-8', errors='ignore') if process.stderr else ''
+                    logger.warning(f"Batch of {len(prepared)} failed to start ({stderr[:150]}), bisecting")
+                    if len(prepared) == 1:
+                        results[prepared[0][3]] = (False, None)
+                        return results
+                    mid = len(prepared) // 2
+                    first_half = [(cs, ob) for _, _, ob, cs in prepared[:mid]]
+                    second_half = [(cs, ob) for _, _, ob, cs in prepared[mid:]]
+                    results.update(self.run_batch(first_half))
+                    results.update(self.run_batch(second_half))
+                    return results
+
+                with ThreadPoolExecutor(max_workers=min(len(prepared), self.concurrency)) as executor:
+                    futures = [executor.submit(self._test_one, port, cs) for _, port, _, cs in prepared]
+                    for future in as_completed(futures):
+                        cs, ok, delay = future.result()
+                        results[cs] = (ok, delay)
         finally:
-            if config_file and os.path.exists(config_file):
+            if os.path.exists(config_file):
                 try:
                     os.unlink(config_file)
                 except Exception as e:
-                    logger.debug(f"Failed to remove temp file {config_file}: {e}")
-            
-            time.sleep(0.05)
+                    logger.debug(f"Failed to remove temp batch file {config_file}: {e}")
+
+        for _, _, _, cs in prepared:
+            if cs not in results:
+                results[cs] = (False, None)
+
+        return results
 
 
 class ParallelXrayTester:
     def __init__(self, xray_path: str = 'xray', max_workers: int = 8, timeout: int = 10,
-                 test_urls: List[str] = None, rounds: int = 2):
+                 test_urls: List[str] = None, rounds: int = 2, batch_size: int = 200):
         self.base_test_urls = test_urls if test_urls else ['https://www.youtube.com/generate_204']
-        self.tester = XrayTester(xray_path, timeout, self.base_test_urls)
-        self.max_workers = max(1, min(max_workers, os.cpu_count() or 4))
+        self.tester = XrayBatchTester(xray_path, timeout, self.base_test_urls[0], concurrency=max_workers)
         self.rounds = max(1, rounds)
-        
-    def _run_single_round(self, configs: List[str]) -> Dict[str, int]:
-        round_results: Dict[str, int] = {}
-        tested = 0
-        
-        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            futures = {executor.submit(self.tester.test_config, cfg): cfg for cfg in configs}
-            
-            for future in as_completed(futures):
-                config = futures[future]
-                tested += 1
-                
-                try:
-                    success, delay, config_str = future.result(timeout=self.tester.timeout + 10)
-                    if success:
-                        round_results[config_str] = delay if delay else 0
-                    
-                    if tested % 25 == 0 or tested == len(configs):
-                        logger.info(f"Progress: {tested}/{len(configs)} ({len(round_results)} working so far)")
-                
-                except Exception as e:
-                    logger.error(f"Test error: {str(e)}")
-        
-        return round_results
-        
+        self.batch_size = max(1, batch_size)
+
+    def _run_single_round(self, configs: List[str]) -> Dict[str, Tuple[bool, Optional[int]]]:
+        results: Dict[str, Tuple[bool, Optional[int]]] = {}
+        supported_entries = []
+
+        for cfg in configs:
+            if not self.tester.is_supported_protocol(cfg):
+                results[cfg] = (True, 0)
+                continue
+            outbound = self.tester.parse_config_string(cfg)
+            if not outbound:
+                results[cfg] = (False, None)
+                continue
+            supported_entries.append((cfg, outbound))
+
+        total_batches = (len(supported_entries) + self.batch_size - 1) // self.batch_size
+        for batch_num, i in enumerate(range(0, len(supported_entries), self.batch_size), 1):
+            chunk = supported_entries[i:i + self.batch_size]
+            batch_results = self.tester.run_batch(chunk)
+            results.update(batch_results)
+            working_in_batch = sum(1 for ok, _ in batch_results.values() if ok)
+            logger.info(f"Batch {batch_num}/{total_batches}: {working_in_batch}/{len(chunk)} working")
+
+        return results
+
     def test_all(self, configs: List[str]) -> List[str]:
         total = len(configs)
-        logger.info(f"Testing {total} configs with {self.max_workers} workers over {self.rounds} round(s)...")
+        logger.info(f"Testing {total} configs with batch size {self.batch_size} over {self.rounds} round(s)...")
         logger.info(f"Base test URLs: {self.base_test_urls}")
-        
+
         candidates = list(configs)
-        skipped = 0
-        
+
         for round_num in range(1, self.rounds + 1):
             if not candidates:
                 break
-            
-            round_urls = rotate_urls(self.base_test_urls, round_num - 1)
-            self.tester.test_url = round_urls[0]
-            logger.info(f"--- Round {round_num}/{self.rounds}: {len(candidates)} configs, endpoint {self.tester.test_url} ---")
-            
+
+            round_url = rotate_urls(self.base_test_urls, round_num - 1)[0]
+            self.tester.test_url = round_url
+            logger.info(f"--- Round {round_num}/{self.rounds}: {len(candidates)} configs, endpoint {round_url} ---")
+
             round_results = self._run_single_round(candidates)
-            skipped = sum(1 for cfg in candidates if cfg in round_results and round_results[cfg] == 0)
-            candidates = [cfg for cfg in candidates if cfg in round_results]
-            
+            candidates = [cfg for cfg in candidates if round_results.get(cfg, (False, None))[0]]
+
             success_rate = (len(candidates) * 100) // max(1, total)
             logger.info(f"Round {round_num} result: {len(candidates)}/{total} survive ({success_rate}%)")
-        
+
         working = candidates
         success_rate = (len(working) * 100) // max(1, total)
-        logger.info(f"Final results after {self.rounds} round(s): {len(working)}/{total} working ({success_rate}%) - {skipped} skipped (unsupported)")
+        logger.info(f"Final results after {self.rounds} round(s): {len(working)}/{total} working ({success_rate}%)")
         return working
 
 
@@ -303,7 +305,7 @@ def main():
     if len(sys.argv) < 3:
         print("Usage: python xray_config_tester.py <input.txt> <output.txt>")
         sys.exit(1)
-    
+
     input_file = sys.argv[1]
     output_file = sys.argv[2]
 
@@ -324,20 +326,21 @@ def main():
     max_workers = config_settings.XRAY_TESTER_MAX_WORKERS
     timeout = config_settings.XRAY_TESTER_TIMEOUT_SECONDS
     rounds = config_settings.XRAY_TESTER_ROUNDS
+    batch_size = getattr(config_settings, 'XRAY_TESTER_BATCH_SIZE', 200)
     test_urls = get_usable_test_urls(config_settings.XRAY_TESTER_URLS)
-    
+
     logger.info(f"Loading configs from {input_file}")
-    
+
     try:
         with open(input_file, 'r', encoding='utf-8') as f:
             lines = f.readlines()
     except FileNotFoundError:
         logger.error(f"Input file not found: {input_file}")
         sys.exit(1)
-    
+
     configs = []
     header_lines = []
-    
+
     for line in lines:
         line = line.strip()
         if line.startswith('//') or not line:
@@ -345,16 +348,16 @@ def main():
                 header_lines.append(line)
         else:
             configs.append(line)
-    
+
     if not configs:
         logger.error("No configs found")
         sys.exit(1)
-    
+
     logger.info(f"Found {len(configs)} configs")
-    
-    tester = ParallelXrayTester(max_workers=max_workers, timeout=timeout, test_urls=test_urls, rounds=rounds)
+
+    tester = ParallelXrayTester(max_workers=max_workers, timeout=timeout, test_urls=test_urls, rounds=rounds, batch_size=batch_size)
     working = tester.test_all(configs)
-    
+
     os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
     with open(output_file, 'w', encoding='utf-8') as f:
         for header in header_lines:
@@ -363,7 +366,7 @@ def main():
             f.write('\n')
         for config in working:
             f.write(config + '\n\n')
-    
+
     if working:
         logger.info(f"Saved {len(working)} working configs to {output_file}")
         sys.exit(0)
