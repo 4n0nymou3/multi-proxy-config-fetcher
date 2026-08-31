@@ -223,6 +223,14 @@ jobs:
         run: python src/config_tester.py configs/singbox_configs_all.json configs/singbox_configs_tested.json
         continue-on-error: true
       
+      # ENABLE THIS STEP to make the singbox_configs_all.json subscription link serve
+      # Sing-box-tested configs instead of raw untested ones, by overwriting
+      # singbox_configs_all.json with the contents of singbox_configs_tested.json after testing completes.
+      # To enable: remove the '#' from the start of the next two lines.
+      # To disable again: put the '#' back at the start of the next two lines.
+      - name: Replace raw sing-box configs with tested configs for default subscription link
+        run: cp configs/singbox_configs_tested.json configs/singbox_configs_all.json
+      
       - name: Filter insecure configs and generate secure outputs
         run: python src/security_filter.py
         continue-on-error: true
