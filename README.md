@@ -180,6 +180,7 @@ SINGBOX_TESTER_URLS = [
     'https://cp.cloudflare.com'
 ]
 SINGBOX_TESTER_ROUNDS = 2
+SINGBOX_TESTER_BATCH_SIZE = 200
 
 # Xray Testing
 ENABLE_XRAY_TESTER = True
@@ -191,6 +192,7 @@ XRAY_TESTER_URLS = [
     'https://cp.cloudflare.com'
 ]
 XRAY_TESTER_ROUNDS = 2
+XRAY_TESTER_BATCH_SIZE = 200
 
 # Geolocation APIs (in priority order)
 LOCATION_APIS = [
@@ -341,6 +343,17 @@ The system tracks comprehensive metrics for each source:
   - Response time analysis
   - Historical trends
 - **Pipeline Run Summary** - A config count for every stage and output file, shown directly on each GitHub Actions run page
+
+## 🧪 Testing
+
+The `tests/` folder contains an automated test suite covering the parsing, security, and testing-batch logic. It runs automatically on every push and pull request via `.github/workflows/tests.yml` and is completely separate from the scheduled config-fetching workflow, so it never affects or delays the regular automatic runs.
+
+To run it locally:
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest tests/ -v
+```
 
 ## 🤝 Contributing
 
