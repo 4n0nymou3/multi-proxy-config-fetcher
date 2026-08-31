@@ -180,6 +180,7 @@ SINGBOX_TESTER_URLS = [
     'https://cp.cloudflare.com'
 ]
 SINGBOX_TESTER_ROUNDS = 2
+SINGBOX_TESTER_BATCH_SIZE = 200
 
 # Xray Testing
 ENABLE_XRAY_TESTER = True
@@ -191,6 +192,7 @@ XRAY_TESTER_URLS = [
     'https://cp.cloudflare.com'
 ]
 XRAY_TESTER_ROUNDS = 2
+XRAY_TESTER_BATCH_SIZE = 200
 
 # Geolocation APIs (in priority order)
 LOCATION_APIS = [
@@ -341,6 +343,17 @@ FRAGMENT_TLS_CIPHER_SUITES = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA25
   - 响应时间分析
   - 历史趋势
 - **流水线运行摘要** — 在每次 GitHub Actions 运行页面上直接显示各阶段与各输出文件的配置数量
+
+## 🧪 测试
+
+`tests/` 目录包含一套自动化测试，覆盖解析、安全过滤和批量测试逻辑。它会在每次 push 和 pull request 时通过 `.github/workflows/tests.yml` 自动运行，与定时抓取配置的工作流完全独立，因此不会影响或拖慢常规的自动运行。
+
+本地运行方式：
+
+```bash
+pip install -r requirements-dev.txt
+python -m pytest tests/ -v
+```
 
 ## 🤝 贡献
 
