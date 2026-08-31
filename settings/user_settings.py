@@ -27,11 +27,11 @@ SOURCE_URLS = [
 
 # Set to True to fetch the maximum possible number of configurations.
 # If True, SPECIFIC_CONFIG_COUNT will be ignored.
-USE_MAXIMUM_POWER = False
+USE_MAXIMUM_POWER = True
 
 # Desired number of configurations to fetch.
 # This is used only if USE_MAXIMUM_POWER is False.
-SPECIFIC_CONFIG_COUNT = 250
+SPECIFIC_CONFIG_COUNT = 0
 
 # Dictionary of protocols to enable or disable.
 # Set each protocol to True to enable, False to disable.
@@ -83,7 +83,16 @@ SINGBOX_TESTER_URLS = [
 # rounds, so a config is checked against more than one destination overall
 # without paying the cost of trying multiple URLs within the same round.
 # Higher values are more accurate but take longer to run. 2 is a good default.
-SINGBOX_TESTER_ROUNDS = 1
+SINGBOX_TESTER_ROUNDS = 3
+
+# Maximum number of configs tested together inside a single shared Sing-box process.
+# Instead of starting a brand new Sing-box process for every single config, up to
+# this many configs are tested through one shared process at once, which
+# reduces process startup overhead. If a batch contains a config that prevents
+# Sing-box from starting, the batch is automatically split in half and retried
+# until the problem config is isolated, so one bad config cannot block the
+# rest of the batch. 200 is a safe default for a public GitHub Actions runner.
+SINGBOX_TESTER_BATCH_SIZE = 200
 
 # --- Xray Config Tester Settings ---
 
@@ -120,6 +129,15 @@ XRAY_TESTER_URLS = [
 # without paying the cost of trying multiple URLs within the same round.
 # Higher values are more accurate but take longer to run. 2 is a good default.
 XRAY_TESTER_ROUNDS = 3
+
+# Maximum number of configs tested together inside a single shared Xray process.
+# Instead of starting a brand new Xray process for every single config, up to
+# this many configs are tested through one shared process at once, which
+# reduces process startup overhead. If a batch contains a config that prevents
+# Xray from starting, the batch is automatically split in half and retried
+# until the problem config is isolated, so one bad config cannot block the
+# rest of the batch. 200 is a safe default for a public GitHub Actions runner.
+XRAY_TESTER_BATCH_SIZE = 200
 
 # --- Location API Settings ---
 
