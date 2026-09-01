@@ -259,7 +259,7 @@ class ConfigEnricher:
                 
                 result = (flag, country)
                 self.location_cache.put(address, result)
-                logger.info(f"{address} -> {flag} {country} (via {api_config['domain']})")
+                logger.debug(f"{address} -> {flag} {country} (via {api_config['domain']})")
                 return result
             
             time.sleep(0.2)
