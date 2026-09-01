@@ -153,12 +153,12 @@ bash run.sh
 | `singbox_configs_all.json` | همه کانفیگ‌ها، فرمت Sing-box | SFA, Hiddify, NekoBox |
 | `singbox_configs_tested.json` | تست‌شده با Sing-box | SFA, Hiddify, NekoBox ⭐ |
 | `singbox_configs_secure.json` | تست‌شده و فیلترشده از نظر امنیت | SFA, Hiddify 🛡️⭐ |
+| `xray_secure_loadbalanced_config.json` | تعادل بار امن Xray | v2rayNG, v2rayN, Nekoray 🛡️⭐ |
 | `clash_configs_all.yaml` | همه کانفیگ‌ها، فرمت Clash | Clash Verge, Mihomo |
 | `clash_configs_tested.yaml` | تست‌شده برای Clash | Clash Verge, Mihomo ⭐ |
 | `clash_configs_secure.yaml` | تست‌شده و فیلترشده از نظر امنیت | Clash Verge, Mihomo 🛡️⭐ |
 | `xray_loadbalanced_config.json` | تعادل بار Xray | v2rayNG, v2rayN, Nekoray ⭐ |
 | `xray_fragment_loadbalanced_config.json` | تعادل بار Xray با قطعه‌بندی پیشرفته‌ی دومرحله‌ای TLS برای مقاومت بیشتر در برابر فیلترینگ | v2rayNG, v2rayN, Nekoray 🧩⭐ |
-| `xray_secure_loadbalanced_config.json` | تعادل بار امن Xray | v2rayNG, v2rayN, Nekoray 🛡️⭐ |
 
 ⭐ = پیشنهادی · 🛡️ = امنیت بالا · 🧩 = قطعه‌بندی ضدفیلترینگ
 
