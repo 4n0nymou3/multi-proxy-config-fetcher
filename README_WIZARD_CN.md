@@ -153,12 +153,12 @@ bash run.sh
 | `singbox_configs_all.json` | 所有配置，Sing-box 格式 | SFA, Hiddify, NekoBox |
 | `singbox_configs_tested.json` | Sing-box 测试通过 | SFA, Hiddify, NekoBox ⭐ |
 | `singbox_configs_secure.json` | 已测试且安全过滤 | SFA, Hiddify 🛡️⭐ |
+| `xray_secure_loadbalanced_config.json` | 安全版 Xray 负载均衡 | v2rayNG, v2rayN, Nekoray 🛡️⭐ |
 | `clash_configs_all.yaml` | 所有配置，Clash 格式 | Clash Verge, Mihomo |
 | `clash_configs_tested.yaml` | Clash 测试通过 | Clash Verge, Mihomo ⭐ |
 | `clash_configs_secure.yaml` | 已测试且安全过滤 | Clash Verge, Mihomo 🛡️⭐ |
 | `xray_loadbalanced_config.json` | Xray 负载均衡 | v2rayNG, v2rayN, Nekoray ⭐ |
 | `xray_fragment_loadbalanced_config.json` | 带两阶段高级 TLS 分片的 Xray 负载均衡配置，抗 DPI 能力更强 | v2rayNG, v2rayN, Nekoray 🧩⭐ |
-| `xray_secure_loadbalanced_config.json` | 安全版 Xray 负载均衡 | v2rayNG, v2rayN, Nekoray 🛡️⭐ |
 
 ⭐ = 推荐 · 🛡️ = 高安全性 · 🧩 = 抗审查分片
 
