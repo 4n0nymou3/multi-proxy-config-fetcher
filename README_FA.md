@@ -69,38 +69,32 @@
 - **TUIC** — پروتکل پراکسی مبتنی بر UDP (همان محدودیت فعلی WireGuard؛ به‌صورت پیش‌فرض غیرفعال است)
 
 ### خط لوله پردازش پیشرفته
-
 1. **جذب هوشمند**
    - پشتیبانی از کانال‌های تلگرام، لینک‌های SSCONF و URLهای دلخواه
    - رمزگشایی خودکار base64 و تشخیص فرمت
    - حذف تکراری‌های معنایی (تطبیق بر اساس پروتکل، آدرس، پورت و اطلاعات ورود، بدون توجه به نام یا ترتیب پارامترها) و اعتبارسنجی
    - تلاش مجدد روی منابع ناموفق فقط برای خطاهای موقتی (تایم‌اوت، قطعی اتصال، کدهای HTTP ۴۰۸/۴۲۹/۵xx)؛ خطاهای دائمی سریع رد می‌شوند
-
-2. **سیستم آزمایش چنددوره‌ای با دو هسته**
+2. **افزایش اطلاعات جغرافیایی**
+   - تشخیص خودکار محل سرور
+   - برچسب‌گذاری با ایموجی پرچم کشور
+   - پشتیبانی از چند API موقعیت‌یابی
+   - سیستم پشتیبان هوشمند
+3. **تغییر نام هوشمند**
+   - برچسب‌های توصیفی با جزئیات پروتکل
+   - تشخیص نوع ترنسپورت (WS, GRPC, HTTP2 و غیره)
+   - تشخیص ویژگی‌های امنیتی (TLS, Reality, XTLS, Vision)
+   - اطلاعات پورت و کشور
+4. **سیستم آزمایش چنددوره‌ای با دو هسته**
    - بررسی سلامت هم با هسته‌ی Xray و هم با هسته‌ی Sing-box
    - هر هسته در چند دور مستقل تست می‌کند (به‌صورت پیش‌فرض ۲ دور) — یک کانفیگ فقط زمانی نگه داشته می‌شود که در همه‌ی دورها موفق باشد، که کانفیگ‌های بی‌ثبات را فیلتر می‌کند
    - آدرس تست در هر دور می‌چرخد تا یک کانفیگ فقط بر اساس یک مقصد ثابت سنجیده نشود
    - آدرس‌های تست پیش از هر اجرا به‌صورت خودکار بررسی می‌شوند و هر آدرسی که در آن لحظه در دسترس نباشد کنار گذاشته می‌شود
    - تست موازی با کارگران، تایم‌اوت و آدرس‌های تست قابل تنظیم
-
-3. **افزایش اطلاعات جغرافیایی**
-   - تشخیص خودکار محل سرور
-   - برچسب‌گذاری با ایموجی پرچم کشور
-   - پشتیبانی از چند API موقعیت‌یابی
-   - سیستم پشتیبان هوشمند
-
-4. **تغییر نام هوشمند**
-   - برچسب‌های توصیفی با جزئیات پروتکل
-   - تشخیص نوع ترنسپورت (WS, GRPC, HTTP2 و غیره)
-   - تشخیص ویژگی‌های امنیتی (TLS, Reality, XTLS, Vision)
-   - اطلاعات پورت و کشور
-
 5. **فیلتر امنیتی**
    - حذف روش‌های رمزنگاری ناامن
    - اعتبارسنجی تنظیمات TLS/SSL
    - فیلتر کردن پروتکل‌های منسوخ
    - ایجاد فایل‌های جداگانه برای نقاط امن Xray، Sing-box و Clash
-
 6. **تبدیل فرمت**
    - تبدیل خودکار به فرمت JSON برای Sing-box
    - تولید پیکربندی‌های متعادل‌شده Xray، شامل یک نسخه با قطعه‌بندی پیشرفته‌ی دومرحله‌ای TLS
@@ -170,18 +164,6 @@ ENABLED_PROTOCOLS = {
 # Config Age Filtering
 MAX_CONFIG_AGE_DAYS = 1
 
-# Sing-box Testing
-ENABLE_SINGBOX_TESTER = True
-SINGBOX_TESTER_MAX_WORKERS = 8
-SINGBOX_TESTER_TIMEOUT_SECONDS = 10
-SINGBOX_TESTER_URLS = [
-    'https://www.youtube.com/generate_204',
-    'https://www.gstatic.com/generate_204',
-    'https://cp.cloudflare.com'
-]
-SINGBOX_TESTER_ROUNDS = 2
-SINGBOX_TESTER_BATCH_SIZE = 200
-
 # Xray Testing
 ENABLE_XRAY_TESTER = True
 XRAY_TESTER_MAX_WORKERS = 8
@@ -193,6 +175,18 @@ XRAY_TESTER_URLS = [
 ]
 XRAY_TESTER_ROUNDS = 2
 XRAY_TESTER_BATCH_SIZE = 200
+
+# Sing-box Testing
+ENABLE_SINGBOX_TESTER = True
+SINGBOX_TESTER_MAX_WORKERS = 8
+SINGBOX_TESTER_TIMEOUT_SECONDS = 10
+SINGBOX_TESTER_URLS = [
+    'https://www.youtube.com/generate_204',
+    'https://www.gstatic.com/generate_204',
+    'https://cp.cloudflare.com'
+]
+SINGBOX_TESTER_ROUNDS = 2
+SINGBOX_TESTER_BATCH_SIZE = 200
 
 # Geolocation APIs (in priority order)
 LOCATION_APIS = [
@@ -241,12 +235,12 @@ FRAGMENT_TLS_CIPHER_SUITES = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA25
 - `configs/singbox_configs_all.json` - همه پیکربندی‌ها در فرمت Sing-box
 - `configs/singbox_configs_tested.json` - پیکربندی‌های تست‌شده Sing-box
 - `configs/singbox_configs_secure.json` - پیکربندی‌های Sing-box فیلترشده از نظر امنیت
+- `configs/xray_secure_loadbalanced_config.json` - پیکربندی متعادل‌شده Xray ایمن
 - `configs/clash_configs_all.yaml` - همه پیکربندی‌ها در فرمت Clash/Mihomo
 - `configs/clash_configs_tested.yaml` - پیکربندی‌های تست‌شده سازگار با Clash
 - `configs/clash_configs_secure.yaml` - پیکربندی‌های Clash فیلترشده از نظر امنیت
 - `configs/xray_loadbalanced_config.json` - پیکربندی متعادل‌شده Xray
 - `configs/xray_fragment_loadbalanced_config.json` - پیکربندی متعادل‌شده Xray با قطعه‌بندی پیشرفته‌ی TLS
-- `configs/xray_secure_loadbalanced_config.json` - پیکربندی متعادل‌شده Xray ایمن
 - `configs/location_cache.json` - داده‌های کش شده موقعیت جغرافیایی
 - `configs/channel_stats.json` - معیارهای عملکرد منابع
 
