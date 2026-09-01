@@ -53,15 +53,15 @@ def build_summary():
 
     rows.append(('Raw fetched', 'configs/proxy_configs.txt', format_count(count_txt_configs('configs/proxy_configs.txt'))))
     rows.append(('Xray-tested', 'configs/proxy_configs_tested.txt', format_count(count_txt_configs('configs/proxy_configs_tested.txt'))))
-    rows.append(('Xray load balanced', 'configs/xray_loadbalanced_config.json', format_count(count_xray_outbounds('configs/xray_loadbalanced_config.json'))))
-    rows.append(('Xray Fragment load balanced', 'configs/xray_fragment_loadbalanced_config.json', format_count(count_xray_outbounds('configs/xray_fragment_loadbalanced_config.json'))))
-    rows.append(('Xray secure load balanced', 'configs/xray_secure_loadbalanced_config.json', format_count(count_xray_outbounds('configs/xray_secure_loadbalanced_config.json'))))
     rows.append(('Sing-box all', 'configs/singbox_configs_all.json', format_count(count_singbox_outbounds('configs/singbox_configs_all.json'))))
     rows.append(('Sing-box tested', 'configs/singbox_configs_tested.json', format_count(count_singbox_outbounds('configs/singbox_configs_tested.json'))))
     rows.append(('Sing-box secure', 'configs/singbox_configs_secure.json', format_count(count_singbox_outbounds('configs/singbox_configs_secure.json'))))
+    rows.append(('Xray secure load balanced', 'configs/xray_secure_loadbalanced_config.json', format_count(count_xray_outbounds('configs/xray_secure_loadbalanced_config.json'))))
     rows.append(('Clash all', 'configs/clash_configs_all.yaml', format_count(count_clash_proxies('configs/clash_configs_all.yaml'))))
     rows.append(('Clash tested', 'configs/clash_configs_tested.yaml', format_count(count_clash_proxies('configs/clash_configs_tested.yaml'))))
     rows.append(('Clash secure', 'configs/clash_configs_secure.yaml', format_count(count_clash_proxies('configs/clash_configs_secure.yaml'))))
+    rows.append(('Xray load balanced', 'configs/xray_loadbalanced_config.json', format_count(count_xray_outbounds('configs/xray_loadbalanced_config.json'))))
+    rows.append(('Xray Fragment load balanced', 'configs/xray_fragment_loadbalanced_config.json', format_count(count_xray_outbounds('configs/xray_fragment_loadbalanced_config.json'))))
 
     lines = []
     lines.append('## Multi Pipeline Run Summary')
