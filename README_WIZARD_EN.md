@@ -153,12 +153,12 @@ Each run also writes a timestamped log file under `logs/run_<date>.log`, and log
 | `singbox_configs_all.json` | All configs, Sing-box format | SFA, Hiddify, NekoBox |
 | `singbox_configs_tested.json` | Sing-box tested | SFA, Hiddify, NekoBox ⭐ |
 | `singbox_configs_secure.json` | Tested & security-filtered | SFA, Hiddify 🛡️⭐ |
+| `xray_secure_loadbalanced_config.json` | Secure load balancer | v2rayNG, v2rayN, Nekoray 🛡️⭐ |
 | `clash_configs_all.yaml` | All configs, Clash format | Clash Verge, Mihomo |
 | `clash_configs_tested.yaml` | Clash tested | Clash Verge, Mihomo ⭐ |
 | `clash_configs_secure.yaml` | Tested & security-filtered | Clash Verge, Mihomo 🛡️⭐ |
 | `xray_loadbalanced_config.json` | Xray load balancer | v2rayNG, v2rayN, Nekoray ⭐ |
 | `xray_fragment_loadbalanced_config.json` | Xray load balancer with advanced two-stage TLS fragmentation for stronger DPI resistance | v2rayNG, v2rayN, Nekoray 🧩⭐ |
-| `xray_secure_loadbalanced_config.json` | Secure load balancer | v2rayNG, v2rayN, Nekoray 🛡️⭐ |
 
 ⭐ = Recommended · 🛡️ = High security · 🧩 = Anti-censorship fragmentation
 
