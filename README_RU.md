@@ -69,38 +69,32 @@
 - **TUIC** — прокси-протокол на основе UDP (то же текущее ограничение, что и у WireGuard выше; по умолчанию отключён)
 
 ### Продвинутая обработка (pipeline)
-
 1. **Интеллектуальный сбор**
    - Поддержка Telegram-каналов, SSCONF-ссылок и пользовательских URL
    - Автоматическое base64-декодирование и определение формата
    - Семантическое удаление дубликатов (сравнение по протоколу, адресу, порту и учётным данным, без учёта имени или порядка параметров) и валидация
    - Повтор запроса для неудачных источников только при временных ошибках (таймауты, проблемы с соединением, HTTP 408/429/5xx); при постоянных ошибках — быстрый отказ
-
-2. **Многораундовая система тестирования на двух ядрах**
+2. **Географическое обогащение**
+   - Автоматическое определение местоположения сервера
+   - Пометка флагом страны (emoji)
+   - Поддержка нескольких геолокационных API
+   - Интеллектуальный механизм резервного варианта
+3. **Умное переименование**
+   - Описательные теги с деталями протокола
+   - Определение типа транспорта (WS, GRPC, HTTP2 и т.д.)
+   - Обнаружение функций безопасности (TLS, Reality, XTLS, Vision)
+   - Информация о порте и стране
+4. **Многораундовая система тестирования на двух ядрах**
    - Проверка работоспособности как ядром Xray, так и ядром Sing-box
    - Каждое ядро тестирует в несколько независимых раундов (по умолчанию 2) — конфигурация сохраняется, только если проходит каждый раунд, что отсеивает нестабильные конфигурации
    - Тестовый URL меняется между раундами, чтобы конфигурация не оценивалась только по одному адресу
    - Тестовые URL автоматически проверяются перед каждым запуском, и любая недоступная в этот момент конечная точка пропускается
    - Параллельное тестирование с настраиваемым количеством воркеров, таймаутом и тестовыми URL
-
-3. **Географическое обогащение**
-   - Автоматическое определение местоположения сервера
-   - Пометка флагом страны (emoji)
-   - Поддержка нескольких геолокационных API
-   - Интеллектуальный механизм резервного варианта
-
-4. **Умное переименование**
-   - Описательные теги с деталями протокола
-   - Определение типа транспорта (WS, GRPC, HTTP2 и т.д.)
-   - Обнаружение функций безопасности (TLS, Reality, XTLS, Vision)
-   - Информация о порте и стране
-
 5. **Фильтрация безопасности**
    - Удаление небезопасных методов шифрования
    - Проверка TLS/SSL конфигураций
    - Фильтрация устаревших протоколов
    - Генерация отдельных файлов безопасных конечных точек для Xray, Sing-box и Clash
-
 6. **Преобразование форматов**
    - Автоматическое преобразование в формат Sing-box JSON
    - Генерация конфигураций Xray с балансировкой нагрузки, включая вариант с продвинутой двухэтапной фрагментацией TLS
@@ -170,18 +164,6 @@ ENABLED_PROTOCOLS = {
 # Config Age Filtering
 MAX_CONFIG_AGE_DAYS = 1
 
-# Sing-box Testing
-ENABLE_SINGBOX_TESTER = True
-SINGBOX_TESTER_MAX_WORKERS = 8
-SINGBOX_TESTER_TIMEOUT_SECONDS = 10
-SINGBOX_TESTER_URLS = [
-    'https://www.youtube.com/generate_204',
-    'https://www.gstatic.com/generate_204',
-    'https://cp.cloudflare.com'
-]
-SINGBOX_TESTER_ROUNDS = 2
-SINGBOX_TESTER_BATCH_SIZE = 200
-
 # Xray Testing
 ENABLE_XRAY_TESTER = True
 XRAY_TESTER_MAX_WORKERS = 8
@@ -193,6 +175,18 @@ XRAY_TESTER_URLS = [
 ]
 XRAY_TESTER_ROUNDS = 2
 XRAY_TESTER_BATCH_SIZE = 200
+
+# Sing-box Testing
+ENABLE_SINGBOX_TESTER = True
+SINGBOX_TESTER_MAX_WORKERS = 8
+SINGBOX_TESTER_TIMEOUT_SECONDS = 10
+SINGBOX_TESTER_URLS = [
+    'https://www.youtube.com/generate_204',
+    'https://www.gstatic.com/generate_204',
+    'https://cp.cloudflare.com'
+]
+SINGBOX_TESTER_ROUNDS = 2
+SINGBOX_TESTER_BATCH_SIZE = 200
 
 # Geolocation APIs (in priority order)
 LOCATION_APIS = [
@@ -241,12 +235,12 @@ FRAGMENT_TLS_CIPHER_SUITES = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA25
 - `configs/singbox_configs_all.json` - Все конфигурации в формате Sing-box
 - `configs/singbox_configs_tested.json` - Конфигурации, протестированные Sing-box
 - `configs/singbox_configs_secure.json` - Конфигурации Sing-box, отфильтрованные по безопасности
+- `configs/xray_secure_loadbalanced_config.json` - Безопасная конфигурация Xray с балансировкой нагрузки
 - `configs/clash_configs_all.yaml` - Все конфигурации в формате Clash/Mihomo
 - `configs/clash_configs_tested.yaml` - Протестированные конфигурации Clash
 - `configs/clash_configs_secure.yaml` - Конфигурации Clash, отфильтрованные по безопасности
 - `configs/xray_loadbalanced_config.json` - Конфигурация Xray с балансировкой нагрузки
 - `configs/xray_fragment_loadbalanced_config.json` - Конфигурация Xray с балансировкой нагрузки и продвинутой фрагментацией TLS
-- `configs/xray_secure_loadbalanced_config.json` - Безопасная конфигурация Xray с балансировкой нагрузки
 - `configs/location_cache.json` - Кэш геолокационных данных
 - `configs/channel_stats.json` - Метрики производительности источников
 
