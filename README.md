@@ -69,38 +69,32 @@ Sources scoring below 30% are automatically disabled to maintain system quality.
 - **TUIC** - UDP-based proxy protocol (same current limitation as WireGuard above; disabled by default)
 
 ### Advanced Processing Pipeline
-
 1. **Intelligent Fetching**
    - Supports Telegram channels, SSCONF links, and custom URLs
    - Automatic base64 decoding and format detection
    - Semantic duplicate removal (matches configs by protocol, address, port, and credentials, ignoring name or parameter order) and validation
    - Retries failed sources only on transient errors (timeouts, connection issues, HTTP 408/429/5xx); permanent errors fail fast
-
-2. **Multi-Round, Two-Core Testing System**
+2. **Geographical Enrichment**
+   - Automatic server location detection
+   - Country flag emoji tagging
+   - Support for multiple geolocation APIs
+   - Intelligent fallback system
+3. **Smart Renaming**
+   - Descriptive tags with protocol details
+   - Transport type identification (WS, GRPC, HTTP2, etc.)
+   - Security feature detection (TLS, Reality, XTLS, Vision)
+   - Port and country information
+4. **Multi-Round, Two-Core Testing System**
    - Health checks using both the Xray core and the Sing-box core
    - Each core tests in multiple independent rounds (2 by default) - a config is only kept if it passes every round, filtering out unstable "flaky" configs
    - The test URL is rotated between rounds so configs aren't judged against a single destination
    - Test URLs are automatically pre-checked before each run, and any endpoint that is unreachable at that moment is skipped
    - Parallel testing with configurable workers, timeout, and test URLs
-
-3. **Geographical Enrichment**
-   - Automatic server location detection
-   - Country flag emoji tagging
-   - Support for multiple geolocation APIs
-   - Intelligent fallback system
-
-4. **Smart Renaming**
-   - Descriptive tags with protocol details
-   - Transport type identification (WS, GRPC, HTTP2, etc.)
-   - Security feature detection (TLS, Reality, XTLS, Vision)
-   - Port and country information
-
 5. **Security Filtering**
    - Removes insecure encryption methods
    - Validates TLS/SSL configurations
    - Filters deprecated protocols
    - Generates separate secure endpoint files for Xray, Sing-box, and Clash
-
 6. **Format Conversion**
    - Automatic conversion to Sing-box JSON format
    - Xray load-balanced configuration generation, including a variant with advanced two-stage TLS fragmentation
@@ -170,18 +164,6 @@ ENABLED_PROTOCOLS = {
 # Config Age Filtering
 MAX_CONFIG_AGE_DAYS = 1
 
-# Sing-box Testing
-ENABLE_SINGBOX_TESTER = True
-SINGBOX_TESTER_MAX_WORKERS = 8
-SINGBOX_TESTER_TIMEOUT_SECONDS = 10
-SINGBOX_TESTER_URLS = [
-    'https://www.youtube.com/generate_204',
-    'https://www.gstatic.com/generate_204',
-    'https://cp.cloudflare.com'
-]
-SINGBOX_TESTER_ROUNDS = 2
-SINGBOX_TESTER_BATCH_SIZE = 200
-
 # Xray Testing
 ENABLE_XRAY_TESTER = True
 XRAY_TESTER_MAX_WORKERS = 8
@@ -193,6 +175,18 @@ XRAY_TESTER_URLS = [
 ]
 XRAY_TESTER_ROUNDS = 2
 XRAY_TESTER_BATCH_SIZE = 200
+
+# Sing-box Testing
+ENABLE_SINGBOX_TESTER = True
+SINGBOX_TESTER_MAX_WORKERS = 8
+SINGBOX_TESTER_TIMEOUT_SECONDS = 10
+SINGBOX_TESTER_URLS = [
+    'https://www.youtube.com/generate_204',
+    'https://www.gstatic.com/generate_204',
+    'https://cp.cloudflare.com'
+]
+SINGBOX_TESTER_ROUNDS = 2
+SINGBOX_TESTER_BATCH_SIZE = 200
 
 # Geolocation APIs (in priority order)
 LOCATION_APIS = [
@@ -241,12 +235,12 @@ The system generates multiple output files for different use cases:
 - `configs/singbox_configs_all.json` - All configs in Sing-box format
 - `configs/singbox_configs_tested.json` - Sing-box tested configs
 - `configs/singbox_configs_secure.json` - Security-filtered Sing-box configs
+- `configs/xray_secure_loadbalanced_config.json` - Secure load-balanced Xray config
 - `configs/clash_configs_all.yaml` - All configs in Clash/Mihomo format
 - `configs/clash_configs_tested.yaml` - Clash-compatible tested configs
 - `configs/clash_configs_secure.yaml` - Security-filtered Clash configs
 - `configs/xray_loadbalanced_config.json` - Load-balanced Xray config
 - `configs/xray_fragment_loadbalanced_config.json` - Load-balanced Xray config with advanced TLS fragmentation
-- `configs/xray_secure_loadbalanced_config.json` - Secure load-balanced Xray config
 - `configs/location_cache.json` - Cached geolocation data
 - `configs/channel_stats.json` - Source performance metrics
 
