@@ -69,38 +69,32 @@ Web 界面提供：
 - **TUIC** — 基于 UDP 的代理协议（与上面 WireGuard 相同的当前限制；默认禁用）
 
 ### 高级处理流水线
-
 1. **智能抓取**
    - 支持 Telegram 频道、SSCONF 链接和自定义 URL
    - 自动 base64 解码与格式检测
    - 语义级去重（按协议、地址、端口和凭据匹配，忽略名称或参数顺序）与校验
    - 仅对临时性错误（超时、连接问题、HTTP 408/429/5xx）重试失败的来源；永久性错误会快速失败
-
-2. **多轮双核心测试系统**
+2. **地理信息增强**
+   - 自动检测服务器位置
+   - 使用国家旗帜表情进行标记
+   - 支持多个地理定位 API
+   - 智能回退机制
+3. **智能重命名**
+   - 带协议细节的描述性标签
+   - 传输类型识别（WS、GRPC、HTTP2 等）
+   - 安全特性检测（TLS、Reality、XTLS、Vision）
+   - 端口与国家信息
+4. **多轮双核心测试系统**
    - 同时使用 Xray core 与 Sing-box core 进行健康检查
    - 每个 core 会进行多轮独立测试（默认 2 轮）——只有每一轮都通过的配置才会被保留，从而过滤掉不稳定的配置
    - 测试 URL 会在各轮之间轮换，避免配置只依据单一目标被判定
    - 每次运行前会自动预检测试 URL，当时不可用的端点会被跳过
    - 支持并行测试，worker 数量、超时时间和测试 URL 均可配置
-
-3. **地理信息增强**
-   - 自动检测服务器位置
-   - 使用国家旗帜表情进行标记
-   - 支持多个地理定位 API
-   - 智能回退机制
-
-4. **智能重命名**
-   - 带协议细节的描述性标签
-   - 传输类型识别（WS、GRPC、HTTP2 等）
-   - 安全特性检测（TLS、Reality、XTLS、Vision）
-   - 端口与国家信息
-
 5. **安全过滤**
    - 移除不安全的加密方法
    - 验证 TLS/SSL 配置
    - 过滤已弃用的协议
    - 为 Xray、Sing-box 和 Clash 分别生成安全端点文件
-
 6. **格式转换**
    - 自动转换为 Sing-box JSON 格式
    - 生成 Xray 负载均衡配置，包含带有两阶段高级 TLS 分片的版本
@@ -170,18 +164,6 @@ ENABLED_PROTOCOLS = {
 # Config Age Filtering
 MAX_CONFIG_AGE_DAYS = 1
 
-# Sing-box Testing
-ENABLE_SINGBOX_TESTER = True
-SINGBOX_TESTER_MAX_WORKERS = 8
-SINGBOX_TESTER_TIMEOUT_SECONDS = 10
-SINGBOX_TESTER_URLS = [
-    'https://www.youtube.com/generate_204',
-    'https://www.gstatic.com/generate_204',
-    'https://cp.cloudflare.com'
-]
-SINGBOX_TESTER_ROUNDS = 2
-SINGBOX_TESTER_BATCH_SIZE = 200
-
 # Xray Testing
 ENABLE_XRAY_TESTER = True
 XRAY_TESTER_MAX_WORKERS = 8
@@ -193,6 +175,18 @@ XRAY_TESTER_URLS = [
 ]
 XRAY_TESTER_ROUNDS = 2
 XRAY_TESTER_BATCH_SIZE = 200
+
+# Sing-box Testing
+ENABLE_SINGBOX_TESTER = True
+SINGBOX_TESTER_MAX_WORKERS = 8
+SINGBOX_TESTER_TIMEOUT_SECONDS = 10
+SINGBOX_TESTER_URLS = [
+    'https://www.youtube.com/generate_204',
+    'https://www.gstatic.com/generate_204',
+    'https://cp.cloudflare.com'
+]
+SINGBOX_TESTER_ROUNDS = 2
+SINGBOX_TESTER_BATCH_SIZE = 200
 
 # Geolocation APIs (in priority order)
 LOCATION_APIS = [
@@ -241,12 +235,12 @@ FRAGMENT_TLS_CIPHER_SUITES = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA25
 - `configs/singbox_configs_all.json` - 以 Sing-box 格式保存的所有配置
 - `configs/singbox_configs_tested.json` - Sing-box 测试通过的配置
 - `configs/singbox_configs_secure.json` - 安全过滤后的 Sing-box 配置
+- `configs/xray_secure_loadbalanced_config.json` - 安全的 Xray 负载均衡配置
 - `configs/clash_configs_all.yaml` - 以 Clash/Mihomo 格式保存的所有配置
 - `configs/clash_configs_tested.yaml` - Clash 测试通过的配置
 - `configs/clash_configs_secure.yaml` - 安全过滤后的 Clash 配置
 - `configs/xray_loadbalanced_config.json` - Xray 负载均衡配置
 - `configs/xray_fragment_loadbalanced_config.json` - 带高级 TLS 分片的 Xray 负载均衡配置
-- `configs/xray_secure_loadbalanced_config.json` - 安全的 Xray 负载均衡配置
 - `configs/location_cache.json` - 地理位置缓存数据
 - `configs/channel_stats.json` - 源性能指标
 
