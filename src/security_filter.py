@@ -340,9 +340,9 @@ class SecurityFilter:
         secure_proxy_tags = all_proxy_tags - insecure_tags_map.keys()
         
         if insecure_tags_map:
-            logger.warning(f"Found and removed {len(insecure_tags_map)} insecure configs:")
+            logger.warning(f"Found and removed {len(insecure_tags_map)} insecure configs")
             for tag, reason in insecure_tags_map.items():
-                logger.warning(f" - {tag} (Reason: {reason})")
+                logger.debug(f" - {tag} (Reason: {reason})")
         else:
             logger.info("No insecure configs found. All configs are secure.")
         
