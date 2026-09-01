@@ -153,12 +153,12 @@ bash run.sh
 | `singbox_configs_all.json` | Все конфигурации, формат Sing-box | SFA, Hiddify, NekoBox |
 | `singbox_configs_tested.json` | Протестировано Sing-box | SFA, Hiddify, NekoBox ⭐ |
 | `singbox_configs_secure.json` | Протестировано и отфильтровано по безопасности | SFA, Hiddify 🛡️⭐ |
+| `xray_secure_loadbalanced_config.json` | Безопасный балансировщик нагрузки Xray | v2rayNG, v2rayN, Nekoray 🛡️⭐ |
 | `clash_configs_all.yaml` | Все конфигурации, формат Clash | Clash Verge, Mihomo |
 | `clash_configs_tested.yaml` | Протестировано для Clash | Clash Verge, Mihomo ⭐ |
 | `clash_configs_secure.yaml` | Протестировано и отфильтровано по безопасности | Clash Verge, Mihomo 🛡️⭐ |
 | `xray_loadbalanced_config.json` | Балансировщик нагрузки Xray | v2rayNG, v2rayN, Nekoray ⭐ |
 | `xray_fragment_loadbalanced_config.json` | Балансировщик нагрузки Xray с продвинутой двухэтапной фрагментацией TLS для большей устойчивости к DPI | v2rayNG, v2rayN, Nekoray 🧩⭐ |
-| `xray_secure_loadbalanced_config.json` | Безопасный балансировщик нагрузки Xray | v2rayNG, v2rayN, Nekoray 🛡️⭐ |
 
 ⭐ = Рекомендуется · 🛡️ = Повышенная безопасность · 🧩 = Фрагментация против цензуры
 
