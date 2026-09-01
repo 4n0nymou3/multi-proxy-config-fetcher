@@ -24,6 +24,7 @@ SOURCE_URLS = [
     "https://raw.githubusercontent.com/v2FreeHub/v2hub-configs/refs/heads/main/Sub-AutoUpdate",
     #"https://raw.githubusercontent.com/therealaleph/Iran-configs/refs/heads/main/ir_configs.txt",
     "https://t.me/s/persianvpnhub",
+    "https://t.me/s/oneclickvpnkeys",
 ]
 
 # Set to True to fetch the maximum possible number of configurations.
