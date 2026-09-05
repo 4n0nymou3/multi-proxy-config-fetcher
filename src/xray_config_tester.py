@@ -133,7 +133,7 @@ class XrayBatchTester:
 
     def build_batch_config(self, items: List[Tuple[int, int, Dict]]) -> Dict:
         inbounds = []
-        outbounds = []
+        outbounds = [{"tag": "block", "protocol": "blackhole"}]
         rules = []
         for tag_id, port, outbound in items:
             inbounds.append({
@@ -150,6 +150,11 @@ class XrayBatchTester:
                 "inboundTag": [f"in-{tag_id}"],
                 "outboundTag": f"out-{tag_id}"
             })
+        rules.append({
+            "type": "field",
+            "network": "tcp,udp",
+            "outboundTag": "block"
+        })
         return {
             "log": {"loglevel": "error"},
             "inbounds": inbounds,
@@ -359,19 +364,26 @@ def main():
     working = tester.test_all(configs)
 
     os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
-    with open(output_file, 'w', encoding='utf-8') as f:
-        for header in header_lines:
-            f.write(header + '\n')
-        if header_lines:
-            f.write('\n')
-        for config in working:
-            f.write(config + '\n\n')
 
     if working:
+        with open(output_file, 'w', encoding='utf-8') as f:
+            for header in header_lines:
+                f.write(header + '\n')
+            if header_lines:
+                f.write('\n')
+            for config in working:
+                f.write(config + '\n\n')
         logger.info(f"Saved {len(working)} working configs to {output_file}")
         sys.exit(0)
     else:
-        logger.error("No working configs found")
+        logger.error("No working configs found - saving original untested configs instead of an empty file")
+        with open(output_file, 'w', encoding='utf-8') as f:
+            for header in header_lines:
+                f.write(header + '\n')
+            if header_lines:
+                f.write('\n')
+            for config in configs:
+                f.write(config + '\n\n')
         sys.exit(0)
 
 
