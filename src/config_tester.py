@@ -39,7 +39,7 @@ class SingBoxBatchTester:
 
     def build_batch_config(self, items: List[Tuple[int, int, Dict]]) -> Dict:
         inbounds = []
-        outbounds = []
+        outbounds = [{"type": "block", "tag": "block"}]
         rules = []
         for idx, port, outbound in items:
             in_tag = f"in-{idx}"
@@ -59,7 +59,7 @@ class SingBoxBatchTester:
             "log": {"level": "error"},
             "inbounds": inbounds,
             "outbounds": outbounds,
-            "route": {"rules": rules}
+            "route": {"rules": rules, "final": "block"}
         }
 
     def _test_one(self, port: int, tag: str) -> Tuple[str, bool, Optional[int]]:
