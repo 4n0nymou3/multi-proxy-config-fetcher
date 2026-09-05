@@ -18,16 +18,19 @@ def test_build_batch_config_structure():
     batch = tester.build_batch_config(items)
 
     assert len(batch['inbounds']) == 2
-    assert len(batch['outbounds']) == 2
-    assert len(batch['routing']['rules']) == 2
+    assert len(batch['outbounds']) == 3
+    assert len(batch['routing']['rules']) == 3
     assert batch['inbounds'][0]['tag'] == 'in-0'
     assert batch['inbounds'][0]['port'] == 10001
     assert batch['inbounds'][1]['tag'] == 'in-1'
     assert batch['inbounds'][1]['port'] == 10002
-    assert batch['outbounds'][0]['tag'] == 'out-0'
-    assert batch['outbounds'][0]['protocol'] == 'vless'
+    assert batch['outbounds'][0]['tag'] == 'block'
+    assert batch['outbounds'][0]['protocol'] == 'blackhole'
+    assert batch['outbounds'][1]['tag'] == 'out-0'
+    assert batch['outbounds'][1]['protocol'] == 'vless'
     assert batch['routing']['rules'][0]['inboundTag'] == ['in-0']
     assert batch['routing']['rules'][0]['outboundTag'] == 'out-0'
+    assert batch['routing']['rules'][-1]['outboundTag'] == 'block'
 
 
 def test_build_batch_config_does_not_mutate_original_outbound():
