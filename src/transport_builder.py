@@ -26,7 +26,7 @@ def map_transport_for_singbox(net_type: str) -> str:
     }
     return transport_map.get(net_type, net_type)
 
-def build_singbox_settings(data: Dict, alpn_override: Optional[list] = None) -> Tuple[Dict, Dict]:
+def build_singbox_settings(data: Dict, alpn_override: Optional[list] = None, disable_utls: bool = False) -> Tuple[Dict, Dict]:
     transport = {}
     tls = {"enabled": False}
     
@@ -80,8 +80,9 @@ def build_singbox_settings(data: Dict, alpn_override: Optional[list] = None) -> 
                 "server_name": data.get('sni', address),
                 "insecure": insecure_flag,
                 "alpn": alpn_override if alpn_override else (data.get('alpn', '').split(',') if data.get('alpn') else ["h2", "http/1.1"]),
-                "utls": {"enabled": True, "fingerprint": sanitize_fingerprint(data.get('fp'))}
             }
+            if not disable_utls:
+                tls["utls"] = {"enabled": True, "fingerprint": sanitize_fingerprint(data.get('fp'))}
             if security == 'xtls':
                 tls["xtls"] = {"enabled": True}
 
