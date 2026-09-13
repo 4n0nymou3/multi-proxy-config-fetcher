@@ -46,7 +46,7 @@ def build_singbox_settings(data: Dict, alpn_override: Optional[list] = None, dis
         elif net_type == 'grpc':
             transport = {
                 "type": "grpc",
-                "service_name": data.get('path', data.get('serviceName', ''))
+                "service_name": data.get('serviceName') or data.get('path') or ''
             }
         elif net_type in ('http', 'h2'):
             transport = {
@@ -111,7 +111,7 @@ def build_xray_settings(data: Dict) -> Dict:
             }
         elif net_type == 'grpc':
             stream_settings["grpcSettings"] = {
-                "serviceName": data.get('path', data.get('serviceName', ''))
+                "serviceName": data.get('serviceName') or data.get('path') or ''
             }
         elif net_type in ('http', 'h2', 'h3', 'quic'):
             stream_settings["network"] = "xhttp"
