@@ -181,8 +181,8 @@ class ConfigRenamer:
         info_parts = [protocol_type]
         
         if protocol_type == "VMess":
-            net_type = data.get('net', 'tcp').lower()
-            tls = data.get('tls', 'none').lower()
+            net_type = str(data.get('net') or 'tcp').lower()
+            tls = str(data.get('tls') or 'none').lower()
             
             if net_type == 'ws':
                 info_parts.append('WS')
@@ -208,9 +208,9 @@ class ConfigRenamer:
                 info_parts.append('UTLS')
         
         elif protocol_type == "VLESS":
-            transport_type = data.get('type', 'tcp').lower()
-            security = data.get('security', 'none').lower()
-            flow = data.get('flow', '').lower()
+            transport_type = str(data.get('type') or 'tcp').lower()
+            security = str(data.get('security') or 'none').lower()
+            flow = str(data.get('flow') or '').lower()
             
             if transport_type == 'ws':
                 info_parts.append('WS')
@@ -249,9 +249,9 @@ class ConfigRenamer:
                 info_parts.append('UTLS')
         
         elif protocol_type == "Trojan":
-            transport_type = data.get('type', 'tcp').lower()
-            security = data.get('security', 'tls').lower()
-            flow = data.get('flow', '').lower()
+            transport_type = str(data.get('type') or 'tcp').lower()
+            security = str(data.get('security') or 'tls').lower()
+            flow = str(data.get('flow') or '').lower()
             
             if transport_type == 'ws':
                 info_parts.append('WS')
@@ -292,7 +292,7 @@ class ConfigRenamer:
                 info_parts.append('OBFS')
         
         elif protocol_type == "SS":
-            method = data.get('method', '').lower()
+            method = str(data.get('method') or '').lower()
             if '2022' in method:
                 info_parts.append('2022')
                 if 'blake3' in method:
