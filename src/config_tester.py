@@ -37,7 +37,7 @@ class SingBoxBatchTester:
         except Exception as e:
             raise RuntimeError(f"sing-box verification error: {e}")
 
-    def build_batch_config(self, items: List[Tuple[int, int, Dict]], log_file: Optional[str] = None) -> Dict:
+    def build_batch_config(self, items: List[Tuple[int, int, Dict]]) -> Dict:
         inbounds = []
         outbounds = [{"type": "block", "tag": "block"}]
         rules = []
@@ -55,11 +55,8 @@ class SingBoxBatchTester:
                 "inbound": [in_tag],
                 "outbound": real_tag
             })
-        log_config = {"level": "warn"}
-        if log_file:
-            log_config["output"] = log_file
         return {
-            "log": log_config,
+            "log": {"level": "error"},
             "inbounds": inbounds,
             "outbounds": outbounds,
             "route": {"rules": rules, "final": "block"}
@@ -104,9 +101,7 @@ class SingBoxBatchTester:
             return results
 
         fd, config_file = tempfile.mkstemp(suffix='.json', text=True, prefix='singbox_batch_')
-        log_fd, log_file = tempfile.mkstemp(suffix='.log', text=True, prefix='singbox_log_')
-        os.close(log_fd)
-        batch_config = self.build_batch_config([(i, p, o) for i, p, o, _ in prepared], log_file=log_file)
+        batch_config = self.build_batch_config([(i, p, o) for i, p, o, _ in prepared])
         try:
             with os.fdopen(fd, 'w') as f:
                 json.dump(batch_config, f)
@@ -163,27 +158,6 @@ class SingBoxBatchTester:
                     os.unlink(config_file)
                 except Exception as e:
                     logger.debug(f"Failed to remove temp batch file {config_file}: {e}")
-
-            hy2_failed_tags = {
-                tag for _, _, outbound, tag in prepared
-                if outbound.get('type') in ('hysteria2', 'tuic') and not results.get(tag, (False, None))[0]
-            }
-            if hy2_failed_tags and os.path.exists(log_file):
-                try:
-                    with open(log_file, 'r', encoding='utf-8', errors='ignore') as lf:
-                        hy2_lines = [line.strip() for line in lf if 'hysteria2' in line.lower() or 'tuic' in line.lower()]
-                    if hy2_lines:
-                        sample = hy2_lines[:30]
-                        logger.warning(f"[HY2-DIAG] sing-box log for {len(hy2_failed_tags)} failed QUIC outbound(s):\n" + "\n".join(sample))
-                    else:
-                        logger.warning(f"[HY2-DIAG] {len(hy2_failed_tags)} QUIC outbound(s) failed with no matching sing-box log lines (level=warn)")
-                except Exception as e:
-                    logger.debug(f"Failed to read diagnostic log {log_file}: {e}")
-            if os.path.exists(log_file):
-                try:
-                    os.unlink(log_file)
-                except Exception as e:
-                    logger.debug(f"Failed to remove temp log file {log_file}: {e}")
 
         for _, _, _, tag in prepared:
             if tag not in results:
