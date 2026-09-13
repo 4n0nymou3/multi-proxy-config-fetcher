@@ -270,6 +270,82 @@ def update_config_with_working_outbounds(config: Dict, working_outbounds: List[D
     return config
 
 
+PREFLIGHT_SAMPLE_LINKS = [
+    ("VLESS+REALITY", "vless://00000000-0000-0000-0000-000000000000@1.2.3.4:443?security=reality&sni=www.microsoft.com&pbk=zuq2EfnWwPjEEhfwBLYQjnxrcK_KJecPuybyHdwR8Ec&sid=ab12&fp=chrome&flow=xtls-rprx-vision&type=tcp"),
+    ("Trojan+gRPC", "trojan://preflight@1.2.3.4:443?security=tls&sni=example.com&type=grpc&serviceName=preflight"),
+    ("VLESS+httpupgrade", "vless://00000000-0000-0000-0000-000000000000@1.2.3.4:443?security=tls&sni=example.com&type=httpupgrade&host=example.com&path=/up"),
+    ("VMess+WS+TLS", "vmess://eyJ2IjoiMiIsInBzIjoicHJlZmxpZ2h0IiwiYWRkIjoiMS4yLjMuNCIsInBvcnQiOiI0NDMiLCJpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMCIsImFpZCI6IjAiLCJuZXQiOiJ3cyIsImhvc3QiOiJleGFtcGxlLmNvbSIsInBhdGgiOiIvIiwidGxzIjoidGxzIn0="),
+    ("Shadowsocks-2022", "ss://MjAyMi1ibGFrZTMtYWVzLTEyOC1nY206WWN1TVZ4RWUrNUMxYlYybnZ4RU84QT09@1.2.3.4:8443#preflight"),
+    ("Hysteria2+obfs", "hysteria2://preflight@1.2.3.4:36712?sni=example.com&insecure=1&obfs=salamander&obfs-password=preflight#preflight"),
+]
+
+
+PREFLIGHT_TIMEOUT_SECONDS = 4
+PREFLIGHT_FAST_FAIL_THRESHOLD = 1.5
+QUIC_PROTOCOLS = {'hysteria2', 'tuic'}
+
+
+def run_preflight_checks(singbox_path: str) -> None:
+    import config_to_singbox
+    converter = config_to_singbox.ConfigToSingbox()
+    tester = SingBoxBatchTester(
+        singbox_path=singbox_path, timeout=PREFLIGHT_TIMEOUT_SECONDS,
+        test_url='https://www.youtube.com/generate_204', concurrency=1
+    )
+    failures = []
+    for i, (name, link) in enumerate(PREFLIGHT_SAMPLE_LINKS, 1):
+        protocol_type = link.split('://', 1)[0]
+        try:
+            outbound = converter.convert_to_singbox(link, i, protocol_type)
+        except Exception as e:
+            failures.append(f"{name}: exception while building outbound ({e})")
+            continue
+        if not outbound:
+            failures.append(f"{name}: failed to parse/build outbound")
+            continue
+        outbound['tag'] = f'preflight-{i}'
+
+        with tempfile.TemporaryDirectory(prefix='singbox_preflight_') as tmpdir:
+            probe_config = {"log": {"level": "error"}, "outbounds": [outbound, {"type": "direct", "tag": "direct"}]}
+            config_path = os.path.join(tmpdir, "probe.json")
+            try:
+                with open(config_path, 'w', encoding='utf-8') as f:
+                    json.dump(probe_config, f)
+                import subprocess
+                result = subprocess.run([singbox_path, 'check', '-c', config_path], capture_output=True, timeout=15)
+                if result.returncode != 0:
+                    detail = result.stderr.decode('utf-8', 'replace').strip().splitlines()
+                    reason = detail[-1] if detail else 'unknown error'
+                    failures.append(f"{name}: rejected by installed sing-box core ({reason})")
+                    continue
+            except Exception as e:
+                failures.append(f"{name}: preflight check itself failed ({e})")
+                continue
+
+        if outbound.get('type') in QUIC_PROTOCOLS:
+            start = time.time()
+            try:
+                results = tester.run_batch([outbound])
+            except Exception as e:
+                failures.append(f"{name}: connection probe itself failed ({e})")
+                continue
+            elapsed = time.time() - start
+            ok = results.get(outbound['tag'], (False, None))[0]
+            if not ok and elapsed < PREFLIGHT_FAST_FAIL_THRESHOLD:
+                failures.append(
+                    f"{name}: rejected almost instantly ({elapsed:.1f}s, expected a full {PREFLIGHT_TIMEOUT_SECONDS}s "
+                    f"timeout against an unreachable test address) - likely a shape the installed sing-box core cannot use, not a dead server"
+                )
+
+    if failures:
+        logger.warning(
+            f"Preflight check found {len(failures)}/{len(PREFLIGHT_SAMPLE_LINKS)} incompatible shape(s) "
+            f"with the installed sing-box core:\n" + "\n".join(f"  - {f}" for f in failures)
+        )
+    else:
+        logger.info(f"Preflight check passed: all {len(PREFLIGHT_SAMPLE_LINKS)} sample outbound shapes behaved normally against the installed sing-box core")
+
+
 def main():
     config_settings = ProxyConfig()
 
@@ -299,6 +375,11 @@ def main():
     rounds = config_settings.TESTER_ROUNDS
     batch_size = getattr(config_settings, 'TESTER_BATCH_SIZE', 200)
     test_urls = get_usable_test_urls(config_settings.TESTER_URLS)
+
+    try:
+        run_preflight_checks('sing-box')
+    except Exception as e:
+        logger.warning(f"Preflight check could not run: {e}")
 
     logger.info(f"Loading config from {input_file}")
 
