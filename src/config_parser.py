@@ -96,8 +96,8 @@ def decode_vmess(config: str) -> Optional[Dict]:
         return None
     
     data['name'] = data.get('ps', data.get('name', ''))
-    data['net'] = data.get('net', 'tcp').lower()
-    data['tls'] = data.get('tls', 'none').lower()
+    data['net'] = str(data.get('net') or 'tcp').lower()
+    data['tls'] = str(data.get('tls') or 'none').lower()
 
     valid_security = {'auto', 'aes-128-gcm', 'chacha20-poly1305', 'none', 'zero'}
     scy = str(data.get('scy') or 'auto').strip().lower()
