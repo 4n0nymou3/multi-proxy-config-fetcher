@@ -29,8 +29,8 @@ def build_singbox_settings(data: Dict, alpn_override: Optional[list] = None, dis
     transport = {}
     tls = {"enabled": False}
     
-    net_type = data.get('net', data.get('type', 'tcp')).lower()
-    security = data.get('security', data.get('tls', 'none')).lower()
+    net_type = str(data.get('net') or data.get('type') or 'tcp').lower()
+    security = str(data.get('security') or data.get('tls') or 'none').lower()
     address = data.get('address', data.get('add', ''))
     port = data.get('port', 443)
     
@@ -97,8 +97,8 @@ def build_singbox_settings(data: Dict, alpn_override: Optional[list] = None, dis
 def build_xray_settings(data: Dict) -> Dict:
     stream_settings = {"network": "tcp", "security": "none"}
     
-    net_type = data.get('net', data.get('type', 'tcp')).lower()
-    security = data.get('security', data.get('tls', 'none')).lower()
+    net_type = str(data.get('net') or data.get('type') or 'tcp').lower()
+    security = str(data.get('security') or data.get('tls') or 'none').lower()
     address = data.get('address', data.get('add', ''))
     
     try:
