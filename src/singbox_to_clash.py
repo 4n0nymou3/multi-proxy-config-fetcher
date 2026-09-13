@@ -41,6 +41,11 @@ def singbox_outbound_to_clash_proxy(outbound: Dict) -> Optional[Dict]:
             'network': 'h2',
             'h2-opts': {'host': transport.get('host') or [server], 'path': transport.get('path', '/')}
         }
+    elif net_type == 'httpupgrade':
+        transport_fields = {
+            'network': 'httpupgrade',
+            'httpupgrade-opts': {'path': transport.get('path', '/'), 'host': transport.get('host', server)}
+        }
 
     tls_fields = {}
     if tls.get('enabled'):
