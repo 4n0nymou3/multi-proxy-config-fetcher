@@ -20,7 +20,6 @@ def sanitize_fingerprint(fp: Optional[str]) -> str:
 
 def map_transport_for_singbox(net_type: str) -> str:
     transport_map = {
-        'httpupgrade': 'ws',
         'splithttp': 'http',
         'xhttp': 'http'
     }
@@ -55,10 +54,16 @@ def build_singbox_settings(data: Dict, alpn_override: Optional[list] = None, dis
                 "host": [data.get('host', address)],
                 "path": data.get('path', '/')
             }
+        elif net_type == 'httpupgrade':
+            transport = {
+                "type": "httpupgrade",
+                "host": data.get('host', address),
+                "path": data.get('path', '/')
+            }
         elif net_type == 'quic':
             transport = {"type": "quic"}
         elif net_type == 'kcp':
-            transport = {"type": "kcp"}
+            transport = {}
         
         tls_enabled = security in ('tls', 'xtls', 'reality') or port in [443, 2053, 2083, 2087, 2096, 8443]
         
@@ -83,8 +88,6 @@ def build_singbox_settings(data: Dict, alpn_override: Optional[list] = None, dis
             }
             if not disable_utls:
                 tls["utls"] = {"enabled": True, "fingerprint": sanitize_fingerprint(data.get('fp'))}
-            if security == 'xtls':
-                tls["xtls"] = {"enabled": True}
 
     except Exception as e:
         logger.warning(f"Error building Sing-box settings: {e}")
