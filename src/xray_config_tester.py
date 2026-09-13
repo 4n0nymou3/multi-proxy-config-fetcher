@@ -319,6 +319,57 @@ class ParallelXrayTester:
         return working
 
 
+PREFLIGHT_SAMPLE_LINKS = [
+    ("VLESS+REALITY", "vless://00000000-0000-0000-0000-000000000000@1.2.3.4:443?security=reality&sni=www.microsoft.com&pbk=zuq2EfnWwPjEEhfwBLYQjnxrcK_KJecPuybyHdwR8Ec&sid=ab12&fp=chrome&flow=xtls-rprx-vision&type=tcp"),
+    ("VLESS+gRPC", "vless://00000000-0000-0000-0000-000000000000@1.2.3.4:443?security=tls&sni=example.com&type=grpc&serviceName=preflight"),
+    ("VLESS+httpupgrade", "vless://00000000-0000-0000-0000-000000000000@1.2.3.4:443?security=tls&sni=example.com&type=httpupgrade&host=example.com&path=/up"),
+    ("Trojan+TLS", "trojan://preflight@1.2.3.4:443?security=tls&sni=example.com"),
+    ("VMess+WS+TLS", "vmess://eyJ2IjoiMiIsInBzIjoicHJlZmxpZ2h0IiwiYWRkIjoiMS4yLjMuNCIsInBvcnQiOiI0NDMiLCJpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMCIsImFpZCI6IjAiLCJuZXQiOiJ3cyIsImhvc3QiOiJleGFtcGxlLmNvbSIsInBhdGgiOiIvIiwidGxzIjoidGxzIn0="),
+    ("Shadowsocks-2022", "ss://MjAyMi1ibGFrZTMtYWVzLTEyOC1nY206WWN1TVZ4RWUrNUMxYlYybnZ4RU84QT09@1.2.3.4:8443#preflight"),
+]
+
+
+def run_preflight_checks(xray_path: str) -> None:
+    tester = XrayBatchTester(xray_path=xray_path)
+    failures = []
+    with tempfile.TemporaryDirectory(prefix='xray_preflight_') as tmpdir:
+        for name, link in PREFLIGHT_SAMPLE_LINKS:
+            try:
+                outbound = tester.parse_config_string(link)
+            except Exception as e:
+                failures.append(f"{name}: exception while building outbound ({e})")
+                continue
+            if not outbound:
+                failures.append(f"{name}: failed to parse/build outbound")
+                continue
+            outbound['tag'] = 'preflight'
+            probe_config = {"log": {"loglevel": "error"}, "inbounds": [], "outbounds": [outbound]}
+            config_path = os.path.join(tmpdir, f"preflight_{name.replace('+', '_')}.json")
+            try:
+                with open(config_path, 'w', encoding='utf-8') as f:
+                    json.dump(probe_config, f)
+                import subprocess
+                result = subprocess.run(
+                    [xray_path, 'run', '-test', '-c', config_path],
+                    capture_output=True,
+                    timeout=15
+                )
+                if result.returncode != 0:
+                    detail = result.stdout.decode('utf-8', 'replace').strip().splitlines()
+                    reason = detail[-1] if detail else 'unknown error'
+                    failures.append(f"{name}: rejected by installed Xray core ({reason})")
+            except Exception as e:
+                failures.append(f"{name}: preflight check itself failed ({e})")
+
+    if failures:
+        logger.warning(
+            f"Preflight check found {len(failures)}/{len(PREFLIGHT_SAMPLE_LINKS)} incompatible shape(s) "
+            f"with the installed Xray core:\n" + "\n".join(f"  - {f}" for f in failures)
+        )
+    else:
+        logger.info(f"Preflight check passed: all {len(PREFLIGHT_SAMPLE_LINKS)} sample outbound shapes accepted by the installed Xray core")
+
+
 def main():
     config_settings = ProxyConfig()
 
@@ -348,6 +399,11 @@ def main():
     rounds = config_settings.XRAY_TESTER_ROUNDS
     batch_size = getattr(config_settings, 'XRAY_TESTER_BATCH_SIZE', 200)
     test_urls = get_usable_test_urls(config_settings.XRAY_TESTER_URLS)
+
+    try:
+        run_preflight_checks('xray')
+    except Exception as e:
+        logger.warning(f"Preflight check could not run: {e}")
 
     logger.info(f"Loading configs from {input_file}")
 
