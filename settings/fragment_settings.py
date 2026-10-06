@@ -14,7 +14,7 @@ FRAGMENT_ENABLED = True
 # max_split: maximum number of splits. 0 means no extra limit.
 FRAGMENT_STAGE_1 = {
     "packets": "tlshello",
-    "lengths": [0,104,1],
+    "lengths": [0,80,1],
     "delays": ["0"],
     "max_split": "0"
 }
@@ -28,9 +28,9 @@ FRAGMENT_STAGE_2_ENABLED = True
 # regardless of its content, further breaking up Stage 1's output.
 FRAGMENT_STAGE_2 = {
     "packets": "1-1",
-    "lengths": [114,1],
-    "delays": ["1"],
-    "max_split": "11"
+    "lengths": [50,1],
+    "delays": ["3"],
+    "max_split": "40"
 }
 
 # TLS fingerprint to force on every TLS/XTLS config when Fragment is enabled.
