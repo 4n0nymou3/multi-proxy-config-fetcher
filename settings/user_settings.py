@@ -25,7 +25,6 @@ SOURCE_URLS = [
     #"https://raw.githubusercontent.com/v2FreeHub/v2hub-configs/refs/heads/main/Sub-AutoUpdate",
     #"https://raw.githubusercontent.com/ShadowException/VPN/refs/heads/main/configs/VPN-cat",
     #"https://raw.githubusercontent.com/prominbro/sub/refs/heads/main/212.txt",
-    "https://raw.githubusercontent.com/luxxuria/harvester/refs/heads/main/speed_tested.txt",
     #"https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_Sub.txt",
     #"https://github.com/Epodonios/v2ray-configs/raw/main/All_Configs_Sub.txt",
     #"https://raw.githubusercontent.com/ebrasha/free-v2ray-public-list/refs/heads/main/V2Ray-Config-By-EbraSha-All-Type.txt",
