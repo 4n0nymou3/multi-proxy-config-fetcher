@@ -229,7 +229,7 @@ print(sorted(releases, key=lambda r: r['published_at'])[-1]['tag_name'] if relea
             
             if [ -z "$xray_version" ]; then
                 print_warning "Failed to detect Xray version, using fallback..."
-                xray_version="v26.3.27"
+                xray_version="v26.10.29"
             fi
             
             local download_url="https://github.com/XTLS/Xray-core/releases/download/${xray_version}/Xray-linux-${xray_arch}.zip"
