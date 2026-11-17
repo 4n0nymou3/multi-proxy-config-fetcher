@@ -132,5 +132,60 @@
         }
       ]
     }
+  },
+  {
+    "type": "direct",
+    "tag": "Anonymous Serverless 4",
+    "finalmask": {
+      "tcp": [
+        {
+          "type": "fragment",
+          "settings": {
+            "packets": "tlshello",
+            "lengths": [
+              "100-200"
+            ],
+            "delays": [
+              "0"
+            ]
+          }
+        }
+      ],
+      "udp": [
+        {
+          "type": "noise",
+          "settings": {
+            "reset": "30-60",
+            "noise": [
+              {
+                "type": "exp",
+                "packet": "<b 0x123401000001000000000000076578616d706c6503636f6d0000010001>",
+                "delay": "0"
+              },
+              {
+                "rand": "40-70",
+                "randRange": "0-255",
+                "delay": "0"
+              },
+              {
+                "rand": "40-70",
+                "randRange": "0-255",
+                "delay": "0"
+              },
+              {
+                "rand": "40-70",
+                "randRange": "0-255",
+                "delay": "0"
+              },
+              {
+                "rand": "40-70",
+                "randRange": "0-255",
+                "delay": "0"
+              }
+            ]
+          }
+        }
+      ]
+    }
   }
 ]
