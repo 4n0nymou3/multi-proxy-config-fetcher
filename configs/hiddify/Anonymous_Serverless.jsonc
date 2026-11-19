@@ -195,6 +195,61 @@
     "finalmask": {
       "tcp": [
         {
+          "type": "fragment",
+          "settings": {
+            "packets": "tlshello",
+            "lengths": [
+              "120-180"
+            ],
+            "delays": [
+              "0"
+            ]
+          }
+        }
+      ],
+      "udp": [
+        {
+          "type": "noise",
+          "settings": {
+            "reset": "36-54",
+            "noise": [
+              {
+                "type": "exp",
+                "packet": "<b 0x5a2c0100000100000000000003777777076578616d706c65036e65740000010001>",
+                "delay": "0"
+              },
+              {
+                "rand": "45-63",
+                "randRange": "0-255",
+                "delay": "0"
+              },
+              {
+                "rand": "45-63",
+                "randRange": "0-255",
+                "delay": "0"
+              },
+              {
+                "rand": "45-63",
+                "randRange": "0-255",
+                "delay": "0"
+              },
+              {
+                "rand": "45-63",
+                "randRange": "0-255",
+                "delay": "0"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "type": "direct",
+    "tag": "Anonymous Serverless 6",
+    "finalmask": {
+      "tcp": [
+        {
           "type": "merge",
           "settings": {
             "times": 100,
